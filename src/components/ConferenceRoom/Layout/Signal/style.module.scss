@@ -1,0 +1,12 @@
+.signal {
+  --color-0: #f53f3f;
+  --color-1: #ff7d00;
+  --color-2: #00b42a;
+  --color-3: #00b42a;
+
+  svg {
+    width: 1.2em;
+    height: 1.2em;
+    fill: var(--color);
+  }
+}

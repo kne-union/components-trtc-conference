@@ -1,0 +1,138 @@
+.info {
+  margin: 0 auto;
+  background: var(--bg-color-grey);
+  border-radius: 8px;
+  overflow: hidden;
+  min-height: var(--box-height, 680px);
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.1);
+}
+
+.right-panel {
+  width: var(--box-width, 600px);
+  flex: none;
+  padding: 30px;
+}
+
+.divider {
+  margin: 10px 0 24px;
+}
+
+.title {
+  font-size: 18px;
+  font-weight: bold;
+  padding: 0 20px;
+}
+
+.options-btn {
+  opacity: 0;
+  transition: opacity 500ms;
+}
+
+.list-item {
+  &:hover .options-btn {
+    opacity: 1;
+  }
+}
+
+.date-card {
+  border: none;
+  background: transparent;
+  margin-bottom: 20px;
+
+  :global {
+    .ant-card-head {
+      border-bottom: none;
+      color: var(--font-color-grey);
+      font-weight: normal;
+      font-size: 14px;
+      min-height: unset;
+      margin-bottom: 8px;
+    }
+
+    .ant-card-body {
+      padding: 0;
+    }
+
+    .ant-list-item {
+      padding: 10px 20px;
+      border-bottom: none;
+      transition: background-color 500ms;
+      border-radius: 8px;
+
+      &:hover {
+        background: var(--bg-color-grey-3);
+      }
+    }
+  }
+}
+
+.conference-title {
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.time {
+  font-size: 12px;
+  color: var(--font-color-grey);
+}
+
+.menu-item {
+  &:global(.ant-btn) {
+    height: unset;
+    border: none;
+    width: auto;
+  }
+
+  padding: 10px 4px;
+
+  &:hover {
+    color: #ffffff !important;
+    background: var(--primary-color) !important;
+  }
+}
+
+.menu-item-text {
+  font-size: 12px;
+}
+
+.menu-bar {
+  background: var(--primary-color);
+  padding: 10px;
+}
+
+.current-user {
+  position: relative;
+  padding: 12px;
+
+  :hover .current-user-edit {
+    opacity: 1;
+  }
+}
+
+.current-user-edit {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  opacity: 0;
+  transition: opacity 500ms;
+}
+
+.member-area,
+.member-table {
+  width: 100%;
+}
+
+.member-title {
+  color: var(--font-color-grey);
+}
+
+.tips {
+  font-size: 32px;
+  font-weight: bold;
+  padding: 32px;
+  color: var(--font-color-grey-1);
+}
+
+.scroller {
+  max-height: calc(var(--box-height, 680px) - 180px);
+}

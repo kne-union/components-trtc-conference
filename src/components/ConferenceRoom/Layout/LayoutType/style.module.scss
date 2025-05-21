@@ -1,0 +1,35 @@
+.type-container {
+  flex: 1;
+  pointer-events: none;
+  height: 100%;
+}
+
+.type-item {
+  height: 100%;
+  min-height: 60px;
+  background: var(--primary-color-6);
+}
+
+.layout-item-outer {
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+}
+
+.layout-item {
+  padding: 2px;
+  background: #ffffff;
+  border: 2px solid #ffffff;
+  min-width: 200px;
+  height: 200px;
+
+  &.is-active {
+    border-color: var(--primary-color);
+  }
+}
+
+.layout-label {
+  &.is-active {
+    color: var(--primary-color);
+  }
+}

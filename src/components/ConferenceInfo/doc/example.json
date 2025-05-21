@@ -1,0 +1,53 @@
+{
+  "isFull": true,
+  "list": [
+    {
+      "title": "这里填写示例标题",
+      "description": "这里填写示例说明",
+      "code": "./base.js",
+      "scope": [
+        {
+          "name": "_ConferenceInfo",
+          "packageName": "@components/ConferenceInfo"
+        }
+      ]
+    },
+    {
+      "title": "这里填写示例标题",
+      "description": "这里填写示例说明",
+      "code": "./form-inner.js",
+      "scope": [
+        {
+          "name": "_ConferenceInfo",
+          "packageName": "@components/ConferenceInfo"
+        },
+        {
+          "name": "remoteLoader",
+          "packageName": "@kne/remote-loader"
+        }
+      ]
+    },
+    {
+      "title": "这里填写示例标题",
+      "description": "这里填写示例说明",
+      "code": "./detail.js",
+      "scope": [
+        {
+          "name": "_ConferenceInfo",
+          "packageName": "@components/ConferenceInfo"
+        }
+      ]
+    },
+    {
+      "title": "这里填写示例标题",
+      "description": "这里填写示例说明",
+      "code": "./detail-end.js",
+      "scope": [
+        {
+          "name": "_ConferenceInfo",
+          "packageName": "@components/ConferenceInfo"
+        }
+      ]
+    }
+  ]
+}

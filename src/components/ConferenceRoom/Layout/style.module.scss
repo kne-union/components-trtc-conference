@@ -1,0 +1,25 @@
+.header {
+  background: var(--bg-color-grey-1);
+  padding: 4px 12px;
+  border-radius: 8px;
+}
+
+.name {
+  font-weight: bold;
+}
+
+.timer {
+  min-width: 60px;
+  text-align: center;
+}
+
+.main {
+  min-height: 500px;
+  align-items: center;
+  justify-content: center;
+}
+
+.toolbar {
+  border-top: 1px solid var(--bg-color-grey-3);
+  padding: 12px;
+}

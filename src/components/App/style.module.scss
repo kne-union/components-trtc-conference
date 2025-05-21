@@ -1,0 +1,10 @@
+.box {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: var(--font-color-grey-4);
+  --box-width: 900px;
+}
