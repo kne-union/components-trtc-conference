@@ -32,7 +32,7 @@ const Conference = createWithRemoteLoader({
           />
         );
       }}
-      error={<Navigate to={`${baseUrl}detail`} />}
+      error={<Navigate to={`${baseUrl}/detail`} />}
     />
   );
 });

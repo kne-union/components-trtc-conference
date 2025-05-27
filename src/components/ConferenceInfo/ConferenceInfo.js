@@ -8,10 +8,11 @@ import groupBy from 'lodash/groupBy';
 import style from './style.module.scss';
 import MenuBar from './MenuBar';
 import { ConferenceDetailInner } from './ConferenceDetail';
+import { EditConferenceButton } from './EditConference';
 
 const ConferenceInfo = createWithRemoteLoader({
   modules: ['components-core:ButtonGroup', 'components-core:Icon', 'components-core:StateTag', 'components-core:Common@SimpleBar']
-})(({ remoteModules, className, user, current = 1, pageSize = 20, onPageChange, getDetailUrl, data, reload, apis }) => {
+})(({ remoteModules, className, user, current = 1, pageSize = 20, onPageChange, getDetailUrl, data, reload, apis, actions }) => {
   const [conference, setConference] = useState(null);
   const [ButtonGroup, Icon, StateTag, SimpleBar] = remoteModules;
   const { message } = App.useApp();
@@ -68,6 +69,37 @@ const ConferenceInfo = createWithRemoteLoader({
                           size="small"
                           dataSource={item}
                           renderItem={item => {
+                            const options = [
+                              {
+                                type: 'primary',
+                                size: 'small',
+                                shape: 'round',
+                                children: '查看',
+                                onClick: () => {
+                                  setConference(item);
+                                }
+                              },
+                              {
+                                buttonComponent: EditConferenceButton,
+                                data: item,
+                                apis,
+                                onSuccess: reload,
+                                size: 'small',
+                                shape: 'round',
+                                children: '编辑'
+                              }
+                            ];
+                            if (item.status === 1) {
+                              options.push({
+                                size: 'small',
+                                shape: 'round',
+                                children: '删除',
+                                confirm: true,
+                                onClick: async () => {
+                                  await actions.remove({ id: item.id });
+                                }
+                              });
+                            }
                             return (
                               <List.Item className={style['list-item']} key={item.id}>
                                 <Flex vertical flex={1}>
@@ -80,17 +112,7 @@ const ConferenceInfo = createWithRemoteLoader({
                                     </Flex>
                                     <div className={style['options-btn']}>
                                       <ButtonGroup
-                                        list={[
-                                          {
-                                            type: 'primary',
-                                            size: 'small',
-                                            shape: 'round',
-                                            children: '查看',
-                                            onClick: () => {
-                                              setConference(item);
-                                            }
-                                          }
-                                        ]}
+                                        list={options}
                                         more={<Button icon={<Icon type="icon-gengduo2" />} className="btn-no-padding" type="link" />}
                                       />
                                     </div>

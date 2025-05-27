@@ -4,12 +4,12 @@ import formatConferenceTime from './formatConferenceTime';
 
 const renderModal = ({ inviter, conference, shorten, message }) => {
   const text = `
-            ${inviter.nickname} 邀请您参加视频会议
+            ${inviter.nickname || inviter.email || '默认用户'} 邀请您参加视频会议
             会议名称：${conference.name}
             会议时间：${formatConferenceTime(conference)}
 
             点击链接直接加入会议：
-            ${window.location.origin}/detail?code=${shorten}`;
+            ${window.location.origin}/invite?code=${shorten}`;
   return {
     title: '邀请参会人员',
     size: 'small',

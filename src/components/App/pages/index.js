@@ -9,6 +9,7 @@ const loadableWithProps = func =>
 const pages = {
   Home: loadableWithProps(() => import('./Home')),
   Detail: loadableWithProps(() => import('./Detail')),
+  Invite: loadableWithProps(() => import('./Invite')),
   Conference: loadableWithProps(() => import('./Conference'))
 };
 

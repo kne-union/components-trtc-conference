@@ -4,7 +4,7 @@ import range from 'lodash/range';
 
 const ConferenceFormInner = createWithRemoteLoader({
   modules: ['components-core:FormInfo']
-})(({ remoteModules }) => {
+})(({ remoteModules, isEdit }) => {
   const [FormInfo] = remoteModules;
   const { TableList, useFormContext } = FormInfo;
   const { Input, DatePicker, Select, Upload, Switch, InputNumber, Checkbox } = FormInfo.fields;
@@ -14,11 +14,13 @@ const ConferenceFormInner = createWithRemoteLoader({
       <FormInfo
         column={1}
         list={[
-          <Input name="name" label="会议名称" rule="REQ" />,
+          <Input name="name" label="会议名称" rule="REQ LEN-0-100" />,
           <DatePicker
+            disabled={isEdit}
             name="startTime"
             label="开始时间"
             rule="REQ"
+            inputReadOnly
             showTime
             minuteStep={15}
             format="YYYY-MM-DD HH:mm"
@@ -68,22 +70,31 @@ const ConferenceFormInner = createWithRemoteLoader({
             maxLength={10}
             accept={['.pdf', '.jpg', '.png', '.jpeg', '.doc', '.docx', '.xls', '.xlsx', '.html']}
           />,
-          <Switch name="options.documentVisibleAll" label="文档全员可见" tips="默认仅主持人可见" />
+          <Switch
+            name="options.documentVisibleAll"
+            label="文档全员可见"
+            tips="默认仅主持人可见"
+            display={formData.options?.document && formData.options?.document.length > 0}
+          />
         ]}
       />
-      <TableList
-        name="members"
-        title="成员"
-        column={1}
-        list={[
-          <Input name="nickname" label="昵称" />,
-          <Input name="email" label="邮箱" rule="EMAIL" />,
-          <Switch name="isMaster" label="是否主持人" />
-        ]}
-      />
-      <Checkbox name="includingMe" label="我也参加" labelHidden defaultValue={true}>
-        我也参加
-      </Checkbox>
+      {!isEdit && (
+        <>
+          <TableList
+            name="members"
+            title="成员"
+            column={1}
+            list={[
+              <Input name="nickname" label="昵称" />,
+              <Input name="email" label="邮箱" rule="EMAIL" />,
+              <Switch name="isMaster" label="是否主持人" />
+            ]}
+          />
+          <Checkbox name="includingMe" label="我也参加" labelHidden defaultValue={true}>
+            我也参加
+          </Checkbox>
+        </>
+      )}
     </>
   );
 });

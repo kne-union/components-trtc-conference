@@ -42,7 +42,11 @@ const ConferenceCountDown = ({ startTime, duration, onComplete }) => {
     );
   }
 
-  if (dayjs(startTime).isSame(current, 'day')) {
+  if (dayjs(startTime).diff(current, 'minute') < 60) {
+    return `${dayjs(startTime).diff(current, 'minute')}分钟后`;
+  }
+
+  if (dayjs(startTime).diff(current, 'hour') < 24) {
     return `${dayjs(startTime).diff(current, 'hour')}小时后`;
   }
   return `${dayjs(startTime).diff(current, 'day')}天后`;
