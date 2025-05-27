@@ -2,44 +2,47 @@ import { createWithRemoteLoader } from '@kne/remote-loader';
 import { ConferenceDetail } from '@components/ConferenceInfo';
 import Fetch from '@kne/react-fetch';
 import style from '../../style.module.scss';
-import { useNavigate, useSearchParams } from 'react-router-dom';
-import { useEffect } from 'react';
-import { setToken } from '@kne/token-storage';
+import { useNavigate, useSearchParams, Navigate } from 'react-router-dom';
+import { getToken } from '@kne/token-storage';
+import localStorage from '@kne/local-storage';
 import { useContext } from '../../context';
 
-const Detail = createWithRemoteLoader({
+const Invite = createWithRemoteLoader({
   modules: ['components-core:Global@usePreset']
 })(({ remoteModules }) => {
   const [usePreset] = remoteModules;
   const { apis } = usePreset();
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { baseUrl, headerName, name } = useContext();
-  useEffect(() => {
-    const code = searchParams.get('code');
-    if (code) {
-      setToken(headerName, code);
-      setSearchParams(searchParams => {
-        const newSearchParams = new URLSearchParams(searchParams);
-        newSearchParams.delete('code');
-        return newSearchParams;
-      });
-    }
-  }, [searchParams, setSearchParams, headerName]);
+  const code = searchParams.get('code');
   return (
     <div className={style['box']}>
       <Fetch
-        {...Object.assign({}, apis[name].getConferenceDetail)}
+        {...Object.assign({}, apis[name].getConferenceDetail, {
+          options: {
+            headers: {
+              [headerName]: code
+            }
+          }
+        })}
         render={({ data, reload }) => {
+          const conferenceIdKey = 'CURRENT_CONFERENCE_ID';
+          const token = getToken(headerName);
+          if (localStorage.getItem(conferenceIdKey) === data.conference.id && token) {
+            return <Navigate to={`${baseUrl}/detail?code=${token}`} replace />;
+          }
+          const conferenceId = data.conference.id;
           return (
             <ConferenceDetail
               {...data.conference}
-              current={data.member}
+              inviter={data.inviter}
               onEnter={() => {
                 navigate(`${baseUrl}/conference`);
               }}
               onReload={data => {
                 if (data?.shorten) {
+                  localStorage.setItem(conferenceIdKey, conferenceId);
                   window.location.href = `${window.location.origin}${baseUrl}/detail?code=${data.shorten}`;
                   return;
                 }
@@ -49,7 +52,9 @@ const Detail = createWithRemoteLoader({
                 saveMember: apis[name].saveMember,
                 inviteMember: apis[name].inviteMember,
                 removeMember: apis[name].removeMember,
-                joinConference: apis[name].joinConference
+                joinConference: Object.assign({}, apis[name].joinConference, {
+                  headers: { [headerName]: code }
+                })
               }}
             />
           );
@@ -59,4 +64,4 @@ const Detail = createWithRemoteLoader({
   );
 });
 
-export default Detail;
+export default Invite;

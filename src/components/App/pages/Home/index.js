@@ -4,15 +4,17 @@ import { useSearchParams } from 'react-router-dom';
 import Fetch from '@kne/react-fetch';
 import style from '../../style.module.scss';
 import { useContext } from '../../context';
+import { App } from 'antd';
 
 const Home = createWithRemoteLoader({
   modules: ['components-core:Global@usePreset']
 })(({ remoteModules }) => {
   const [usePreset] = remoteModules;
-  const { apis } = usePreset();
+  const { apis, ajax } = usePreset();
   const { baseUrl, userInfo, name } = useContext();
   const [searchParams, setSearchParams] = useSearchParams();
   const pageSize = 10;
+  const { message } = App.useApp();
   return (
     <div className={style['box']}>
       <Fetch
@@ -30,7 +32,7 @@ const Home = createWithRemoteLoader({
               reload={reload}
               pageSize={pageSize}
               getDetailUrl={item => {
-                return `${baseUrl}detail?code=${item.shorten}`;
+                return `${baseUrl}/detail?code=${item.shorten}`;
               }}
               onPageChange={({ currentPage }) => {
                 setSearchParams(searchParams => {
@@ -42,7 +44,23 @@ const Home = createWithRemoteLoader({
               data={data}
               apis={{
                 create: apis[name].createConference,
+                save: apis[name].saveConference,
                 inviteMember: apis[name].inviteMember
+              }}
+              actions={{
+                remove: async ({ id }) => {
+                  const { data: resData } = await ajax(
+                    Object.assign({}, apis[name].deleteConference, {
+                      data: { id }
+                    })
+                  );
+
+                  if (resData.code !== 0) {
+                    return;
+                  }
+                  message.success('删除成功');
+                  reload();
+                }
               }}
             />
           );

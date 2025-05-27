@@ -37,6 +37,14 @@ const getApis = options => {
     createConference: {
       url: `${prefix}/create`,
       method: 'POST'
+    },
+    saveConference: {
+      url: `${prefix}/save`,
+      method: 'POST'
+    },
+    deleteConference: {
+      url: `${prefix}/delete`,
+      method: 'POST'
     }
   };
 };

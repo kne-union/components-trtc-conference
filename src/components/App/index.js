@@ -2,7 +2,7 @@ import { Routes, Route } from 'react-router-dom';
 import { Provider } from './context';
 import pages from './pages';
 
-const { Home, Detail, Conference } = pages;
+const { Home, Detail, Invite, Conference } = pages;
 
 const App = ({ baseUrl, userInfo, headerName = 'x-trtc-conference-code', name = 'conference' }) => {
   return (
@@ -10,6 +10,7 @@ const App = ({ baseUrl, userInfo, headerName = 'x-trtc-conference-code', name = 
       <Routes>
         <Route path={baseUrl}>
           <Route index element={<Home />} />
+          <Route path="invite" element={<Invite />} />
           <Route path="detail" element={<Detail />} />
           <Route path="conference" element={<Conference />} />
         </Route>
