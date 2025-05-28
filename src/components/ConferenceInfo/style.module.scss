@@ -7,9 +7,12 @@
   box-shadow: 0 0 30px rgba(0, 0, 0, 0.1);
 }
 
-.right-panel {
+.right-panel-outer {
   width: var(--box-width, 600px);
   flex: none;
+}
+
+.right-panel {
   padding: 30px;
 }
 
@@ -98,6 +101,8 @@
 .menu-bar {
   background: var(--primary-color);
   padding: 10px;
+  width: 80px;
+  box-sizing: border-box;
 }
 
 .current-user {
@@ -134,5 +139,5 @@
 }
 
 .scroller {
-  max-height: calc(var(--box-height, 680px) - 180px);
+  max-height: calc(var(--box-height, 680px) - 120px);
 }

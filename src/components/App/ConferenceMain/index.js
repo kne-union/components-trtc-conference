@@ -57,7 +57,7 @@ const CurrentView = ({ sdk, current, videoIsPlay, audioIsPlay }) => {
 
   return (
     <div className={style['view-item']}>
-      <div ref={ref} />
+      <div ref={ref} className={style['video-outer']} />
       {!videoIsPlay && <ViewClose className={style['view-close']} />}
       <ViewBar current={current} videoIsPlay={videoIsPlay} audioIsPlay={audioIsPlay} />
     </div>
@@ -74,7 +74,7 @@ const CurrentShareScreenView = ({ sdk, current }) => {
 
   return (
     <div className={style['view-item']}>
-      <div ref={ref} />
+      <div ref={ref} className={style['video-outer']} />
       <ViewBar current={current} shareScreen />
     </div>
   );
@@ -88,7 +88,7 @@ const RemoteView = ({ sdk, userId, streamType, current, videoIsPlay, audioIsPlay
 
   return (
     <div className={style['view-item']}>
-      <div ref={ref} />
+      <div ref={ref} className={style['video-outer']} />
       {!videoIsPlay && <ViewClose className={style['view-close']} />}
       <ViewBar current={current} shareScreen={shareScreen} videoIsPlay={videoIsPlay} audioIsPlay={audioIsPlay} />
     </div>

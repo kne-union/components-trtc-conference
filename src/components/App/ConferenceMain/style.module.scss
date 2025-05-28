@@ -3,6 +3,14 @@
   height: 100%;
   position: relative;
   overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  .video-outer {
+    width: 100%;
+    height: 100%;
+  }
 }
 
 .view-item-bar {
@@ -23,6 +31,7 @@
   min-width: unset !important;
   min-height: unset !important;
   display: block;
+
   :global {
     .ant-avatar {
       width: 20px !important;

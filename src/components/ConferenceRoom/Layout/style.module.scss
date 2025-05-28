@@ -17,6 +17,8 @@
   min-height: 500px;
   align-items: center;
   justify-content: center;
+  --main-height: calc(100vh - 108px);
+  height: var(--main-height);
 }
 
 .toolbar {
