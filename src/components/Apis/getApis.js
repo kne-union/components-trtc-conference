@@ -18,6 +18,10 @@ const getApis = options => {
       url: `${prefix}/inviteMember`,
       method: 'POST'
     },
+    inviteMemberFormUser: {
+      url: `${prefix}/inviteMemberFormUser`,
+      method: 'POST'
+    },
     joinConference: {
       url: `${prefix}/join`,
       method: 'POST'
@@ -45,6 +49,10 @@ const getApis = options => {
     deleteConference: {
       url: `${prefix}/delete`,
       method: 'POST'
+    },
+    getMemberShorten: {
+      url: `${prefix}/getMemberShorten`,
+      method: 'GET'
     }
   };
 };

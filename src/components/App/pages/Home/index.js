@@ -45,9 +45,21 @@ const Home = createWithRemoteLoader({
               apis={{
                 create: apis[name].createConference,
                 save: apis[name].saveConference,
-                inviteMember: apis[name].inviteMember
+                inviteMember: Object.assign(apis[name].inviteMemberFormUser),
+                getMemberShorten: apis[name].getMemberShorten
               }}
               actions={{
+                getMemberShorten: async ({ id }) => {
+                  const { data: resData } = await ajax(
+                    Object.assign({}, apis[name].getMemberShorten, {
+                      params: { id }
+                    })
+                  );
+                  if (resData.code !== 0) {
+                    throw new Error(resData.msg);
+                  }
+                  return resData.data;
+                },
                 remove: async ({ id }) => {
                   const { data: resData } = await ajax(
                     Object.assign({}, apis[name].deleteConference, {

@@ -16,10 +16,12 @@ export const ConferenceDetailInner = createWithRemoteLoader({
     'components-core:InfoPage@TableView',
     'components-core:StateTag',
     'components-core:ConfirmButton',
-    'components-core:Global@usePreset'
+    'components-core:Global@usePreset',
+    'components-core:LoadingButton'
   ]
 })(({
   remoteModules,
+  id,
   current,
   inviter,
   startTime,
@@ -34,31 +36,39 @@ export const ConferenceDetailInner = createWithRemoteLoader({
   onEnter,
   onDetailEnter,
   onDetailLinkCopy,
+  onEdit,
   onBack,
   isAdmin
 }) => {
-  const [Icon, Image, TableView, StateTag, ConfirmButton, usePreset] = remoteModules;
+  const [Icon, Image, TableView, StateTag, ConfirmButton, usePreset, LoadingButton] = remoteModules;
   const { ajax } = usePreset();
   const { message } = App.useApp();
 
   return (
     <Flex vertical flex={1} className={style['right-panel']}>
-      <Flex className={style['title']} gap={8}>
-        {onBack && (
-          <Button
-            type="link"
-            className="btn-no-padding"
-            icon={<Icon type="icon-arrow-thin-left" />}
-            style={{ gap: '0' }}
-            onClick={() => {
-              onBack();
-            }}
-          >
-            返回
+      <Flex className={style['title']} gap={8} justify="space-between">
+        <Flex gap={8}>
+          {onBack && (
+            <Button
+              type="link"
+              className="btn-no-padding"
+              icon={<Icon type="icon-arrow-thin-left" />}
+              style={{ gap: '0' }}
+              onClick={() => {
+                onBack();
+              }}
+            >
+              返回
+            </Button>
+          )}
+          <div>{name}</div>
+          <div>({formatConferenceTime({ startTime, duration })})</div>
+        </Flex>
+        {onEdit && (
+          <Button type="link" onClick={onEdit}>
+            编辑
           </Button>
         )}
-        <div>{name}</div>
-        <div>({formatConferenceTime({ startTime, duration })})</div>
       </Flex>
       <Divider className={style['divider']} />
       <Flex vertical align="center" className={style['current-user']} gap={30}>
@@ -189,24 +199,24 @@ export const ConferenceDetailInner = createWithRemoteLoader({
                       return (
                         status === 0 && (
                           <Flex gap={8}>
-                            <Button
+                            <LoadingButton
                               type="link"
                               className="btn-no-padding"
                               onClick={() => {
-                                onDetailEnter(item);
+                                return onDetailEnter(item);
                               }}
                             >
                               进入
-                            </Button>
-                            <Button
+                            </LoadingButton>
+                            <LoadingButton
                               type="link"
                               className="btn-no-padding"
                               onClick={() => {
-                                onDetailLinkCopy(item);
+                                return onDetailLinkCopy(item);
                               }}
                             >
                               复制链接
-                            </Button>
+                            </LoadingButton>
                           </Flex>
                         )
                       );
@@ -246,6 +256,15 @@ export const ConferenceDetailInner = createWithRemoteLoader({
             dataSource={members}
           />
         </Flex>
+        {isAdmin && (
+          <Flex justify="center">
+            {isInvitationAllowed && status === 0 && (
+              <InviteMember type="primary" size="large" shape="round" apis={apis} id={id} disabled={members.length >= maxCount}>
+                邀请成员({members.length}/{maxCount})
+              </InviteMember>
+            )}
+          </Flex>
+        )}
       </Flex>
     </Flex>
   );
@@ -254,7 +273,9 @@ export const ConferenceDetailInner = createWithRemoteLoader({
 const ConferenceDetail = ({ className, ...props }) => {
   return (
     <Flex className={classnames(className, style['info'])} vertical>
-      <ConferenceDetailInner {...props} />
+      <div className={style['right-panel-outer']}>
+        <ConferenceDetailInner {...props} />
+      </div>
     </Flex>
   );
 };

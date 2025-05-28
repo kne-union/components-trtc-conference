@@ -12,21 +12,21 @@ const LEAPIN_VIDEO_CONFERENCE_WINDOW_HORIZONTAL_SIZES = 'LEAPIN_VIDEO_CONFERENCE
 
 const WindowItem = createWithRemoteLoader({
   modules: ['components-core:Common@useResize', 'components-core:Icon']
-})(({ remoteModules, className, children, base = 'width', ratio = 9 / 16, onMainView }) => {
+})(({ remoteModules, className, children, base = 'width', isSingle, ratio = 9 / 16, onMainView }) => {
   const [useResize, Icon] = remoteModules;
   const [width, setWidth] = useState(0);
   const [height, setHeight] = useState(0);
   const ref = useResize(dom => {
-    if (base === 'width') {
-      setHeight(Math.ceil(dom.clientWidth * ratio));
-    } else {
-      setWidth(Math.ceil(dom.clientHeight / ratio));
-    }
+    setHeight(Math.ceil(dom.clientWidth * ratio));
+    setWidth(Math.ceil(dom.clientHeight / ratio));
   });
   return (
     <div
       ref={ref}
-      className={classnames(style['window-item'], className)}
+      className={classnames(style['window-item'], className, {
+        [style['window-item-single']]: isSingle,
+        [style['window-item-main']]: isSingle
+      })}
       style={
         base === 'width'
           ? {
@@ -66,7 +66,7 @@ const GridList = createWithRemoteLoader({
           {list.map(({ view, index }) => {
             return (
               <Col span={list.length >= 3 ? 8 : Math.round(24 / list.length)} key={index}>
-                <WindowItem>{view}</WindowItem>
+                <WindowItem isSingle={list.length === 1}>{view}</WindowItem>
               </Col>
             );
           })}
@@ -93,7 +93,7 @@ const VerticalList = createWithRemoteLoader({
         <Flex gap={12} className={style['vertical-content']}>
           {childrenList.map(({ view, index }) => {
             return (
-              <WindowItem key={index} base="height" onMainView={() => onMainView(index)}>
+              <WindowItem isSingle={list.length === 1} key={index} base="height" onMainView={() => onMainView(index)}>
                 {view}
               </WindowItem>
             );
@@ -105,7 +105,7 @@ const VerticalList = createWithRemoteLoader({
   const mainPanel = (
     <Splitter.Panel size={sizes[type === 'top' ? 1 : 0]}>
       <div
-        className={style['window-item']}
+        className={classnames(style['window-item'], style['window-item-main'])}
         style={{
           '--width': '100%',
           '--height': '100%'
@@ -157,7 +157,7 @@ const HorizontalList = createWithRemoteLoader({
           <Flex gap={12} vertical className={style['horizontal-content']}>
             {childrenList.map(({ view, index }) => {
               return (
-                <WindowItem key={index} base="width" onMainView={() => onMainView(index)}>
+                <WindowItem isSingle={list.length === 1} key={index} base="width" onMainView={() => onMainView(index)}>
                   {view}
                 </WindowItem>
               );
@@ -171,7 +171,7 @@ const HorizontalList = createWithRemoteLoader({
   const mainPanel = (
     <Splitter.Panel size={sizes[type === 'left' ? 1 : 0]}>
       <div
-        className={style['window-item']}
+        className={classnames(style['window-item'], style['window-item-main'])}
         style={{
           '--width': '100%',
           '--height': '100%'

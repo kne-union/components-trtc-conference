@@ -58,9 +58,7 @@ const Layout = createWithRemoteLoader({
             </Button>
           </Flex>
         </Flex>
-        <Flex flex={1} className={style['main']}>
-          {children}
-        </Flex>
+        <div className={style['main']}>{children}</div>
         <Flex justify="space-between" align="center" className={style['toolbar']} gap={12}>
           <Flex justify="center" flex={1} gap={4}>
             {toolbar}

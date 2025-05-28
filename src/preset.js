@@ -72,8 +72,8 @@ export const globalInit = async () => {
     }
   });
   const registry = {
-    url: 'https://uc.fatalent.cn',
-    tpl: '{{url}}/packages/@kne-components/{{remote}}/{{version}}/build'
+    url: 'https://cdn.leapin-ai.com',
+    tpl: '{{url}}/components/@kne-components/{{remote}}/{{version}}/build'
   };
 
   const componentsCoreRemote = {

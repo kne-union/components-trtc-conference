@@ -36,9 +36,20 @@
   justify-content: center;
   align-items: center;
   background: #000000;
-  height: var(--height);
-  width: var(--width);
   position: relative;
+
+  &:not(.window-item-single) {
+    width: var(--width);
+    height: var(--height);
+  }
+
+  &.window-item-single {
+    height: var(--main-height);
+  }
+
+  &.window-item-main video {
+    object-fit: contain !important;
+  }
 
   video {
     display: block;
