@@ -49,6 +49,9 @@ class ConferenceSDK {
     this.trtc.on(TRTC.EVENT.REMOTE_AUDIO_UNAVAILABLE, ({ userId }) => {
       this.events.onUpdate?.({ userId, type: 'remote', audioIsPlay: false });
     });
+    this.trtc.on(TRTC.EVENT.KICKED_OUT, event => {
+      this.events.onKickedOut?.({ reason: event.reason });
+    });
     this.trtc.on(TRTC.EVENT.NETWORK_QUALITY, event => {
       const format = {
         0: -1,

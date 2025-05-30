@@ -35,7 +35,7 @@ const AddConference = createWithRemoteLoader({
             }
             message.success('添加成功');
             formModalApi.close();
-            onSuccess && onSuccess();
+            onSuccess && onSuccess(resData.data);
           }
         },
         children: <ConferenceFormInner />

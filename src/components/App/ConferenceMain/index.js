@@ -181,6 +181,22 @@ const Conference = createWithRemoteLoader({
           onUpdate,
           onQualityChange: level => {
             setSignalLevel(level);
+          },
+          onKickedOut: ({ reason }) => {
+            switch (reason) {
+              case 'kick':
+                message.error('您在其他端登录被挤下线');
+                break;
+              case 'banned':
+                message.error('管理员或主持人已将您移出房间');
+                break;
+              case 'room_disband':
+                message.error('会议房间已经被解散');
+                break;
+              default:
+                message.error('未知原因导致下线');
+            }
+            navigate(baseUrl + '/detail');
           }
         }
       });
