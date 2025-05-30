@@ -7,7 +7,7 @@ const ConferenceFormInner = createWithRemoteLoader({
 })(({ remoteModules, isEdit }) => {
   const [FormInfo] = remoteModules;
   const { TableList, useFormContext } = FormInfo;
-  const { Input, DatePicker, Select, Upload, Switch, InputNumber, Checkbox } = FormInfo.fields;
+  const { Input, DatePicker, Select, Upload, Switch, InputNumber, Checkbox, RadioGroup } = FormInfo.fields;
   const { formData } = useFormContext();
   return (
     <>
@@ -94,6 +94,33 @@ const ConferenceFormInner = createWithRemoteLoader({
             我也参加
           </Checkbox>
         </>
+      )}
+      {!isEdit && (
+        <FormInfo
+          title="高级设置"
+          column={1}
+          list={[
+            <RadioGroup
+              name="options.setting.record"
+              label="是否录制会议"
+              defaultValue=""
+              options={[
+                { value: '', label: '不启用' },
+                { value: 'audio', label: '录制音频' },
+                { value: 'video', label: '录制视频' }
+              ]}
+            />,
+            <RadioGroup
+              name="options.setting.speech"
+              label="是否开启实时语音识别"
+              defaultValue={false}
+              options={[
+                { value: false, label: '关闭' },
+                { value: true, label: '开启' }
+              ]}
+            />
+          ]}
+        />
       )}
     </>
   );

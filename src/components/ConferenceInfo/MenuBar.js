@@ -57,7 +57,7 @@ const MenuBar = createWithRemoteLoader({
           if (resData.code !== 0) {
             return;
           }
-          reload && reload();
+          reload && reload(resData.data);
           onDetailEnter(resData.data.members[0]);
         }}
       >

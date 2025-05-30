@@ -21,7 +21,10 @@ const ConferenceInfo = createWithRemoteLoader({
       <MenuBar
         apis={apis}
         user={user}
-        reload={reload}
+        reload={data => {
+          reload && reload();
+          data && setConference(data);
+        }}
         onDetailEnter={item => {
           window.open(getDetailUrl(item), '_blank');
         }}
