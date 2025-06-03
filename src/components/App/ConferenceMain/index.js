@@ -122,6 +122,7 @@ const Conference = createWithRemoteLoader({
     documentInside: true,
     shareScreenOpen: false
   });
+  const speechInputRef = useRef(null);
   const { message } = App.useApp();
   const [list, setList] = useState([]);
 
@@ -197,6 +198,9 @@ const Conference = createWithRemoteLoader({
                 message.error('未知原因导致下线');
             }
             navigate(baseUrl + '/detail');
+          },
+          onSpeech: (...args) => {
+            speechInputRef.current && speechInputRef.current(...args);
           }
         }
       });
@@ -295,7 +299,14 @@ const Conference = createWithRemoteLoader({
       document={
         conference.options?.document &&
         (conference.options?.documentVisibleAll || current.isMaster) && (
-          <ConferenceDocument type={conference.options.documentType} files={conference.options.document} />
+          <ConferenceDocument
+            type={conference.options.documentType}
+            moduleProps={conference.options.moduleProps}
+            getSpeechInput={onSpeechInput => {
+              speechInputRef.current = onSpeechInput;
+            }}
+            files={conference.options.document}
+          />
         )
       }
       actions={{

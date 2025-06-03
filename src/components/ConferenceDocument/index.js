@@ -1,4 +1,4 @@
-import { createWithRemoteLoader } from '@kne/remote-loader';
+import RemoteLoader, { createWithRemoteLoader } from '@kne/remote-loader';
 import { Flex, Select } from 'antd';
 import { useState } from 'react';
 import style from './style.module.scss';
@@ -30,9 +30,24 @@ const Files = createWithRemoteLoader({
   );
 });
 
+const RemoteModule = createWithRemoteLoader({
+  modules: ['components-core:Common@SimpleBar']
+})(({ remoteModules, moduleProps, getSpeechInput }) => {
+  const [SimpleBar] = remoteModules;
+  const { module, props } = moduleProps;
+  return (
+    <SimpleBar className={style['main-scroller']}>
+      <RemoteLoader {...props} module={module} getSpeechInput={getSpeechInput} />
+    </SimpleBar>
+  );
+});
+
 const ConferenceDocument = ({ type, ...props }) => {
   if (type === 'files') {
     return <Files {...props} />;
+  }
+  if (type === 'remote-module') {
+    return <RemoteModule {...props} />;
   }
   return <div>Conference Document</div>;
 };

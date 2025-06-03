@@ -1,7 +1,8 @@
 import { createWithRemoteLoader } from '@kne/remote-loader';
-import { Flex, Button } from 'antd';
+import { Flex, Button, Card } from 'antd';
 import style from './style.module.scss';
 import AddConference from './AddConference';
+import { removeToken } from '@kne/token-storage';
 
 const MenuBar = createWithRemoteLoader({
   modules: [
@@ -9,26 +10,62 @@ const MenuBar = createWithRemoteLoader({
     'components-core:Icon',
     'components-core:Image',
     'LoadingButton',
-    'components-admin:Authenticate@SaveUserInfo'
+    'components-admin:Authenticate@SaveUserInfo',
+    'components-core:Modal@useModal'
   ]
 })(({ remoteModules, user, apis, reload, onDetailEnter }) => {
-  const [usePreset, Icon, Image, LoadingButton, SaveUserInfo] = remoteModules;
+  const [usePreset, Icon, Image, LoadingButton, SaveUserInfo, useModal] = remoteModules;
   const { ajax } = usePreset();
+  const modal = useModal();
   return (
     <Flex vertical gap={10} className={style['menu-bar']}>
-      <SaveUserInfo>
-        {({ onClick }) => {
-          return (
-            <Button
-              className={style['menu-item']}
-              type="primary"
-              shape={'circle'}
-              icon={<Image.Avatar id={user.value.avatar} size={40} />}
-              onClick={onClick}
-            />
-          );
+      <Button
+        className={style['menu-item']}
+        type="primary"
+        shape={'circle'}
+        icon={<Image.Avatar id={user.value.avatar} size={40} />}
+        onClick={() => {
+          const modalApi = modal({
+            title: '用户信息',
+            size: 'small',
+            footer: null,
+            children: (
+              <Card className={style['current-user']}>
+                <Flex vertical gap={12} align="center">
+                  <Image.Avatar size={100} id={user.value.avatar} />
+                  <div>{user.value.email}</div>
+                  <div>{user.value.nickname}</div>
+                  <Button
+                    onClick={() => {
+                      removeToken('X-User-Code');
+                      removeToken('X-User-Token');
+                      window.location.reload();
+                    }}
+                  >
+                    退出登录
+                  </Button>
+                </Flex>
+                <SaveUserInfo>
+                  {({ onClick }) => {
+                    return (
+                      <Button
+                        onClick={() => {
+                          modalApi.close();
+                          onClick();
+                        }}
+                        className={style['current-user-edit']}
+                        size="small"
+                        type="text"
+                        icon={<Icon type="icon-bianji" />}
+                      />
+                    );
+                  }}
+                </SaveUserInfo>
+              </Card>
+            )
+          });
         }}
-      </SaveUserInfo>
+      />
       <AddConference apis={apis} onSuccess={reload}>
         {({ onClick }) => (
           <Button className={style['menu-item']} type="primary" onClick={onClick}>
