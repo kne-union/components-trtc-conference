@@ -31,40 +31,38 @@ const ConferenceInfo = createWithRemoteLoader({
       />
       <div className={style['right-panel-outer']}>
         {conference ? (
-          <SimpleBar className={style['scroller']}>
-            <EditConference
-              data={conference}
-              apis={apis}
-              onSuccess={() => {
-                reload && reload();
-                setConference(null);
-              }}
-            >
-              {({ onClick: onEdit }) => {
-                return (
-                  <ConferenceDetailInner
-                    isAdmin
-                    {...Object.assign({}, conference)}
-                    apis={apis}
-                    onDetailEnter={async item => {
-                      const { shorten } = await actions.getMemberShorten(item);
-                      window.open(getDetailUrl({ shorten }), '_blank');
-                    }}
-                    onEdit={onEdit}
-                    onDetailLinkCopy={async item => {
-                      const { shorten } = await actions.getMemberShorten(item);
-                      navigator.clipboard.writeText(window.location.origin + getDetailUrl({ shorten })).then(() => {
-                        message.success('链接已复制');
-                      });
-                    }}
-                    onBack={() => {
-                      setConference(null);
-                    }}
-                  />
-                );
-              }}
-            </EditConference>
-          </SimpleBar>
+          <EditConference
+            data={conference}
+            apis={apis}
+            onSuccess={() => {
+              reload && reload();
+              setConference(null);
+            }}
+          >
+            {({ onClick: onEdit }) => {
+              return (
+                <ConferenceDetailInner
+                  isAdmin
+                  {...Object.assign({}, conference)}
+                  apis={apis}
+                  onDetailEnter={async item => {
+                    const { shorten } = await actions.getMemberShorten(item);
+                    window.open(getDetailUrl({ shorten }), '_blank');
+                  }}
+                  onEdit={onEdit}
+                  onDetailLinkCopy={async item => {
+                    const { shorten } = await actions.getMemberShorten(item);
+                    navigator.clipboard.writeText(window.location.origin + getDetailUrl({ shorten })).then(() => {
+                      message.success('链接已复制');
+                    });
+                  }}
+                  onBack={() => {
+                    setConference(null);
+                  }}
+                />
+              );
+            }}
+          </EditConference>
         ) : (
           <Flex vertical className={style['right-panel']}>
             <div className={style['title']}>{dayjs().format('MM月DD日')}</div>

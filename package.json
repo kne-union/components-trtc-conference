@@ -1,6 +1,6 @@
 {
   "name": "@kne-components/components-trtc-conference",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "用于实现一个基于trtc的视频会议系统",
   "scripts": {
     "init": "husky",

@@ -141,3 +141,15 @@
 .scroller {
   max-height: calc(var(--box-height, 680px) - 120px);
 }
+
+.preview-file {
+  width: 400px !important;
+}
+
+.preview-list {
+  margin-top: 10px;
+
+  :global(.ant-card) {
+    background: transparent !important;
+  }
+}
