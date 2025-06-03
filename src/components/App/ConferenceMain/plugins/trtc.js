@@ -65,6 +65,11 @@ class ConferenceSDK {
       this.localQuality = format[Math.max(event.uplinkNetworkQuality, event.downlinkNetworkQuality)] || -1;
       this.events.onQualityChange?.(this.localQuality);
     });
+
+    this.trtc.on(TRTC.EVENT.CUSTOM_MESSAGE, event => {
+      // receive custom message
+      console.log('>>>>>>', event);
+    });
   }
 
   async runTask(id, task) {
