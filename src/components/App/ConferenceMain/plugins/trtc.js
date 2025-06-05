@@ -66,6 +66,16 @@ class ConferenceSDK {
       this.events.onQualityChange?.(this.localQuality);
     });
 
+    this.trtc.on(TRTC.EVENT.SCREEN_SHARE_STOPPED, () => {
+      this.events.onShareScreenStop?.();
+      this.events.onUpdate?.({
+        userId: this.sdkParams.userId,
+        type: 'local',
+        streamType: this.STREAM_TYPE_SHARE,
+        videoIsPlay: false
+      });
+    });
+
     this.trtc.on(TRTC.EVENT.CUSTOM_MESSAGE, event => {
       // receive custom message
       console.log('>>>>>>', event);
