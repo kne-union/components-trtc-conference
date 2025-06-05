@@ -199,6 +199,11 @@ const Conference = createWithRemoteLoader({
             }
             navigate(baseUrl + '/detail');
           },
+          onShareScreenStop: () => {
+            setSetting(setting => {
+              return Object.assign({}, setting, { shareScreenOpen: false });
+            });
+          },
           onSpeech: (...args) => {
             speechInputRef.current && speechInputRef.current(...args);
           }
@@ -334,7 +339,11 @@ const Conference = createWithRemoteLoader({
           navigate(baseUrl + '/detail');
         },
         end: async () => {
-          const { data: resData } = await ajax(Object.assign({}, apis.endConference));
+          const { data: resData } = await ajax(
+            Object.assign({}, apis.endConference, {
+              data: { id: conference.id }
+            })
+          );
           if (resData.code !== 0) {
             return;
           }

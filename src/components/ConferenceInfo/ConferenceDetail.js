@@ -70,7 +70,7 @@ export const ConferenceDetailInner = createWithRemoteLoader({
           <div>{name}</div>
           <div>({formatConferenceTime({ startTime, duration })})</div>
         </Flex>
-        {onEdit && (
+        {onEdit && status === 0 && (
           <Button type="link" onClick={onEdit}>
             编辑
           </Button>
@@ -268,31 +268,39 @@ export const ConferenceDetailInner = createWithRemoteLoader({
               <div className={style['member-title']}>会议{get(options, 'setting.record') === 'video' ? '录像' : '录音'}</div>
               <InfoPage className={style['preview-list']}>
                 <InfoPage.Part>
-                  {(members || []).map(item => {
-                    const list =
-                      transform(
-                        get(options, `recordFiles.${item.id}`),
-                        (result, value) => {
-                          if (Array.from(value) && value.length > 0) {
-                            result.push(...value);
-                          }
-                        },
-                        []
-                      ) || [];
-                    return (
-                      <InfoPage.Part title={`${item.nickname}(${item.isMaster ? '主持人' : '参会者'})`}>
-                        <Flex gap={8} justify="center">
-                          {list.length > 0 ? (
-                            list.map(({ fileId }) => {
-                              return <FilePreview id={fileId} className={style['preview-file']} />;
-                            })
-                          ) : (
-                            <Empty description="正在同步录制资源，最长需要10分钟，请稍后查看" />
-                          )}
-                        </Flex>
-                      </InfoPage.Part>
-                    );
-                  })}
+                  {get(options, 'recordFilesAchieved') ? (
+                    (members || [])
+                      .sort((a, b) => {
+                        return a.isMaster === b.isMaster ? 0 : a.isMaster ? -1 : 1;
+                      })
+                      .map(item => {
+                        const list =
+                          transform(
+                            get(options, `recordFiles.${item.id}`),
+                            (result, value) => {
+                              if (Array.from(value) && value.length > 0) {
+                                result.push(...value);
+                              }
+                            },
+                            []
+                          ) || [];
+                        return (
+                          <InfoPage.Part title={`${item.nickname}(${item.isMaster ? '主持人' : '参会者'})`}>
+                            <Flex gap={8} justify="center">
+                              {list.length > 0 ? (
+                                list.map(({ fileId }) => {
+                                  return <FilePreview id={fileId} className={style['preview-file']} />;
+                                })
+                              ) : (
+                                <Empty description="用户没有产生录制资源" />
+                              )}
+                            </Flex>
+                          </InfoPage.Part>
+                        );
+                      })
+                  ) : (
+                    <Empty description="正在同步录制资源，最长需要10分钟，请稍后查看" />
+                  )}
                 </InfoPage.Part>
               </InfoPage>
             </Flex>
