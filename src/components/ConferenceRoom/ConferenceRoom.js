@@ -3,6 +3,7 @@ import Toolbar from './Toolbar';
 import { Provider } from './context';
 import Window from './Window';
 import useControlValue from '@kne/use-control-value';
+import get from 'lodash/get';
 
 const ConferenceRoom = ({
   className,
@@ -22,7 +23,17 @@ const ConferenceRoom = ({
   actions,
   ...props
 }) => {
-  const [setting, setSetting] = useControlValue({ ...props, defaultValue });
+  const settingLayoutType = get(conference, 'options.setting.layoutType');
+  const [setting, setSetting] = useControlValue({
+    ...props,
+    defaultValue: Object.assign(
+      {},
+      defaultValue,
+      settingLayoutType && {
+        layoutType: settingLayoutType
+      }
+    )
+  });
   return (
     <Provider
       value={{

@@ -30,24 +30,13 @@ const Files = createWithRemoteLoader({
   );
 });
 
-const RemoteModule = createWithRemoteLoader({
-  modules: ['components-core:Common@SimpleBar']
-})(({ remoteModules, moduleProps, getSpeechInput }) => {
-  const [SimpleBar] = remoteModules;
-  const { module, props } = moduleProps;
-  return (
-    <SimpleBar className={style['main-scroller']}>
-      <RemoteLoader {...props} module={module} getSpeechInput={getSpeechInput} />
-    </SimpleBar>
-  );
-});
-
 const ConferenceDocument = ({ type, ...props }) => {
   if (type === 'files') {
     return <Files {...props} />;
   }
   if (type === 'remote-module') {
-    return <RemoteModule {...props} />;
+    const { module, moduleProps, getSpeechInput } = props;
+    return <RemoteLoader {...moduleProps} module={module} getSpeechInput={getSpeechInput} className={style['main']} />;
   }
   return <div>Conference Document</div>;
 };
