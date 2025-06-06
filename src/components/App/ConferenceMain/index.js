@@ -302,7 +302,7 @@ const Conference = createWithRemoteLoader({
       value={setting}
       onChange={setSetting}
       document={
-        conference.options?.document &&
+        conference.options?.documentType &&
         (conference.options?.documentVisibleAll || current.isMaster) && (
           <ConferenceDocument
             type={conference.options.documentType}
@@ -311,6 +311,7 @@ const Conference = createWithRemoteLoader({
               speechInputRef.current = onSpeechInput;
             }}
             files={conference.options.document}
+            module={conference.options.module}
           />
         )
       }
