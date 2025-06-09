@@ -13,8 +13,8 @@ const MemberFormInner = createWithRemoteLoader({
         <Flex justify="center">
           <Avatar name="avatar" label="头像" labelHidden interceptor="photo-string" />
         </Flex>,
-        <Input name="nickname" label="昵称" rule="REQ" />,
-        <Input name="email" label="邮箱" />
+        <Input name="nickname" label="昵称" rule="REQ LEN-0-100" />,
+        <Input name="email" label="邮箱" rule="EMAIL LEN-0-100" />
       ]}
     />
   );
