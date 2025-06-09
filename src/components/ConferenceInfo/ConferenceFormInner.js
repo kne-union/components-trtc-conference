@@ -85,8 +85,8 @@ const ConferenceFormInner = createWithRemoteLoader({
             title="成员"
             column={1}
             list={[
-              <Input name="nickname" label="昵称" />,
-              <Input name="email" label="邮箱" rule="EMAIL" />,
+              <Input name="nickname" label="昵称" rule="LEN-0-100" />,
+              <Input name="email" label="邮箱" rule="EMAIL LEN-0-100" />,
               <Switch name="isMaster" label="是否主持人" />
             ]}
           />
