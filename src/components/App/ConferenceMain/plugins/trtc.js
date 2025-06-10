@@ -22,6 +22,9 @@ class ConferenceSDK {
     this.localQuality = -1;
 
     this.trtc.on(TRTC.EVENT.REMOTE_USER_ENTER, ({ userId }) => {
+      if (/^robot/.test(String(userId))) {
+        return;
+      }
       this.events.onEnterRoom?.({ userId, type: 'remote' });
       this.clientState[userId] = 1;
     });
@@ -31,7 +34,7 @@ class ConferenceSDK {
       this.clientState[userId] = 0;
     });
 
-    this.trtc.on(TRTC.EVENT.REMOTE_VIDEO_AVAILABLE, ({ userId, streamType }) => {
+    this.trtc.on(TRTC.EVENT.REMOTE_VIDEO_AVAILABLE, ({ userId, streamType, ...props }) => {
       this.runTask(userId, async () => {
         await this.trtc.startRemoteVideo({ userId, streamType });
         await this.events.onUpdate?.({ userId, type: 'remote', streamType, videoIsPlay: true });
@@ -78,7 +81,10 @@ class ConferenceSDK {
 
     this.trtc.on(TRTC.EVENT.CUSTOM_MESSAGE, event => {
       // receive custom message
-      console.log('>>>>>>', event);
+      const message = JSON.parse(new TextDecoder().decode(event.data));
+      if (message.type === 10000 && message.payload?.end) {
+        this.events.onSpeech?.({ sender: message.sender, message: message.payload.text });
+      }
     });
   }
 

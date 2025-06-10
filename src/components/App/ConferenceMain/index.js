@@ -7,8 +7,10 @@ import style from './style.module.scss';
 import { createWithRemoteLoader } from '@kne/remote-loader';
 import useRefCallback from '@kne/use-ref-callback';
 import transform from 'lodash/transform';
+import pick from 'lodash/pick';
 import { InviteMember } from '@components/ConferenceInfo';
 import ConferenceDocument from '@components/ConferenceDocument';
+import get from 'lodash/get';
 
 const ViewBar = createWithRemoteLoader({
   modules: ['components-core:Image', 'components-code:Icon']
@@ -115,13 +117,16 @@ const Conference = createWithRemoteLoader({
   const [currentSdk, setCurrentSdk] = useState(null);
   const [signalLevel, setSignalLevel] = useState(-1);
   const [setting, setSetting] = useState({
-    layoutType: 1,
+    layoutType: get(conference, 'options.setting.layoutType') || 1,
     mainIndex: 0,
     microphoneOpen: true,
     cameraOpen: true,
     documentInside: true,
     shareScreenOpen: false
   });
+  const memberMap = useMemo(() => {
+    return new Map((conference.members || []).map(item => [item.id, item]));
+  }, [conference.members]);
   const speechInputRef = useRef(null);
   const { message } = App.useApp();
   const [list, setList] = useState([]);
@@ -204,8 +209,17 @@ const Conference = createWithRemoteLoader({
               return Object.assign({}, setting, { shareScreenOpen: false });
             });
           },
-          onSpeech: (...args) => {
-            speechInputRef.current && speechInputRef.current(...args);
+          onSpeech: (message, ...args) => {
+            const member = memberMap.get(message.sender);
+            speechInputRef.current &&
+              speechInputRef.current(
+                {
+                  sender: message.sender,
+                  member: pick(member, ['id', 'nickname', 'avatar', 'email', 'isMaster']),
+                  message: message.message
+                },
+                ...args
+              );
           }
         }
       });
@@ -309,6 +323,26 @@ const Conference = createWithRemoteLoader({
             moduleProps={conference.options.moduleProps}
             getSpeechInput={onSpeechInput => {
               speechInputRef.current = onSpeechInput;
+            }}
+            onSpeechStart={async () => {
+              const { data: resData } = await ajax(Object.assign({}, apis.startAITranscription));
+              if (resData.code !== 0) {
+                return;
+              }
+              message.success('开始语音识别，请做好准备');
+            }}
+            onSpeechEnd={async () => {
+              const { data: resData } = await ajax(
+                Object.assign({}, apis.endConference, {
+                  data: {
+                    id: conference.id
+                  }
+                })
+              );
+              if (resData.code !== 0) {
+                return;
+              }
+              message.success('结束会议');
             }}
             files={conference.options.document}
             module={conference.options.module}
