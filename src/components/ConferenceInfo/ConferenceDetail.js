@@ -10,6 +10,7 @@ import formatConferenceTime from './formatConferenceTime';
 import ConferenceCountDown from './ConferenceCountDown';
 import get from 'lodash/get';
 import transform from 'lodash/transform';
+import ConferenceDocument from '@components/ConferenceDocument';
 
 export const ConferenceDetailInner = createWithRemoteLoader({
   modules: [
@@ -22,7 +23,8 @@ export const ConferenceDetailInner = createWithRemoteLoader({
     'components-core:Global@usePreset',
     'components-core:LoadingButton',
     'components-core:FilePreview',
-    'components-core:Common@SimpleBar'
+    'components-core:Common@SimpleBar',
+    'components-core:Modal@useModal'
   ]
 })(({
   remoteModules,
@@ -46,9 +48,10 @@ export const ConferenceDetailInner = createWithRemoteLoader({
   onBack,
   isAdmin
 }) => {
-  const [Icon, Image, InfoPage, TableView, StateTag, ConfirmButton, usePreset, LoadingButton, FilePreview, SimpleBar] = remoteModules;
+  const [Icon, Image, InfoPage, TableView, StateTag, ConfirmButton, usePreset, LoadingButton, FilePreview, SimpleBar, useModal] = remoteModules;
   const { ajax } = usePreset();
   const { message } = App.useApp();
+  const modal = useModal();
 
   return (
     <Flex vertical flex={1} className={style['right-panel']}>
@@ -171,6 +174,34 @@ export const ConferenceDetailInner = createWithRemoteLoader({
           )}
           {status === 1 && <div className={style['tips']}>会议已结束</div>}
           {[0, 1].indexOf(status) === -1 && <div className={style['tips']}>会议错误请联系邀请人</div>}
+          {options?.documentType && (isAdmin || options?.documentVisibleAll || current.isMaster) && (
+            <Flex vertical className={style['member-area']}>
+              <Flex align="center">
+                <div className={style['member-title']}>会议文档:</div>
+                <LoadingButton
+                  type="link"
+                  onClick={() => {
+                    modal({
+                      title: '文档预览',
+                      footer: null,
+                      children: (
+                        <ConferenceDocument
+                          type={options?.documentType}
+                          moduleProps={Object.assign({}, options?.moduleProps, {
+                            conferenceStep: 'waiting'
+                          })}
+                          files={options?.document}
+                          module={options?.module}
+                        />
+                      )
+                    });
+                  }}
+                >
+                  查看
+                </LoadingButton>
+              </Flex>
+            </Flex>
+          )}
 
           <Flex vertical className={style['member-area']}>
             <div className={style['member-title']}>
