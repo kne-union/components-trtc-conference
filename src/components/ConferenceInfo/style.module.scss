@@ -14,6 +14,8 @@
 
 .right-panel {
   padding: 30px;
+  min-height: 100%;
+  box-sizing: border-box;
 }
 
 .divider {
@@ -139,7 +141,7 @@
 }
 
 .scroller {
-  max-height: calc(var(--box-height, 680px) - 120px);
+  max-height: calc(var(--box-height, 680px) - 151px);
 }
 
 .preview-file {
