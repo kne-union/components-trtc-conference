@@ -197,7 +197,7 @@ export const ConferenceDetailInner = createWithRemoteLoader({
                     });
                   }}
                 >
-                  查看
+                  {options?.documentTitle || '查看'}
                 </LoadingButton>
               </Flex>
             </Flex>
