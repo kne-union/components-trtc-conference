@@ -29,7 +29,8 @@ const Conference = createWithRemoteLoader({
               joinConference: apis[name].joinConference,
               endConference: apis[name].endConference,
               startAITranscription: apis[name].startAITranscription,
-              endAITranscription: apis[name].endAITranscription
+              endAITranscription: apis[name].endAITranscription,
+              recordAITranscription: apis[name].recordAITranscription
             }}
           />
         );

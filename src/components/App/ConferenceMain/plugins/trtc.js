@@ -15,6 +15,8 @@ class ConferenceSDK {
     this.events = events;
     this.conference = conference;
     this.current = current;
+    this.isEnd = false;
+    this.connectTimer = null;
     this.trtc = TRTC.create();
     //0: 未加入房间 1: 已加入房间
     this.clientState = {};
@@ -53,6 +55,7 @@ class ConferenceSDK {
       this.events.onUpdate?.({ userId, type: 'remote', audioIsPlay: false });
     });
     this.trtc.on(TRTC.EVENT.KICKED_OUT, event => {
+      this.isEnd = true;
       this.events.onKickedOut?.({ reason: event.reason });
     });
     this.trtc.on(TRTC.EVENT.NETWORK_QUALITY, event => {
@@ -86,6 +89,19 @@ class ConferenceSDK {
         this.events.onSpeech?.({ sender: message.sender, message: message.payload.text });
       }
     });
+
+    this.trtc.on(TRTC.EVENT.CONNECTION_STATE_CHANGED, event => {
+      const prevState = event.prevState;
+      const curState = event.state;
+      if (curState === 'CONNECTED') {
+        this.connectTimer && clearTimeout(this.connectTimer);
+      }
+      if (prevState === 'CONNECTED' && curState === 'DISCONNECTED') {
+        this.connectTimer = setTimeout(() => {
+          !this.isEnd && this.events.onDisconnected?.();
+        }, 1000);
+      }
+    });
   }
 
   async runTask(id, task) {
@@ -110,6 +126,7 @@ class ConferenceSDK {
   }
 
   async exitRoom() {
+    this.isEnd = true;
     await this.runTask(this.sdkParams.userId, async () => {
       await this.trtc.stopLocalVideo();
       await this.trtc.stopLocalAudio();

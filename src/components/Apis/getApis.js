@@ -46,6 +46,10 @@ const getApis = options => {
       url: `${prefix}/stopAITranscription`,
       method: 'POST'
     },
+    recordAITranscription: {
+      url: `${prefix}/recordAITranscription`,
+      method: 'POST'
+    },
     createConference: {
       url: `${prefix}/create`,
       method: 'POST'

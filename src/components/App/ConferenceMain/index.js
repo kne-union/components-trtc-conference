@@ -11,6 +11,7 @@ import pick from 'lodash/pick';
 import { InviteMember } from '@components/ConferenceInfo';
 import ConferenceDocument from '@components/ConferenceDocument';
 import get from 'lodash/get';
+import createCollector from './createCollector';
 
 const ViewBar = createWithRemoteLoader({
   modules: ['components-core:Image', 'components-code:Icon']
@@ -108,12 +109,13 @@ const sortLocal = (a, b) => {
 };
 
 const Conference = createWithRemoteLoader({
-  modules: ['components-core:Global@usePreset', 'components-core:Modal@useModal']
+  modules: ['components-core:Global@usePreset', 'components-core:Modal@useModal', 'components-core:Modal@useConfirmModal']
 })(({ remoteModules, sdkParams, conference, current = {}, apis, baseUrl, ...props }) => {
-  const [usePreset, useModal] = remoteModules;
+  const [usePreset, useModal, useConfirmModal] = remoteModules;
   const { ajax } = usePreset();
   const navigate = useNavigate();
   const modal = useModal();
+  const confirmModal = useConfirmModal();
   const [currentSdk, setCurrentSdk] = useState(null);
   const [signalLevel, setSignalLevel] = useState(-1);
   const [setting, setSetting] = useState({
@@ -128,6 +130,7 @@ const Conference = createWithRemoteLoader({
     return new Map((conference.members || []).map(item => [item.id, item]));
   }, [conference.members]);
   const speechInputRef = useRef(null);
+  const endConferenceCallbackRef = useRef(null);
   const { message } = App.useApp();
   const [list, setList] = useState([]);
 
@@ -172,7 +175,22 @@ const Conference = createWithRemoteLoader({
     });
   });
 
+  const onSpeechStart = async () => {
+    const { data: resData } = await ajax(Object.assign({}, apis.startAITranscription));
+    if (resData.code !== 0) {
+      return;
+    }
+    message.success('开始语音识别，请做好准备');
+  };
+
   const initSdk = useRefCallback(async () => {
+    const collector = createCollector(data => {
+      return ajax(
+        Object.assign({}, apis.recordAITranscription, {
+          data: { records: data }
+        })
+      );
+    });
     return plugins('trtc').then(sdk => {
       const currentSdk = sdk({
         sdkParams: {
@@ -211,15 +229,25 @@ const Conference = createWithRemoteLoader({
           },
           onSpeech: (message, ...args) => {
             const member = memberMap.get(message.sender);
-            speechInputRef.current &&
-              speechInputRef.current(
-                {
-                  sender: message.sender,
-                  member: pick(member, ['id', 'nickname', 'avatar', 'email', 'isMaster']),
-                  message: message.message
-                },
-                ...args
-              );
+            const target = {
+              sender: message.sender,
+              member: pick(member, ['id', 'nickname', 'avatar', 'email', 'isMaster']),
+              message: message.message,
+              time: new Date()
+            };
+            collector(target);
+            speechInputRef.current && speechInputRef.current(target, ...args);
+          },
+          onDisconnected: () => {
+            confirmModal({
+              type: 'confirm',
+              confirmType: 'warning',
+              title: '网络连接已断开',
+              message: '请检查网络连接，如果发现对方页面卡住还没有恢复连接可以点击重连重新进入房间',
+              onOk: () => {
+                window.location.reload();
+              }
+            });
           }
         }
       });
@@ -324,13 +352,10 @@ const Conference = createWithRemoteLoader({
             getSpeechInput={onSpeechInput => {
               speechInputRef.current = onSpeechInput;
             }}
-            onSpeechStart={async () => {
-              const { data: resData } = await ajax(Object.assign({}, apis.startAITranscription));
-              if (resData.code !== 0) {
-                return;
-              }
-              message.success('开始语音识别，请做好准备');
+            getEndConferenceCallback={callback => {
+              endConferenceCallbackRef.current = callback;
             }}
+            onSpeechStart={onSpeechStart}
             onSpeechEnd={async () => {
               const { data: resData } = await ajax(
                 Object.assign({}, apis.endConference, {
@@ -382,6 +407,7 @@ const Conference = createWithRemoteLoader({
           if (resData.code !== 0) {
             return;
           }
+          endConferenceCallbackRef.current && endConferenceCallbackRef.current();
           navigate(baseUrl + '/detail');
         }
       }}
