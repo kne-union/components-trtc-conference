@@ -35,7 +35,7 @@ const ConferenceDocument = ({ type, ...props }) => {
     return <Files {...props} />;
   }
   if (type === 'remote-module') {
-    const { module, moduleProps, getSpeechInput, onSpeechStart, onSpeechEnd } = props;
+    const { module, moduleProps, getSpeechInput, onSpeechStart, onSpeechEnd, getEndConferenceCallback } = props;
     return (
       <RemoteLoader
         {...moduleProps}
@@ -43,6 +43,7 @@ const ConferenceDocument = ({ type, ...props }) => {
         onSpeechStart={onSpeechStart}
         onSpeechEnd={onSpeechEnd}
         getSpeechInput={getSpeechInput}
+        getEndConferenceCallback={getEndConferenceCallback}
         className={style['main']}
       />
     );
