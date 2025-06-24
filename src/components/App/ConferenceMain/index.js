@@ -407,7 +407,7 @@ const Conference = createWithRemoteLoader({
           if (resData.code !== 0) {
             return;
           }
-          endConferenceCallbackRef.current && endConferenceCallbackRef.current();
+          endConferenceCallbackRef.current && (await endConferenceCallbackRef.current());
           navigate(baseUrl + '/detail');
         }
       }}
