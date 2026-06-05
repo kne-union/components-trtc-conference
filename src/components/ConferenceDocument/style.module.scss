@@ -9,3 +9,16 @@
   --recorder-voice-bottom: -25px;
   --recorder-voice-right: -10px;
 }
+
+@media (max-width: 768px) {
+  .main-scroller {
+    width: 100%;
+  }
+
+  .main {
+    min-width: 0;
+    --container-height: calc(100dvh - 180px);
+    --recorder-voice-bottom: 8px;
+    --recorder-voice-right: 8px;
+  }
+}

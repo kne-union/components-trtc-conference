@@ -28,6 +28,27 @@
   padding: 0 20px;
 }
 
+.title-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.detail-summary {
+  padding: 0 20px 16px;
+}
+
+.detail-name {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.detail-time {
+  min-width: 0;
+  margin-top: 4px;
+  color: var(--font-color-grey);
+  font-size: 14px;
+}
+
 .options-btn {
   opacity: 0;
   transition: opacity 500ms;
@@ -153,5 +174,104 @@
 
   :global(.ant-card) {
     background: transparent !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .info {
+    width: 100%;
+    min-height: var(--box-height, 100dvh);
+    border-radius: 0;
+    box-shadow: none;
+    flex-direction: column;
+  }
+
+  .right-panel-outer {
+    width: 100%;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .right-panel {
+    padding: 16px;
+  }
+
+  .title {
+    padding: 0;
+    font-size: 16px;
+  }
+
+  .detail-summary {
+    padding: 0 0 12px;
+  }
+
+  .detail-name {
+    font-size: 16px;
+  }
+
+  .divider {
+    margin: 8px 0 16px;
+  }
+
+  .menu-bar {
+    width: 100%;
+    padding: 8px;
+    overflow-x: auto;
+    flex-direction: row !important;
+  }
+
+  .menu-item {
+    flex: none;
+    min-width: 56px;
+  }
+
+  .options-btn,
+  .current-user-edit {
+    opacity: 1;
+  }
+
+  .date-card {
+    margin-bottom: 12px;
+
+    :global {
+      .ant-list-item {
+        padding: 10px 8px;
+      }
+    }
+  }
+
+  .conference-title {
+    max-width: 46vw;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .scroller {
+    max-height: calc(var(--box-height, 100dvh) - 120px);
+  }
+
+  .current-user {
+    gap: 16px !important;
+    padding: 8px 0;
+  }
+
+  .tips {
+    padding: 20px 0;
+    font-size: 22px;
+    text-align: center;
+  }
+
+  .member-area {
+    overflow-x: auto;
+  }
+
+  .preview-file {
+    width: 100% !important;
+  }
+
+  .list-pagination {
+    max-width: 100%;
+    overflow-x: auto;
   }
 }

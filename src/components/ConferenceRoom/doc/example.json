@@ -2,35 +2,70 @@
   "isFull": true,
   "list": [
     {
-      "title": "这里填写示例标题",
-      "description": "这里填写示例说明",
+      "title": "基础用法",
+      "description": "展示会议房间的基础用法，包含视频画面、工具栏和会议信息头部",
       "code": "./base.js",
       "scope": [
         {
           "name": "_ConferenceRoom",
           "packageName": "@components/ConferenceRoom"
+        },
+        {
+          "name": "_mockPreset",
+          "packageName": "@root/mockPreset"
+        },
+        {
+          "name": "remoteLoader",
+          "packageName": "@kne/remote-loader"
         }
       ]
     },
     {
-      "title": "这里填写示例标题",
-      "description": "这里填写示例说明",
+      "title": "布局类型选择器",
+      "description": "展示LayoutType布局类型选择器，支持四种布局模式切换",
       "code": "./layout-type.js",
       "scope": [
         {
           "name": "_ConferenceRoom",
           "packageName": "@components/ConferenceRoom"
+        },
+        {
+          "name": "antd",
+          "packageName": "antd"
         }
       ]
     },
     {
-      "title": "这里填写示例标题",
-      "description": "这里填写示例说明",
+      "title": "视频窗口组件",
+      "description": "展示Window组件的布局切换、文档显示和分屏功能",
       "code": "./window.js",
       "scope": [
         {
           "name": "_ConferenceRoom",
           "packageName": "@components/ConferenceRoom"
+        },
+        {
+          "name": "antd",
+          "packageName": "antd"
+        }
+      ]
+    },
+    {
+      "title": "信号强度指示",
+      "description": "展示不同信号强度等级的显示效果",
+      "code": "./signal.js",
+      "scope": [
+        {
+          "name": "_ConferenceRoom",
+          "packageName": "@components/ConferenceRoom"
+        },
+        {
+          "name": "_mockPreset",
+          "packageName": "@root/mockPreset"
+        },
+        {
+          "name": "remoteLoader",
+          "packageName": "@kne/remote-loader"
         },
         {
           "name": "antd",

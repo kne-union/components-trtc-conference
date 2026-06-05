@@ -2,7 +2,31 @@ import { Flex, Row, Col } from 'antd';
 import useControlValue from '@kne/use-control-value';
 import classnames from 'classnames';
 import style from './style.module.scss';
-import { forwardRef, useImperativeHandle } from 'react';
+import { forwardRef, useEffect, useImperativeHandle, useState } from 'react';
+
+const MOBILE_MEDIA_QUERY = '(max-width: 768px)';
+
+const getIsMobile = () => typeof window !== 'undefined' && window.matchMedia(MOBILE_MEDIA_QUERY).matches;
+
+const useIsMobile = () => {
+  const [isMobile, setIsMobile] = useState(getIsMobile);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+    const mediaQueryList = window.matchMedia(MOBILE_MEDIA_QUERY);
+    const onChange = event => {
+      setIsMobile(event.matches);
+    };
+    mediaQueryList.addEventListener('change', onChange);
+    return () => {
+      mediaQueryList.removeEventListener('change', onChange);
+    };
+  }, []);
+
+  return isMobile;
+};
 
 const GridType = () => {
   return (
@@ -45,9 +69,9 @@ const LeftListType = () => {
       <Flex flex={1}>
         <div className={style['type-item']} style={{ width: '100%', height: '100%' }} />
       </Flex>
-      <Flex gap={2} vertical>
+      <Flex gap={2} vertical className={style['side-list']}>
         {Array.from({ length: 3 }).map((item, index) => {
-          return <div key={index} className={style['type-item']} style={{ width: '100px' }} />;
+          return <div key={index} className={style['type-item']} />;
         })}
       </Flex>
     </Flex>
@@ -76,6 +100,7 @@ const BottomListType = () => {
 };
 
 const LayoutType = forwardRef((props, ref) => {
+  const isMobile = useIsMobile();
   const [value, onChange] = useControlValue(
     Object.assign(
       {},
@@ -85,51 +110,62 @@ const LayoutType = forwardRef((props, ref) => {
       props
     )
   );
+  const activeValue = isMobile && [2, 4].indexOf(value) === -1 ? 4 : value;
   const list = [
     {
+      value: 1,
       label: '网格',
-      children: <GridType />
+      children: <GridType />,
+      hiddenInMobile: true
     },
     {
+      value: 2,
       label: '顶部成员列表',
       children: <TopListType />
     },
     {
+      value: 3,
       label: '左侧成员列表',
-      children: <LeftListType />
+      children: <LeftListType />,
+      hiddenInMobile: true
     },
     {
+      value: 4,
       label: '底部成员列表',
       children: <BottomListType />
     }
   ];
 
   useImperativeHandle(ref, () => {
-    return { value, onChange };
-  });
+    return { value: activeValue, onChange };
+  }, [activeValue, onChange]);
   return (
-    <Row wrap>
+    <Row wrap gutter={[12, 12]}>
       {list.map((item, index) => {
         return (
           <Col
-            span={8}
+            xs={12}
+            sm={12}
+            md={12}
             key={index}
-            className={style['layout-item-outer']}
+            className={classnames(style['layout-item-outer'], {
+              [style['hide-in-mobile']]: item.hiddenInMobile
+            })}
             onClick={() => {
-              onChange(index + 1);
+              onChange(item.value);
             }}
           >
             <Flex
               vertical
               className={classnames(style['layout-item'], {
-                [style['is-active']]: value === index + 1
+                [style['is-active']]: activeValue === item.value
               })}
             >
               {item.children}
             </Flex>
             <Flex
               className={classnames(style['layout-label'], {
-                [style['is-active']]: value === index + 1
+                [style['is-active']]: activeValue === item.value
               })}
               justify="center"
             >

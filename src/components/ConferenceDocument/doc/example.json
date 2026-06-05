@@ -2,13 +2,44 @@
   "isFull": false,
   "list": [
     {
-      "title": "这里填写示例标题",
-      "description": "这里填写示例说明",
+      "title": "文件列表模式",
+      "description": "展示会议文档的文件列表模式，支持多文件选择和预览切换",
       "code": "./base.js",
       "scope": [
         {
           "name": "_ConferenceDocument",
           "packageName": "@components/ConferenceDocument"
+        },
+        {
+          "name": "_mockPreset",
+          "packageName": "@root/mockPreset"
+        },
+        {
+          "name": "remoteLoader",
+          "packageName": "@kne/remote-loader"
+        }
+      ]
+    },
+    {
+      "title": "远程模块模式",
+      "description": "展示会议文档的远程模块模式，加载自定义远程组件并传递语音识别和会议结束回调",
+      "code": "./remote-module.js",
+      "scope": [
+        {
+          "name": "_ConferenceDocument",
+          "packageName": "@components/ConferenceDocument"
+        },
+        {
+          "name": "_mockPreset",
+          "packageName": "@root/mockPreset"
+        },
+        {
+          "name": "remoteLoader",
+          "packageName": "@kne/remote-loader"
+        },
+        {
+          "name": "antd",
+          "packageName": "antd"
         }
       ]
     }

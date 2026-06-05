@@ -56,7 +56,7 @@ export const ConferenceDetailInner = createWithRemoteLoader({
   return (
     <Flex vertical flex={1} className={style['right-panel']}>
       <Flex className={style['title']} gap={8} justify="space-between">
-        <Flex gap={8}>
+        <Flex gap={8} className={style['title-info']}>
           {onBack && (
             <Button
               type="link"
@@ -70,8 +70,6 @@ export const ConferenceDetailInner = createWithRemoteLoader({
               返回
             </Button>
           )}
-          <div>{name}</div>
-          <div>({formatConferenceTime({ startTime, duration })})</div>
         </Flex>
         {onEdit && status === 0 && (
           <Button type="link" onClick={onEdit}>
@@ -80,6 +78,10 @@ export const ConferenceDetailInner = createWithRemoteLoader({
         )}
       </Flex>
       <Divider className={style['divider']} />
+      <div className={style['detail-summary']}>
+        <div className={style['detail-name']}>{name}</div>
+        <div className={style['detail-time']}>({formatConferenceTime({ startTime, duration })})</div>
+      </div>
       <SimpleBar className={style['scroller']}>
         <Flex vertical align="center" className={style['current-user']} gap={30}>
           {status === 0 && current && (
@@ -174,7 +176,7 @@ export const ConferenceDetailInner = createWithRemoteLoader({
           )}
           {status === 1 && <div className={style['tips']}>会议已结束</div>}
           {[0, 1].indexOf(status) === -1 && <div className={style['tips']}>会议错误请联系邀请人</div>}
-          {options?.documentType && (isAdmin || options?.documentVisibleAll || current.isMaster) && (
+          {options?.documentType && (isAdmin || options?.documentVisibleAll || current?.isMaster) && (
             <Flex vertical className={style['member-area']}>
               <Flex align="center">
                 <div className={style['member-title']}>会议文档:</div>
@@ -226,14 +228,14 @@ export const ConferenceDetailInner = createWithRemoteLoader({
                 {
                   name: 'role',
                   title: '角色',
-                  getValueOf: (item, { target }) => (target.isMaster ? <StateTag type="success" text="主持人" /> : <StateTag text="参会者" />),
+                  getValueOf: (item, { target } = {}) => (target?.isMaster ? <StateTag type="success" text="主持人" /> : <StateTag text="参会者" />),
                   span: 4
                 },
                 isAdmin
                   ? {
                       name: 'options',
                       title: '操作',
-                      getValueOf: (item, { target }) => {
+                      getValueOf: (item, { target } = {}) => {
                         return (
                           status === 0 && (
                             <Flex gap={8}>
@@ -263,9 +265,9 @@ export const ConferenceDetailInner = createWithRemoteLoader({
                   : {
                       name: 'options',
                       title: '操作',
-                      getValueOf: (item, { target }) =>
+                      getValueOf: (item, { target } = {}) =>
                         status === 0 &&
-                        !target.isMaster &&
+                        !target?.isMaster &&
                         current?.isMaster && (
                           <ConfirmButton
                             danger

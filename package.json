@@ -63,12 +63,12 @@
     }
   },
   "devDependencies": {
-    "@craco/craco": "^7.1.0",
+    "@kne/craco": "^7.1.0",
     "@kne/modules-dev": "^2.0.14",
     "@kne/react-fetch": "^1.4.3",
     "@kne/remote-loader": "^1.2.3",
     "@testing-library/jest-dom": "^6.4.2",
-    "antd": "^5.14.2",
+    "antd": "^6.4.3",
     "axios": "^1.6.7",
     "classnames": "^2.5.1",
     "cross-env": "^7.0.3",
@@ -82,11 +82,14 @@
     "sass": "^1.75.0"
   },
   "dependencies": {
+    "@kne/app-children-router": "^0.1.9",
     "@kne/count-down": "^0.2.2",
     "@kne/local-storage": "^0.1.1",
     "@kne/token-storage": "^1.0.0",
     "@kne/use-control-value": "^0.1.9",
     "@loadable/component": "^5.16.7",
+    "dayjs": "^1.11.21",
+    "framer-motion": "^12.40.0",
     "trtc-sdk-v5": "^5.10.1"
   }
 }

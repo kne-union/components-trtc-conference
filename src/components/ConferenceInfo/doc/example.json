@@ -2,19 +2,27 @@
   "isFull": true,
   "list": [
     {
-      "title": "这里填写示例标题",
-      "description": "这里填写示例说明",
+      "title": "会议列表",
+      "description": "展示会议信息主组件，包含侧边栏操作菜单和会议列表，支持创建会议、快速会议、查看和编辑",
       "code": "./base.js",
       "scope": [
         {
           "name": "_ConferenceInfo",
           "packageName": "@components/ConferenceInfo"
+        },
+        {
+          "name": "_mockPreset",
+          "packageName": "@root/mockPreset"
+        },
+        {
+          "name": "remoteLoader",
+          "packageName": "@kne/remote-loader"
         }
       ]
     },
     {
-      "title": "这里填写示例标题",
-      "description": "这里填写示例说明",
+      "title": "会议表单",
+      "description": "展示创建会议的表单组件，包含会议名称、时间、时长、邀请设置、成员和高级设置",
       "code": "./form-inner.js",
       "scope": [
         {
@@ -28,24 +36,78 @@
       ]
     },
     {
-      "title": "这里填写示例标题",
-      "description": "这里填写示例说明",
+      "title": "会议详情（进行中）",
+      "description": "展示进行中会议的详情页面，包含当前用户信息、倒计时、邀请成员、参会人员列表和文档",
       "code": "./detail.js",
       "scope": [
         {
           "name": "_ConferenceInfo",
           "packageName": "@components/ConferenceInfo"
+        },
+        {
+          "name": "_mockPreset",
+          "packageName": "@root/mockPreset"
+        },
+        {
+          "name": "remoteLoader",
+          "packageName": "@kne/remote-loader"
         }
       ]
     },
     {
-      "title": "这里填写示例标题",
-      "description": "这里填写示例说明",
+      "title": "会议详情（已结束）",
+      "description": "展示已结束会议的详情页面，包含参会人员列表和录制资源回放",
       "code": "./detail-end.js",
       "scope": [
         {
           "name": "_ConferenceInfo",
           "packageName": "@components/ConferenceInfo"
+        },
+        {
+          "name": "_mockPreset",
+          "packageName": "@root/mockPreset"
+        },
+        {
+          "name": "remoteLoader",
+          "packageName": "@kne/remote-loader"
+        }
+      ]
+    },
+    {
+      "title": "成员表单",
+      "description": "展示成员信息编辑表单，包含头像、昵称和邮箱字段",
+      "code": "./member-form.js",
+      "scope": [
+        {
+          "name": "_ConferenceInfo",
+          "packageName": "@components/ConferenceInfo"
+        },
+        {
+          "name": "remoteLoader",
+          "packageName": "@kne/remote-loader"
+        }
+      ]
+    },
+    {
+      "title": "邀请成员",
+      "description": "展示邀请成员弹窗，包含会议邀请信息和复制链接功能",
+      "code": "./invite-member.js",
+      "scope": [
+        {
+          "name": "_ConferenceInfo",
+          "packageName": "@components/ConferenceInfo"
+        },
+        {
+          "name": "_mockPreset",
+          "packageName": "@root/mockPreset"
+        },
+        {
+          "name": "remoteLoader",
+          "packageName": "@kne/remote-loader"
+        },
+        {
+          "name": "antd",
+          "packageName": "antd"
         }
       ]
     }
