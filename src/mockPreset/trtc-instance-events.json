@@ -1,0 +1,225 @@
+{
+  "pageData": [
+    {
+      "id": "event-001",
+      "code": "1001",
+      "time": "2026-06-08T01:00:05.000Z",
+      "payload": {
+        "source": "DescribeUserEvent",
+        "roomId": "conf-001",
+        "userId": "user-001",
+        "peerId": "user-001",
+        "eventId": 1001,
+        "type": "room",
+        "paramOne": "enter",
+        "paramTwo": "",
+        "event": {
+          "EventId": 1001,
+          "Time": 1780870805000,
+          "Type": "room",
+          "ParamOne": "enter"
+        }
+      }
+    },
+    {
+      "id": "event-002",
+      "code": "2001",
+      "time": "2026-06-08T01:12:36.000Z",
+      "payload": {
+        "source": "DescribeUserEvent",
+        "roomId": "conf-001",
+        "userId": "user-002",
+        "peerId": "user-002",
+        "eventId": 2001,
+        "type": "audio",
+        "paramOne": "mute",
+        "paramTwo": "",
+        "event": {
+          "EventId": 2001,
+          "Time": 1780871556000,
+          "Type": "audio",
+          "ParamOne": "mute"
+        }
+      }
+    },
+    {
+      "id": "event-003",
+      "code": "1002",
+      "time": "2026-06-08T01:45:18.000Z",
+      "payload": {
+        "source": "webhook",
+        "roomId": "conf-001",
+        "userId": "user-001",
+        "peerId": "user-001",
+        "eventId": 1002,
+        "eventType": 103,
+        "event": {
+          "EventId": 1002,
+          "Time": 1780873518000,
+          "Type": "room",
+          "ParamOne": "exit"
+        }
+      }
+    },
+    {
+      "id": "event-004",
+      "code": "Client.device-info",
+      "time": "2026-06-08T01:01:00.000Z",
+      "payload": {
+        "source": "ClientSDK",
+        "roomId": "conf-001",
+        "userId": "user-001",
+        "eventType": "device-info",
+        "event": {
+          "type": "device-info",
+          "data": {
+            "userAgent": "Mozilla/5.0",
+            "platform": "MacIntel",
+            "language": "zh-CN",
+            "screenWidth": 1440,
+            "screenHeight": 900,
+            "audioDevices": [{ "deviceId": "mic-1", "label": "MacBook Microphone" }],
+            "videoDevices": [{ "deviceId": "cam-1", "label": "FaceTime HD Camera" }],
+            "audioDeviceId": "mic-1",
+            "videoDeviceId": "cam-1"
+          }
+        }
+      }
+    },
+    {
+      "id": "event-005",
+      "code": "Client.camera-close",
+      "time": "2026-06-08T01:01:30.000Z",
+      "payload": {
+        "source": "ClientSDK",
+        "roomId": "conf-001",
+        "userId": "user-001",
+        "eventType": "camera-close",
+        "event": { "type": "camera-close", "data": { "cameraId": "cam-1" } }
+      }
+    },
+    {
+      "id": "event-006",
+      "code": "Client.microphone-switch",
+      "time": "2026-06-08T01:01:45.000Z",
+      "payload": {
+        "source": "ClientSDK",
+        "roomId": "conf-001",
+        "userId": "user-001",
+        "eventType": "microphone-switch",
+        "event": { "type": "microphone-switch", "data": { "microphoneId": "mic-2" } }
+      }
+    },
+    {
+      "id": "event-007",
+      "code": "Client.network-quality",
+      "time": "2026-06-08T01:02:00.000Z",
+      "payload": {
+        "source": "ClientSDK",
+        "roomId": "conf-001",
+        "userId": "user-001",
+        "eventType": "network-quality",
+        "event": {
+          "type": "network-quality",
+          "data": {
+            "uplinkNetworkQuality": 2,
+            "downlinkNetworkQuality": 1
+          }
+        }
+      }
+    },
+    {
+      "id": "event-008",
+      "code": "Client.network-quality",
+      "time": "2026-06-08T01:04:00.000Z",
+      "payload": {
+        "source": "ClientSDK",
+        "roomId": "conf-001",
+        "userId": "user-001",
+        "eventType": "network-quality",
+        "event": {
+          "type": "network-quality",
+          "data": {
+            "uplinkNetworkQuality": 3,
+            "downlinkNetworkQuality": 2
+          }
+        }
+      }
+    },
+    {
+      "id": "event-009",
+      "code": "Client.statistics",
+      "time": "2026-06-08T01:02:00.000Z",
+      "payload": {
+        "source": "ClientSDK",
+        "roomId": "conf-001",
+        "userId": "user-001",
+        "eventType": "statistics",
+        "event": {
+          "type": "statistics",
+          "data": {
+            "rtt": 38,
+            "upLoss": 0,
+            "downLoss": 0,
+            "bytesSent": 1048576,
+            "bytesReceived": 524288,
+            "localStatistics": {
+              "audio": { "bitrate": 42, "audioLevel": 0.08 },
+              "video": [{ "bitrate": 820, "frameRate": 24, "width": 1280, "height": 720 }]
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "event-010",
+      "code": "Client.statistics",
+      "time": "2026-06-08T01:04:00.000Z",
+      "payload": {
+        "source": "ClientSDK",
+        "roomId": "conf-001",
+        "userId": "user-001",
+        "eventType": "statistics",
+        "event": {
+          "type": "statistics",
+          "data": {
+            "rtt": 56,
+            "upLoss": 1,
+            "downLoss": 0,
+            "bytesSent": 2097152,
+            "bytesReceived": 1048576,
+            "localStatistics": {
+              "audio": { "bitrate": 39, "audioLevel": 0.06 },
+              "video": [{ "bitrate": 760, "frameRate": 22, "width": 1280, "height": 720 }]
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "event-011",
+      "code": "DescribeCallDetailInfo.Metric",
+      "time": "2026-06-08T01:00:00.000Z",
+      "payload": {
+        "source": "DescribeCallDetailInfo",
+        "recordType": "metric",
+        "roomId": "conf-001",
+        "commId": "1400000000_conf-001_1780870800",
+        "userId": "user-001",
+        "dataType": "bigvCapFps",
+        "startTime": 1780870800,
+        "endTime": 1780871100,
+        "data": {
+          "UserId": "user-001",
+          "DataType": "bigvCapFps",
+          "Content": [
+            { "Time": 1780870800, "Value": 24 },
+            { "Time": 1780870920, "Value": 22 },
+            { "Time": 1780871040, "Value": 25 }
+          ]
+        }
+      }
+    }
+  ],
+  "totalCount": 11
+}

@@ -5,16 +5,19 @@ import Fetch from '@kne/react-fetch';
 import style from '../../style.module.scss';
 import { useContext } from '../../context';
 import { App } from 'antd';
+import withLocale from '../../withLocale';
+import { useIntl } from '@kne/react-intl';
 
 const Home = createWithRemoteLoader({
   modules: ['components-core:Global@usePreset']
-})(({ remoteModules }) => {
+})(withLocale(({ remoteModules }) => {
   const [usePreset] = remoteModules;
   const { apis, ajax } = usePreset();
   const { baseUrl, userInfo, name } = useContext();
   const [searchParams, setSearchParams] = useSearchParams();
   const pageSize = 10;
   const { message } = App.useApp();
+  const { formatMessage } = useIntl();
   return (
     <div className={style['box']}>
       <Fetch
@@ -45,8 +48,9 @@ const Home = createWithRemoteLoader({
               apis={{
                 create: apis[name].createConference,
                 save: apis[name].saveConference,
-                inviteMember: Object.assign(apis[name].inviteMemberFormUser),
-                getMemberShorten: apis[name].getMemberShorten
+                inviteMember: Object.assign(apis[name].inviteMemberFromUser),
+                getMemberShorten: apis[name].getMemberShorten,
+                getTrtcInstanceEvents: apis[name].getTrtcInstanceEvents
               }}
               actions={{
                 getMemberShorten: async ({ id }) => {
@@ -60,6 +64,16 @@ const Home = createWithRemoteLoader({
                   }
                   return resData.data;
                 },
+                cancel: async ({ id } = {}) => {
+                  const { data: resData } = await ajax(
+                    Object.assign({}, apis[name].cancelConference, id ? { data: { id } } : {})
+                  );
+                  if (resData.code !== 0) {
+                    return;
+                  }
+                  message.success(formatMessage({ id: 'CancelMeetingSuccess' }));
+                  reload();
+                },
                 remove: async ({ id }) => {
                   const { data: resData } = await ajax(
                     Object.assign({}, apis[name].deleteConference, {
@@ -70,7 +84,7 @@ const Home = createWithRemoteLoader({
                   if (resData.code !== 0) {
                     return;
                   }
-                  message.success('删除成功');
+                  message.success(formatMessage({ id: 'DeleteSuccess' }));
                   reload();
                 }
               }}
@@ -80,6 +94,6 @@ const Home = createWithRemoteLoader({
       />
     </div>
   );
-});
+}));
 
 export default Home;

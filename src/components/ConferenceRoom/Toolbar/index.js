@@ -1,44 +1,120 @@
 import { createWithRemoteLoader } from '@kne/remote-loader';
-import { Flex, Button, App } from 'antd';
-import { useContext } from '../context';
+import { Flex, Button, App, Dropdown } from 'antd';
+import { CaretDownFilled } from '@ant-design/icons';
+import { useContext as useRoomContext } from '../context';
 import style from './style.module.scss';
+import withLocale from '../withLocale';
+import { useIntl } from '@kne/react-intl';
 
 const Toolbar = createWithRemoteLoader({
   modules: ['components-core:Icon', 'components-core:LoadingButton']
-})(({ remoteModules }) => {
+})(withLocale(({ remoteModules }) => {
   const [Icon, LoadingButton] = remoteModules;
-  const { isInvitationAllowed, actions, setting, setSetting } = useContext();
+  const { isInvitationAllowed, actions, setting, setSetting, devices } = useRoomContext();
   const { message } = App.useApp();
+  const { formatMessage } = useIntl();
+
+  const cameraList = devices?.cameras || [];
+  const microphoneList = devices?.microphones || [];
+
+  const cameraMenuItems = cameraList.map(device => ({
+    key: device.deviceId,
+    label: device.label || device.deviceId
+  }));
+
+  const microphoneMenuItems = microphoneList.map(device => ({
+    key: device.deviceId,
+    label: device.label || device.deviceId
+  }));
+
   return (
     <>
-      <LoadingButton
-        className={style['toolbar-item']}
-        type="text"
-        onClick={() => {
-          setSetting(setting => {
-            return Object.assign({}, setting, { microphoneOpen: !setting.microphoneOpen });
-          });
-        }}
-      >
-        <Flex vertical align="center" justify="center">
-          <Icon type={setting.microphoneOpen ? 'icon-maikefengyikaiqi' : 'icon-maikefengyiguanbi'} className="iconfont-ai" size={28} />
-          <div className={style['item-text']}>麦克风</div>
-        </Flex>
-      </LoadingButton>
-      <LoadingButton
-        className={style['toolbar-item']}
-        type="text"
-        onClick={async () => {
-          setSetting(setting => {
-            return Object.assign({}, setting, { cameraOpen: !setting.cameraOpen });
-          });
-        }}
-      >
-        <Flex vertical align="center" justify="center">
-          <Icon type={setting.cameraOpen ? 'icon-shexiangtouyikaiqi' : 'icon-shexiangtouyiguanbi'} className="iconfont-ai" size={28} />
-          <div className={style['item-text']}>摄像头</div>
-        </Flex>
-      </LoadingButton>
+      <div className={style['toolbar-item-wrapper']}>
+        <LoadingButton
+          className={style['toolbar-item']}
+          type="text"
+          onClick={async () => {
+            const nextOpen = !setting.microphoneOpen;
+            if (actions.setMicrophoneOpen) {
+              await actions.setMicrophoneOpen(nextOpen);
+              return;
+            }
+            setSetting(setting => Object.assign({}, setting, { microphoneOpen: nextOpen }));
+          }}
+        >
+          <Flex vertical align="center" justify="center">
+            <Icon type={setting.microphoneOpen ? 'icon-maikefengyikaiqi' : 'icon-maikefengyiguanbi'} fontClassName="iconfont-ai" size={28} />
+            <div className={style['item-text']}>{formatMessage({ id: 'Microphone' })}</div>
+          </Flex>
+        </LoadingButton>
+        {microphoneList.length > 0 && (
+          <Dropdown
+            menu={{
+              items: microphoneMenuItems,
+              selectedKeys: [setting.microphoneId],
+              onClick: async ({ key }) => {
+                if (actions.setMicrophoneId) {
+                  await actions.setMicrophoneId(key);
+                  return;
+                }
+                setSetting(setting => Object.assign({}, setting, { microphoneId: key }));
+              }
+            }}
+            trigger={['click']}
+          >
+            <Button
+              className={style['dropdown-arrow']}
+              type="text"
+              onClick={e => e.stopPropagation()}
+            >
+              <CaretDownFilled />
+            </Button>
+          </Dropdown>
+        )}
+      </div>
+      <div className={style['toolbar-item-wrapper']}>
+        <LoadingButton
+          className={style['toolbar-item']}
+          type="text"
+          onClick={async () => {
+            const nextOpen = !setting.cameraOpen;
+            if (actions.setCameraOpen) {
+              await actions.setCameraOpen(nextOpen);
+              return;
+            }
+            setSetting(setting => Object.assign({}, setting, { cameraOpen: nextOpen }));
+          }}
+        >
+          <Flex vertical align="center" justify="center">
+            <Icon type={setting.cameraOpen ? 'icon-shexiangtouyikaiqi' : 'icon-shexiangtouyiguanbi'} fontClassName="iconfont-ai" size={28} />
+            <div className={style['item-text']}>{formatMessage({ id: 'Camera' })}</div>
+          </Flex>
+        </LoadingButton>
+        {cameraList.length > 0 && (
+          <Dropdown
+            menu={{
+              items: cameraMenuItems,
+              selectedKeys: [setting.cameraId],
+              onClick: async ({ key }) => {
+                if (actions.setCameraId) {
+                  await actions.setCameraId(key);
+                  return;
+                }
+                setSetting(setting => Object.assign({}, setting, { cameraId: key }));
+              }
+            }}
+            trigger={['click']}
+          >
+            <Button
+              className={style['dropdown-arrow']}
+              type="text"
+              onClick={e => e.stopPropagation()}
+            >
+              <CaretDownFilled />
+            </Button>
+          </Dropdown>
+        )}
+      </div>
       <LoadingButton
         className={style['toolbar-item']}
         type="text"
@@ -47,8 +123,8 @@ const Toolbar = createWithRemoteLoader({
         }}
       >
         <Flex vertical align="center" justify="center">
-          <Icon type="icon-share-screen" className="iconfont-ai" size={28} />
-          <div className={style['item-text']}>{setting.shareScreenOpen ? '停止分享' : '分享屏幕'}</div>
+          <Icon type="icon-share-screen" fontClassName="iconfont-ai" size={28} />
+          <div className={style['item-text']}>{setting.shareScreenOpen ? formatMessage({ id: 'StopShare' }) : formatMessage({ id: 'ShareScreen' })}</div>
         </Flex>
       </LoadingButton>
       {isInvitationAllowed && (
@@ -60,8 +136,8 @@ const Toolbar = createWithRemoteLoader({
           }}
         >
           <Flex vertical align="center" justify="center">
-            <Icon type="icon-huiyichengyuan" className="iconfont-ai" size={28} />
-            <div className={style['item-text']}>邀请</div>
+            <Icon type="icon-huiyichengyuan" fontClassName="iconfont-ai" size={28} />
+            <div className={style['item-text']}>{formatMessage({ id: 'Invite' })}</div>
           </Flex>
         </LoadingButton>
       )}
@@ -73,24 +149,24 @@ const Toolbar = createWithRemoteLoader({
         }}
       >
         <Flex vertical align="center" justify="center">
-          <Icon type="icon-zhonglian" className="iconfont-ai" size={28} />
-          <div className={style['item-text']}>重连</div>
+          <Icon type="icon-zhonglian" fontClassName="iconfont-ai" size={28} />
+          <div className={style['item-text']}>{formatMessage({ id: 'Reconnect' })}</div>
         </Flex>
       </Button>
       <Button
         className={style['toolbar-item']}
         type="text"
         onClick={() => {
-          message.warning('功能开发中，敬请期待');
+          message.warning(formatMessage({ id: 'FeatureInDevelopment' }));
         }}
       >
         <Flex vertical align="center" justify="center">
-          <Icon type="icon-liaotian" className="iconfont-ai" size={28} />
-          <div className={style['item-text']}>聊天</div>
+          <Icon type="icon-liaotian" fontClassName="iconfont-ai" size={28} />
+          <div className={style['item-text']}>{formatMessage({ id: 'Chat' })}</div>
         </Flex>
       </Button>
     </>
   );
-});
+}));
 
 export default Toolbar;

@@ -38,18 +38,16 @@ const Detail = createWithRemoteLoader({
               onEnter={() => {
                 navigate(`${baseUrl}/conference`);
               }}
-              onReload={data => {
-                if (data?.shorten) {
-                  window.location.href = `${window.location.origin}${baseUrl}/detail?code=${data.shorten}`;
-                  return;
-                }
+              onReload={() => {
+                console.log('---->reload');
                 reload();
               }}
               apis={{
                 saveMember: apis[name].saveMember,
                 inviteMember: apis[name].inviteMember,
                 removeMember: apis[name].removeMember,
-                joinConference: apis[name].joinConference
+                joinConference: apis[name].joinConference,
+                getTrtcInstanceEvents: apis[name].getTrtcInstanceEvents
               }}
             />
           );

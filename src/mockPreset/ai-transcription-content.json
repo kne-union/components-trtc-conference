@@ -1,0 +1,38 @@
+{
+  "conferenceId": "conf-003",
+  "content": [
+    {
+      "sender": "user-006",
+      "member": {
+        "id": "user-006",
+        "nickname": "孙婷",
+        "email": "sunting@company.com",
+        "isMaster": true
+      },
+      "message": "大家好，我们先确认一下客户需求文档中的优先级。",
+      "time": "2026-06-04T09:03:12.000Z"
+    },
+    {
+      "sender": "user-007",
+      "member": {
+        "id": "user-007",
+        "nickname": "周伟",
+        "email": "zhouwei@company.com",
+        "isMaster": false
+      },
+      "message": "我建议先处理账号权限和会议录制回放两个功能点。",
+      "time": "2026-06-04T09:05:26.000Z"
+    },
+    {
+      "sender": "user-006",
+      "member": {
+        "id": "user-006",
+        "nickname": "孙婷",
+        "email": "sunting@company.com",
+        "isMaster": true
+      },
+      "message": "好的，会议结束后我会把 AI 转写内容同步给项目组。",
+      "time": "2026-06-04T09:08:40.000Z"
+    }
+  ]
+}

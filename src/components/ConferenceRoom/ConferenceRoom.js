@@ -12,6 +12,7 @@ const ConferenceRoom = ({
   document,
   isMaster,
   isInvitationAllowed,
+  devices,
   defaultValue = {
     layoutType: 1,
     mainIndex: 0,
@@ -41,6 +42,7 @@ const ConferenceRoom = ({
         isMaster,
         actions,
         conference,
+        devices,
         setting,
         setSetting
       }}

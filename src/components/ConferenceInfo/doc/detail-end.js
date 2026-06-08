@@ -1,22 +1,27 @@
 const { ConferenceDetail } = _ConferenceInfo;
-const BaseExample = () => {
+const { default: preset, mockConferenceList, mockAiTranscriptionContent } = _mockPreset;
+const { createWithRemoteLoader } = remoteLoader;
+
+const conference = mockConferenceList.pageData[2];
+
+const BaseExample = createWithRemoteLoader({
+  modules: ['components-core:Global@PureGlobal']
+})(({ remoteModules }) => {
+  const [PureGlobal] = remoteModules;
   return (
-    <ConferenceDetail
-      startTime={new Date()}
-      duration={60}
-      name="张三的会议"
-      status={1}
-      memberList={[
-        {
-          nickname: '张三',
-          isMaster: true
-        },
-        {
-          nickname: '李四'
-        }
-      ]}
-    />
+    <PureGlobal preset={preset}>
+      <div style={{ '--box-width': '100%' }}>
+        <ConferenceDetail
+          {...conference}
+          current={conference.members[0]}
+          apis={preset.apis.conference}
+          isAdmin
+          aiTranscriptionContent={mockAiTranscriptionContent}
+          onReload={() => {}}
+        />
+      </div>
+    </PureGlobal>
   );
-};
+});
 
 render(<BaseExample />);

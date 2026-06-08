@@ -1,6 +1,6 @@
 import ConferenceRoom from '@components/ConferenceRoom';
 import plugins from './plugins';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { App, Flex, Spin } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import style from './style.module.scss';
@@ -12,18 +12,21 @@ import { InviteMember } from '@components/ConferenceInfo';
 import ConferenceDocument from '@components/ConferenceDocument';
 import get from 'lodash/get';
 import createCollector from './createCollector';
+import withLocale from './withLocale';
+import { useIntl } from '@kne/react-intl';
 
 const ViewBar = createWithRemoteLoader({
-  modules: ['components-core:Image', 'components-code:Icon']
-})(({ remoteModules, current = {}, shareScreen, videoIsPlay, audioIsPlay }) => {
+  modules: ['components-core:Image', 'components-core:Icon']
+})(withLocale(({ remoteModules, current = {}, shareScreen, videoIsPlay, audioIsPlay }) => {
   const [Image, Icon] = remoteModules;
+  const { formatMessage } = useIntl();
   return (
     <Flex className={style['view-item-bar']} justify="space-between" align="center" gap={8}>
       <Flex gap={8}>
         <Image.Avatar className={style['avatar']} id={current.avatar} />
         <div>
-          {current.nickname || '未命名'}
-          {shareScreen ? '的屏幕分享' : ''}
+          {current.nickname || formatMessage({ id: 'Unnamed' })}
+          {shareScreen ? formatMessage({ id: 'ScreenShareOf' }) : ''}
         </div>
       </Flex>
       {shareScreen ? (
@@ -36,26 +39,39 @@ const ViewBar = createWithRemoteLoader({
       )}
     </Flex>
   );
-});
+}));
 
 const ViewClose = createWithRemoteLoader({
-  modules: ['components-code:Icon']
+  modules: ['components-core:Icon']
 })(({ remoteModules, className }) => {
   const [Icon] = remoteModules;
   return <Icon className={className} type="icon-eyes-off" fontClassName="iconfont-ai" size={40} />;
 });
 
-const CurrentView = ({ sdk, current, videoIsPlay, audioIsPlay }) => {
+const CurrentView = ({ sdk, current, videoIsPlay, audioIsPlay, onVideoElementChange }) => {
   const ref = useRef(null);
   const optionsRef = useRef({ sdk });
   useEffect(() => {
+    onVideoElementChange?.(ref.current);
+    return () => {
+      onVideoElementChange?.(null);
+    };
+  }, [onVideoElementChange]);
+
+  useEffect(() => {
+    if (!videoIsPlay) {
+      return;
+    }
     const { sdk } = optionsRef.current;
-    sdk.updateLocalVideo({ el: ref.current, mute: !videoIsPlay });
+    sdk.updateLocalVideo({ el: ref.current, mute: false });
   }, [videoIsPlay]);
 
   useEffect(() => {
+    if (!audioIsPlay) {
+      return;
+    }
     const { sdk } = optionsRef.current;
-    sdk.updateLocalAudio({ el: ref.current, mute: !audioIsPlay });
+    sdk.updateLocalAudio({ el: ref.current, mute: false });
   }, [audioIsPlay]);
 
   return (
@@ -110,7 +126,7 @@ const sortLocal = (a, b) => {
 
 const Conference = createWithRemoteLoader({
   modules: ['components-core:Global@usePreset', 'components-core:Modal@useModal', 'components-core:Modal@useConfirmModal']
-})(({ remoteModules, sdkParams, conference, current = {}, apis, baseUrl, ...props }) => {
+})(withLocale(({ remoteModules, sdkParams, conference, current = {}, apis, baseUrl, ...props }) => {
   const [usePreset, useModal, useConfirmModal] = remoteModules;
   const { ajax } = usePreset();
   const navigate = useNavigate();
@@ -131,8 +147,60 @@ const Conference = createWithRemoteLoader({
   }, [conference.members]);
   const speechInputRef = useRef(null);
   const endConferenceCallbackRef = useRef(null);
+  const localVideoElementRef = useRef(null);
+  const settingRef = useRef(setting);
   const { message } = App.useApp();
   const [list, setList] = useState([]);
+  const [devices, setDevices] = useState({ cameras: [], microphones: [] });
+  const { formatMessage } = useIntl();
+  const buildClientDeviceInfo = useCallback(({ cameras = [], microphones = [], setting = {} } = {}) => {
+    const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+    return {
+      userAgent: navigator.userAgent,
+      language: navigator.language,
+      platform: navigator.platform,
+      screenWidth: window.screen?.width,
+      screenHeight: window.screen?.height,
+      devicePixelRatio: window.devicePixelRatio,
+      connection: connection
+        ? {
+            effectiveType: connection.effectiveType,
+            downlink: connection.downlink,
+            rtt: connection.rtt,
+            saveData: connection.saveData
+          }
+        : undefined,
+      audioDevices: microphones.map(item => ({ deviceId: item.deviceId, label: item.label, groupId: item.groupId })),
+      videoDevices: cameras.map(item => ({ deviceId: item.deviceId, label: item.label, groupId: item.groupId })),
+      audioDeviceId: setting.microphoneId,
+      videoDeviceId: setting.cameraId
+    };
+  }, []);
+  useEffect(() => {
+    settingRef.current = setting;
+  }, [setting]);
+  const onLocalVideoElementChange = useCallback(element => {
+    localVideoElementRef.current = element;
+  }, []);
+
+  const updateDevices = useCallback(async () => {
+    if (!navigator.mediaDevices?.enumerateDevices) {
+      return { cameras: [], microphones: [], setting: {} };
+    }
+    const mediaDevices = await navigator.mediaDevices.enumerateDevices();
+    const cameras = mediaDevices.filter(device => device.kind === 'videoinput');
+    const microphones = mediaDevices.filter(device => device.kind === 'audioinput');
+    const currentSetting = settingRef.current || {};
+    const nextDeviceSetting = {
+      cameraId: currentSetting.cameraId || cameras[0]?.deviceId,
+      microphoneId: currentSetting.microphoneId || microphones[0]?.deviceId
+    };
+    setDevices({ cameras, microphones });
+    setSetting(setting => {
+      return Object.assign({}, setting, nextDeviceSetting);
+    });
+    return { cameras, microphones, setting: nextDeviceSetting };
+  }, []);
 
   const onEnterRoom = useRefCallback(({ userId, type, ...props }) => {
     setList(list => {
@@ -180,7 +248,7 @@ const Conference = createWithRemoteLoader({
     if (resData.code !== 0) {
       return;
     }
-    message.success('开始语音识别，请做好准备');
+    message.success(formatMessage({ id: 'StartSpeechRecognition' }));
   };
 
   const initSdk = useRefCallback(async () => {
@@ -191,6 +259,19 @@ const Conference = createWithRemoteLoader({
         })
       );
     });
+    const clientEventCollector = createCollector(
+      data => {
+        if (!apis.recordClientEvents) {
+          return Promise.resolve();
+        }
+        return ajax(
+          Object.assign({}, apis.recordClientEvents, {
+            data: { events: data }
+          })
+        );
+      },
+      { maxLength: 1 }
+    );
     return plugins('trtc').then(sdk => {
       const currentSdk = sdk({
         sdkParams: {
@@ -206,19 +287,22 @@ const Conference = createWithRemoteLoader({
           onQualityChange: level => {
             setSignalLevel(level);
           },
+          onClientEvent: event => {
+            clientEventCollector(event);
+          },
           onKickedOut: ({ reason }) => {
             switch (reason) {
               case 'kick':
-                message.error('您在其他端登录被挤下线');
+                message.error(formatMessage({ id: 'KickedOutByOtherDevice' }));
                 break;
               case 'banned':
-                message.error('管理员或主持人已将您移出房间');
+                message.error(formatMessage({ id: 'BannedByHost' }));
                 break;
               case 'room_disband':
-                message.error('会议房间已经被解散');
+                message.warning(formatMessage({ id: 'RoomDisbanded' }));
                 break;
               default:
-                message.error('未知原因导致下线');
+                message.error(formatMessage({ id: 'UnknownOfflineReason' }));
             }
             navigate(baseUrl + '/detail');
           },
@@ -242,8 +326,8 @@ const Conference = createWithRemoteLoader({
             confirmModal({
               type: 'confirm',
               confirmType: 'warning',
-              title: '网络连接已断开',
-              message: '请检查网络连接，如果发现对方页面卡住还没有恢复连接可以点击重连重新进入房间',
+              title: formatMessage({ id: 'NetworkDisconnected' }),
+              message: formatMessage({ id: 'CheckNetworkConnection' }),
               onOk: () => {
                 window.location.reload();
               }
@@ -259,6 +343,8 @@ const Conference = createWithRemoteLoader({
   useEffect(() => {
     const promise = initSdk().then(async currentSdk => {
       await currentSdk.enterRoom();
+      const deviceInfo = await updateDevices();
+      currentSdk.recordClientEvent('device-info', buildClientDeviceInfo(deviceInfo));
       return currentSdk;
     });
     return () => {
@@ -266,7 +352,17 @@ const Conference = createWithRemoteLoader({
         return currentSdk.exitRoom();
       });
     };
-  }, [conference.id, initSdk]);
+  }, [buildClientDeviceInfo, conference.id, initSdk, updateDevices]);
+
+  useEffect(() => {
+    if (!navigator.mediaDevices?.addEventListener) {
+      return;
+    }
+    navigator.mediaDevices.addEventListener('devicechange', updateDevices);
+    return () => {
+      navigator.mediaDevices.removeEventListener('devicechange', updateDevices);
+    };
+  }, [updateDevices]);
 
   const targetList = useMemo(() => {
     if (!currentSdk) {
@@ -287,6 +383,7 @@ const Conference = createWithRemoteLoader({
               current={currentUser}
               audioIsPlay={setting.microphoneOpen}
               videoIsPlay={setting.cameraOpen && videoView && videoView[currentSdk.STREAM_TYPE_MAIN]}
+              onVideoElementChange={onLocalVideoElementChange}
             />
           );
         } else {
@@ -314,7 +411,7 @@ const Conference = createWithRemoteLoader({
                     userId={userId}
                     streamType={streamType}
                     current={currentUser}
-                    videoIsPlay={videoView && videoView[currentSdk.STREAM_TYPE_MAIN]}
+                    videoIsPlay={videoView && videoView[streamType]}
                     shareScreen
                   />
                 )
@@ -324,7 +421,7 @@ const Conference = createWithRemoteLoader({
       },
       []
     );
-  }, [list, currentSdk, setting.cameraOpen, setting.microphoneOpen]);
+  }, [list, currentSdk, setting.cameraOpen, setting.microphoneOpen, onLocalVideoElementChange]);
 
   if (!currentSdk) {
     return (
@@ -341,6 +438,7 @@ const Conference = createWithRemoteLoader({
       isMaster={current.isMaster}
       isInvitationAllowed={conference.isInvitationAllowed && current.isMaster}
       signalLevel={signalLevel}
+      devices={devices}
       value={setting}
       onChange={setSetting}
       document={
@@ -358,16 +456,12 @@ const Conference = createWithRemoteLoader({
             onSpeechStart={onSpeechStart}
             onSpeechEnd={async () => {
               const { data: resData } = await ajax(
-                Object.assign({}, apis.endConference, {
-                  data: {
-                    id: conference.id
-                  }
-                })
+                Object.assign({}, apis.stopAITranscription)
               );
               if (resData.code !== 0) {
                 return;
               }
-              message.success('结束会议');
+              message.success(formatMessage({ id: 'StopSpeechRecognition' }));
             }}
             files={conference.options.document}
             module={conference.options.module}
@@ -375,6 +469,34 @@ const Conference = createWithRemoteLoader({
         )
       }
       actions={{
+        setMicrophoneOpen: async open => {
+          await currentSdk.setLocalAudioOpen({ open, microphoneId: setting.microphoneId });
+          setSetting(setting => {
+            return Object.assign({}, setting, { microphoneOpen: open });
+          });
+        },
+        setCameraOpen: async open => {
+          await currentSdk.setLocalVideoOpen({ open, el: localVideoElementRef.current, cameraId: setting.cameraId });
+          setSetting(setting => {
+            return Object.assign({}, setting, { cameraOpen: open });
+          });
+        },
+        setMicrophoneId: async microphoneId => {
+          if (setting.microphoneOpen) {
+            await currentSdk.switchLocalAudioDevice({ microphoneId });
+          }
+          setSetting(setting => {
+            return Object.assign({}, setting, { microphoneId });
+          });
+        },
+        setCameraId: async cameraId => {
+          if (setting.cameraOpen) {
+            await currentSdk.switchLocalVideoDevice({ cameraId });
+          }
+          setSetting(setting => {
+            return Object.assign({}, setting, { cameraId });
+          });
+        },
         shareScreen: async () => {
           if (setting.shareScreenOpen) {
             await currentSdk.stopShareScreen();
@@ -393,7 +515,7 @@ const Conference = createWithRemoteLoader({
           if (resData.code !== 0) {
             return;
           }
-          modal(InviteMember.renderModal(Object.assign({}, resData.data, { message })));
+          modal(InviteMember.renderModal(Object.assign({}, resData.data, { message, formatMessage })));
         },
         leave: () => {
           navigate(baseUrl + '/detail');
@@ -414,6 +536,6 @@ const Conference = createWithRemoteLoader({
       list={targetList}
     />
   );
-});
+}));
 
 export default Conference;

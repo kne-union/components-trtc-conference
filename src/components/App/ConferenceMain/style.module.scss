@@ -53,3 +53,38 @@
     display: block;
   }
 }
+
+@media (max-width: 768px) {
+  .view-item-bar {
+    height: 26px;
+    padding: 0 6px;
+    font-size: 11px;
+  }
+
+  .view-item-bar > :global(.ant-flex:first-child) {
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  .view-item-bar > :global(.ant-flex:first-child) > div:last-child {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .avatar {
+    width: 18px !important;
+    height: 18px !important;
+
+    :global {
+      .ant-avatar {
+        width: 18px !important;
+        height: 18px !important;
+      }
+    }
+  }
+
+  .view-close {
+    font-size: 32px;
+  }
+}

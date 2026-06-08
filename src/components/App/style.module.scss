@@ -8,3 +8,16 @@
   background: var(--font-color-grey-4);
   --box-width: 900px;
 }
+
+@media (max-width: 768px) {
+  .box {
+    min-height: 100dvh;
+    height: 100dvh;
+    justify-content: flex-start;
+    align-items: stretch;
+    padding: 0;
+    box-sizing: border-box;
+    --box-width: calc(100vw - 24px);
+    --box-height: 100dvh;
+  }
+}

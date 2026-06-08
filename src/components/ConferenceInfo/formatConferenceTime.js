@@ -1,8 +1,8 @@
 import dayjs from 'dayjs';
 
-const formatConferenceTime = ({ startTime, duration }) => {
+const formatConferenceTime = ({ startTime, duration, formatMessage }) => {
   if (!startTime) {
-    return '无时间限制';
+    return formatMessage({ id: 'NoTimeLimit' });
   }
 
   const startTimeStr = dayjs(startTime).format(
@@ -17,9 +17,9 @@ const formatConferenceTime = ({ startTime, duration }) => {
     })()
   );
   if (!duration) {
-    return `${startTimeStr}开始`;
+    return `${startTimeStr}${formatMessage({ id: 'Start' })}`;
   }
-  const endTimeStr = dayjs(startTime).add(duration, 'minute').format('HH:mm');
+  const endTimeStr = dayjs(startTime).add(duration, 'second').format('HH:mm');
 
   return `${startTimeStr} - ${endTimeStr}`;
 };

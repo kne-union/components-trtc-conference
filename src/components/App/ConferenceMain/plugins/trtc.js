@@ -6,7 +6,7 @@ class ConferenceSDK {
 
   constructor({ sdkParams, conference, current, events = {} }) {
     this.sdkParams = {
-      sdkAppId: sdkParams.sdkAppId,
+      sdkAppId: Number(sdkParams.sdkAppId),
       userId: sdkParams.userId,
       userSig: sdkParams.userSig,
       strRoomId: sdkParams.roomId
@@ -27,11 +27,13 @@ class ConferenceSDK {
       if (/^robot/.test(String(userId))) {
         return;
       }
+      this.recordClientEvent('enter', { userId, userType: 'remote' });
       this.events.onEnterRoom?.({ userId, type: 'remote' });
       this.clientState[userId] = 1;
     });
 
     this.trtc.on(TRTC.EVENT.REMOTE_USER_EXIT, ({ userId }) => {
+      this.recordClientEvent('exit', { userId, userType: 'remote' });
       this.events.onExitRoom?.({ userId, type: 'remote' });
       this.clientState[userId] = 0;
     });
@@ -39,19 +41,27 @@ class ConferenceSDK {
     this.trtc.on(TRTC.EVENT.REMOTE_VIDEO_AVAILABLE, ({ userId, streamType, ...props }) => {
       this.runTask(userId, async () => {
         await this.trtc.startRemoteVideo({ userId, streamType });
+        if (streamType === this.STREAM_TYPE_MAIN) {
+          this.recordClientEvent('camera-open', { userId, userType: 'remote', streamType });
+        }
         await this.events.onUpdate?.({ userId, type: 'remote', streamType, videoIsPlay: true });
       });
     });
     this.trtc.on(TRTC.EVENT.REMOTE_VIDEO_UNAVAILABLE, ({ userId, streamType }) => {
       this.runTask(userId, async () => {
         await this.trtc.stopRemoteVideo({ userId, streamType });
+        if (streamType === this.STREAM_TYPE_MAIN) {
+          this.recordClientEvent('camera-close', { userId, userType: 'remote', streamType });
+        }
         this.events.onUpdate?.({ userId, type: 'remote', streamType, videoIsPlay: false });
       });
     });
     this.trtc.on(TRTC.EVENT.REMOTE_AUDIO_AVAILABLE, ({ userId }) => {
+      this.recordClientEvent('microphone-open', { userId, userType: 'remote' });
       this.events.onUpdate?.({ userId, type: 'remote', audioIsPlay: true });
     });
     this.trtc.on(TRTC.EVENT.REMOTE_AUDIO_UNAVAILABLE, ({ userId }) => {
+      this.recordClientEvent('microphone-close', { userId, userType: 'remote' });
       this.events.onUpdate?.({ userId, type: 'remote', audioIsPlay: false });
     });
     this.trtc.on(TRTC.EVENT.KICKED_OUT, event => {
@@ -69,7 +79,12 @@ class ConferenceSDK {
         6: -1
       };
       this.localQuality = format[Math.max(event.uplinkNetworkQuality, event.downlinkNetworkQuality)] || -1;
+      this.recordClientEvent('network-quality', event);
       this.events.onQualityChange?.(this.localQuality);
+    });
+
+    this.trtc.on(TRTC.EVENT.STATISTICS, statistics => {
+      this.recordClientEvent('statistics', statistics);
     });
 
     this.trtc.on(TRTC.EVENT.SCREEN_SHARE_STOPPED, () => {
@@ -110,6 +125,16 @@ class ConferenceSDK {
     await this.taskPromise[id];
   }
 
+  recordClientEvent(type, data = {}) {
+    this.events.onClientEvent?.({
+      type,
+      userId: data.userId || this.sdkParams.userId,
+      roomId: this.roomId,
+      time: new Date(),
+      data
+    });
+  }
+
   async enterRoom() {
     await this.runTask(this.sdkParams.userId, async () => {
       await this.trtc.enterRoom(this.sdkParams);
@@ -118,6 +143,7 @@ class ConferenceSDK {
     });
     this.clientState[this.sdkParams.userId] = 1;
     this.events.onLocalStateChange?.(this.clientState[this.sdkParams.userId]);
+    this.recordClientEvent('enter', { userId: this.sdkParams.userId, userType: 'local' });
     this.events.onEnterRoom?.({
       userId: this.sdkParams.userId,
       type: 'local',
@@ -134,6 +160,7 @@ class ConferenceSDK {
     });
     this.clientState[this.sdkParams.userId] = 0;
     this.events.onLocalStateChange?.(this.clientState[this.sdkParams.userId]);
+    this.recordClientEvent('exit', { userId: this.sdkParams.userId, userType: 'local' });
     this.events.onExitRoom?.({ userId: this.sdkParams.userId, type: 'local' });
   }
 
@@ -143,6 +170,53 @@ class ConferenceSDK {
 
   async updateLocalAudio({ mute = false }) {
     this.clientState[this.sdkParams.userId] === 1 && (await this.trtc.updateLocalAudio({ mute }));
+  }
+
+  async setLocalVideoOpen({ open, el, cameraId }) {
+    if (this.clientState[this.sdkParams.userId] !== 1) {
+      return;
+    }
+    if (open) {
+      await this.trtc.startLocalVideo({
+        view: el,
+        option: cameraId ? { cameraId } : undefined
+      });
+      this.recordClientEvent('camera-open', { cameraId });
+      return;
+    }
+    await this.trtc.stopLocalVideo();
+    this.recordClientEvent('camera-close', { cameraId });
+  }
+
+  async setLocalAudioOpen({ open, microphoneId }) {
+    if (this.clientState[this.sdkParams.userId] !== 1) {
+      return;
+    }
+    if (open) {
+      await this.trtc.startLocalAudio({
+        option: microphoneId ? { microphoneId } : undefined
+      });
+      this.recordClientEvent('microphone-open', { microphoneId });
+      return;
+    }
+    await this.trtc.stopLocalAudio();
+    this.recordClientEvent('microphone-close', { microphoneId });
+  }
+
+  async switchLocalVideoDevice({ cameraId }) {
+    if (this.clientState[this.sdkParams.userId] !== 1) {
+      return;
+    }
+    await this.trtc.updateLocalVideo({ option: { cameraId } });
+    this.recordClientEvent('camera-switch', { cameraId });
+  }
+
+  async switchLocalAudioDevice({ microphoneId }) {
+    if (this.clientState[this.sdkParams.userId] !== 1) {
+      return;
+    }
+    await this.trtc.updateLocalAudio({ option: { microphoneId } });
+    this.recordClientEvent('microphone-switch', { microphoneId });
   }
 
   async updateRemote({ userId, streamType, el }) {

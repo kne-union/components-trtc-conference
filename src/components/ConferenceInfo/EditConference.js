@@ -1,20 +1,23 @@
 import { createWithRemoteLoader } from '@kne/remote-loader';
 import ConferenceFormInner from './ConferenceFormInner';
 import { App, Button } from 'antd';
+import withLocale from './withLocale';
+import { useIntl } from '@kne/react-intl';
 
 const EditConference = createWithRemoteLoader({
   modules: ['components-core:FormInfo', 'components-core:Global@usePreset']
-})(({ remoteModules, children, data, apis, onSuccess }) => {
+})(withLocale(({ remoteModules, children, data, apis, onSuccess }) => {
   const [FormInfo, usePreset] = remoteModules;
   const { useFormModal } = FormInfo;
   const formModal = useFormModal();
   const { ajax } = usePreset();
   const { message } = App.useApp();
   const id = data.id;
+  const { formatMessage } = useIntl();
   return children({
     onClick: () => {
       const formModalApi = formModal({
-        title: '编辑会议',
+        title: formatMessage({ id: 'EditMeeting' }),
         size: 'small',
         formProps: {
           data,
@@ -36,7 +39,7 @@ const EditConference = createWithRemoteLoader({
             if (resData.code !== 0) {
               return;
             }
-            message.success('保存成功');
+            message.success(formatMessage({ id: 'SaveSuccess' }));
             formModalApi.close();
             onSuccess && onSuccess();
           }
@@ -45,7 +48,7 @@ const EditConference = createWithRemoteLoader({
       });
     }
   });
-});
+}));
 
 export const EditConferenceButton = ({ data, apis, onSuccess, ...props }) => {
   return (

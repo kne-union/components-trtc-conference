@@ -10,6 +10,14 @@
   background: var(--primary-color-6);
 }
 
+.side-list {
+  width: 34%;
+
+  .type-item {
+    width: 100%;
+  }
+}
+
 .layout-item-outer {
   display: flex;
   flex-direction: column;
@@ -21,7 +29,9 @@
   background: #ffffff;
   border: 2px solid #ffffff;
   min-width: 200px;
+  width: 100%;
   height: 200px;
+  box-sizing: border-box;
 
   &.is-active {
     border-color: var(--primary-color);
@@ -31,5 +41,20 @@
 .layout-label {
   &.is-active {
     color: var(--primary-color);
+  }
+}
+
+@media (max-width: 768px) {
+  .hide-in-mobile {
+    display: none;
+  }
+
+  .layout-item-outer {
+    margin-bottom: 12px;
+  }
+
+  .layout-item {
+    min-width: 0;
+    height: 140px;
   }
 }

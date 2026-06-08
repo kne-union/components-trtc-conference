@@ -1,11 +1,14 @@
 import { useEffect, useState, useRef } from 'react';
 import dayjs from 'dayjs';
 import CountDown from '@kne/count-down';
+import withLocale from './withLocale';
+import { useIntl } from '@kne/react-intl';
 
-const ConferenceCountDown = ({ startTime, duration, onComplete }) => {
+const ConferenceCountDown = withLocale(({ startTime, duration, onComplete }) => {
   const [current, setCurrent] = useState(dayjs());
   const ref = useRef({ startTime, duration, onComplete });
   ref.current = { startTime, duration, onComplete };
+  const { formatMessage } = useIntl();
   useEffect(() => {
     const { startTime, duration, onComplete } = ref.current;
     const timer = setInterval(() => {
@@ -15,7 +18,7 @@ const ConferenceCountDown = ({ startTime, duration, onComplete }) => {
         clearInterval(timer);
         onComplete && onComplete();
       }
-      if (now.isAfter(dayjs(startTime).add(duration, 'minute'))) {
+      if (now.isAfter(dayjs(startTime).add(duration, 'second'))) {
         clearInterval(timer);
         onComplete && onComplete();
       }
@@ -31,25 +34,25 @@ const ConferenceCountDown = ({ startTime, duration, onComplete }) => {
   }
 
   if (current.isAfter(startTime)) {
-    return '会议已开始，点击进入会议按钮直接进入';
+    return formatMessage({ id: 'MeetingStarted' });
   }
   if (dayjs(startTime).diff(current, 'second') <= 3600) {
     return (
       <>
         <CountDown duration={dayjs(startTime).diff(current, 'second')} />
-        s后
+        {formatMessage({ id: 'SecondsAfter' })}
       </>
     );
   }
 
   if (dayjs(startTime).diff(current, 'minute') < 60) {
-    return `${dayjs(startTime).diff(current, 'minute')}分钟后`;
+    return `${dayjs(startTime).diff(current, 'minute')}${formatMessage({ id: 'MinutesAfter' })}`;
   }
 
   if (dayjs(startTime).diff(current, 'hour') < 24) {
-    return `${dayjs(startTime).diff(current, 'hour')}小时后`;
+    return `${dayjs(startTime).diff(current, 'hour')}${formatMessage({ id: 'HoursAfter' })}`;
   }
-  return `${dayjs(startTime).diff(current, 'day')}天后`;
-};
+  return `${dayjs(startTime).diff(current, 'day')}${formatMessage({ id: 'DaysAfter' })}`;
+});
 
 export default ConferenceCountDown;

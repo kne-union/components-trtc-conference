@@ -18,8 +18,8 @@ const getApis = options => {
       url: `${prefix}/inviteMember`,
       method: 'POST'
     },
-    inviteMemberFormUser: {
-      url: `${prefix}/inviteMemberFormUser`,
+    inviteMemberFromUser: {
+      url: `${prefix}/inviteMemberFromUser`,
       method: 'POST'
     },
     joinConference: {
@@ -38,6 +38,10 @@ const getApis = options => {
       url: `${prefix}/end`,
       method: 'POST'
     },
+    cancelConference: {
+      url: `${prefix}/cancel`,
+      method: 'POST'
+    },
     startAITranscription: {
       url: `${prefix}/startAITranscription`,
       method: 'POST'
@@ -49,6 +53,18 @@ const getApis = options => {
     recordAITranscription: {
       url: `${prefix}/recordAITranscription`,
       method: 'POST'
+    },
+    recordClientEvents: {
+      url: `${prefix}/recordClientEvents`,
+      method: 'POST'
+    },
+    getAiTranscriptionContent: {
+      url: `${prefix}/getAiTranscriptionContent`,
+      method: 'GET'
+    },
+    getTrtcInstanceEvents: {
+      url: `${prefix}/getTrtcInstanceEvents`,
+      method: 'GET'
     },
     createConference: {
       url: `${prefix}/create`,

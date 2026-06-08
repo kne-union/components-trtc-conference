@@ -1,0 +1,115 @@
+{
+  "totalCount": 5,
+  "pageData": [
+    {
+      "id": "conf-001",
+      "shorten": "abc001",
+      "name": "Q2季度产品规划评审会",
+      "startTime": "2026-06-05T10:00:00.000Z",
+      "duration": 3600,
+      "status": 0,
+      "isInvitationAllowed": true,
+      "maxCount": 10,
+      "members": [
+        { "id": "user-001", "nickname": "陈建国", "email": "chenjianguo@company.com", "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=chen", "isMaster": true },
+        { "id": "user-002", "nickname": "李明辉", "email": "liminghui@company.com", "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=li", "isMaster": false },
+        { "id": "user-003", "nickname": "王芳", "email": "wangfang@company.com", "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=wang", "isMaster": false }
+      ],
+      "options": {
+        "setting": { "record": "audio", "speech": true, "layoutType": 1 },
+        "documentType": "files",
+        "document": [
+          { "filename": "Q2产品规划.pdf", "id": "file-001" },
+          { "filename": "竞品分析报告.xlsx", "id": "file-002" }
+        ],
+        "documentVisibleAll": true
+      }
+    },
+    {
+      "id": "conf-002",
+      "shorten": "abc002",
+      "name": "前端技术分享会",
+      "startTime": "2026-06-05T11:00:00.000Z",
+      "duration": 5400,
+      "status": 0,
+      "isInvitationAllowed": true,
+      "maxCount": 20,
+      "members": [
+        { "id": "user-004", "nickname": "赵磊", "email": "zhaolei@company.com", "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=zhao", "isMaster": true },
+        { "id": "user-005", "nickname": "刘洋", "email": "liuyang@company.com", "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=liuyang", "isMaster": false }
+      ],
+      "options": {
+        "setting": { "record": "", "speech": false, "layoutType": 2 }
+      }
+    },
+    {
+      "id": "conf-003",
+      "shorten": "abc003",
+      "name": "客户需求对接会",
+      "startTime": "2026-06-04T09:00:00.000Z",
+      "duration": 2700,
+      "status": 1,
+      "isInvitationAllowed": false,
+      "maxCount": 5,
+      "members": [
+        { "id": "user-006", "nickname": "孙婷", "email": "sunting@company.com", "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=sun", "isMaster": true },
+        { "id": "user-007", "nickname": "周伟", "email": "zhouwei@company.com", "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=zhou", "isMaster": false }
+      ],
+      "options": {
+        "setting": { "record": "video", "speech": true },
+        "documentType": "files",
+        "document": [
+          { "filename": "需求文档v2.1.docx", "id": "file-003" }
+        ],
+        "documentVisibleAll": false,
+        "recordFilesAchieved": true,
+        "recordFiles": {
+          "user-006": [{ "fileId": "rec-001" }, { "fileId": "rec-002" }],
+          "user-007": [{ "fileId": "rec-003" }]
+        }
+      }
+    },
+    {
+      "id": "conf-004",
+      "shorten": "abc004",
+      "name": "新员工入职培训",
+      "startTime": "2026-06-07T14:00:00.000Z",
+      "duration": 7200,
+      "status": 0,
+      "isInvitationAllowed": true,
+      "maxCount": 50,
+      "members": [
+        { "id": "user-008", "nickname": "吴晓燕", "email": "wuxiaoyan@company.com", "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=wu", "isMaster": true }
+      ],
+      "options": {
+        "setting": { "record": "video", "speech": true, "layoutType": 4 },
+        "documentType": "files",
+        "document": [
+          { "filename": "公司制度手册.pdf", "id": "file-004" },
+          { "filename": "技术架构概览.pdf", "id": "file-005" },
+          { "filename": "开发流程规范.pdf", "id": "file-006" }
+        ],
+        "documentVisibleAll": true
+      }
+    },
+    {
+      "id": "conf-005",
+      "shorten": "abc005",
+      "name": "每日站会",
+      "startTime": "2026-06-05T09:00:00.000Z",
+      "duration": 900,
+      "status": 0,
+      "isInvitationAllowed": false,
+      "maxCount": 8,
+      "members": [
+        { "id": "user-009", "nickname": "郑浩", "email": "zhenghao@company.com", "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=zheng", "isMaster": true },
+        { "id": "user-010", "nickname": "黄丽", "email": "huangli@company.com", "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=huang", "isMaster": false },
+        { "id": "user-011", "nickname": "马超", "email": "machao@company.com", "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=ma", "isMaster": false },
+        { "id": "user-012", "nickname": "林小燕", "email": "linxiaoyan@company.com", "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=lin", "isMaster": false }
+      ],
+      "options": {
+        "setting": { "record": "", "speech": false, "layoutType": 1 }
+      }
+    }
+  ]
+}

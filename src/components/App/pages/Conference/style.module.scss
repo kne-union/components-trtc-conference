@@ -1,3 +1,9 @@
 .conference-room {
   height: 100vh;
 }
+
+@media (max-width: 768px) {
+  .conference-room {
+    height: 100dvh;
+  }
+}

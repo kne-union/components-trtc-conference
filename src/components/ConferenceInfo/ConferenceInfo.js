@@ -9,13 +9,16 @@ import style from './style.module.scss';
 import MenuBar from './MenuBar';
 import { ConferenceDetailInner } from './ConferenceDetail';
 import EditConference, { EditConferenceButton } from './EditConference';
+import withLocale from './withLocale';
+import { useIntl } from '@kne/react-intl';
 
 const ConferenceInfo = createWithRemoteLoader({
-  modules: ['components-core:ButtonGroup', 'components-core:Icon', 'components-core:StateTag', 'components-core:Common@SimpleBar']
-})(({ remoteModules, className, user, current = 1, pageSize = 20, onPageChange, getDetailUrl, data, reload, apis, actions }) => {
+  modules: ['components-core:ButtonGroup', 'components-core:Icon', 'components-core:StateTag', 'components-core:Common@SimpleBar', 'components-admin:Account@Language']
+})(withLocale(({ remoteModules, className, user, current = 1, pageSize = 20, onPageChange, getDetailUrl, data, reload, apis, actions }) => {
   const [conference, setConference] = useState(null);
-  const [ButtonGroup, Icon, StateTag, SimpleBar] = remoteModules;
+  const [ButtonGroup, Icon, StateTag, SimpleBar, Language] = remoteModules;
   const { message } = App.useApp();
+  const { formatMessage } = useIntl();
   return (
     <Flex className={classnames(className, style['info'])}>
       <MenuBar
@@ -50,10 +53,15 @@ const ConferenceInfo = createWithRemoteLoader({
                     window.open(getDetailUrl({ shorten }), '_blank');
                   }}
                   onEdit={onEdit}
+                  onCancel={async () => {
+                    await actions.cancel({ id: conference.id });
+                    reload && reload();
+                    setConference(null);
+                  }}
                   onDetailLinkCopy={async item => {
                     const { shorten } = await actions.getMemberShorten(item);
                     navigator.clipboard.writeText(window.location.origin + getDetailUrl({ shorten })).then(() => {
-                      message.success('链接已复制');
+                      message.success(formatMessage({ id: 'LinkCopied' }));
                     });
                   }}
                   onBack={() => {
@@ -65,21 +73,32 @@ const ConferenceInfo = createWithRemoteLoader({
           </EditConference>
         ) : (
           <Flex vertical className={style['right-panel']}>
-            <div className={style['title']}>{dayjs().format('MM月DD日')}</div>
+            <Flex className={style['title']} justify="space-between" align="center" gap={8}>
+              <div>{dayjs().format(formatMessage({ id: 'DateFormat' }))}</div>
+              <Language colorful={false} />
+            </Flex>
             <Divider className={style['divider']} />
-            <Flex flex={1} vertical gap={10}>
-              <div>
-                <SimpleBar className={style['scroller']}>
+            <Flex flex={1} vertical gap={10} className={style['list-content']}>
+              <div className={style['list-scroller-outer']}>
+                <SimpleBar className={classnames(style['scroller'], style['list-scroller'])}>
                   {data.pageData.length > 0 ? (
                     transform(
                       groupBy(data.pageData, item => {
                         return dayjs(item.startTime).format('YYYY-MM-DD');
                       }),
                       (result, value) => {
-                        result.push(value);
+                        result.push(
+                          value.slice().sort((a, b) => {
+                            return dayjs(b.startTime).valueOf() - dayjs(a.startTime).valueOf();
+                          })
+                        );
                       },
                       []
-                    ).map(item => {
+                    )
+                      .sort((a, b) => {
+                        return dayjs(b[0]?.startTime).valueOf() - dayjs(a[0]?.startTime).valueOf();
+                      })
+                      .map(item => {
                       const time = dayjs(item[0]?.startTime).format('YYYY-MM-DD');
                       return (
                         <Card key={time} className={style['date-card']} size="small" title={time}>
@@ -87,12 +106,13 @@ const ConferenceInfo = createWithRemoteLoader({
                             size="small"
                             dataSource={item}
                             renderItem={item => {
+                              const isBeforeStart = item.status === 0 && item.startTime && dayjs().isBefore(dayjs(item.startTime));
                               const options = [
                                 {
                                   type: 'primary',
                                   size: 'small',
                                   shape: 'round',
-                                  children: '查看',
+                                  children: formatMessage({ id: 'View' }),
                                   onClick: () => {
                                     setConference(item);
                                   }
@@ -104,14 +124,27 @@ const ConferenceInfo = createWithRemoteLoader({
                                   onSuccess: reload,
                                   size: 'small',
                                   shape: 'round',
-                                  children: '编辑'
+                                  children: formatMessage({ id: 'Edit' })
                                 }
                               ];
-                              if (item.status === 1) {
+                              if (isBeforeStart) {
+                                options.push({
+                                  danger: true,
+                                  size: 'small',
+                                  shape: 'round',
+                                  children: formatMessage({ id: 'CancelMeeting' }),
+                                  confirm: true,
+                                  message: formatMessage({ id: 'CancelMeetingConfirm' }),
+                                  onClick: async () => {
+                                    await actions.cancel({ id: item.id });
+                                  }
+                                });
+                              }
+                              if ([1, 2].indexOf(item.status) > -1) {
                                 options.push({
                                   size: 'small',
                                   shape: 'round',
-                                  children: '删除',
+                                  children: formatMessage({ id: 'Delete' }),
                                   confirm: true,
                                   onClick: async () => {
                                     await actions.remove({ id: item.id });
@@ -120,13 +153,16 @@ const ConferenceInfo = createWithRemoteLoader({
                               }
                               return (
                                 <List.Item className={style['list-item']} key={item.id}>
-                                  <Flex vertical flex={1}>
-                                    <Flex justify="space-between">
-                                      <Flex gap={8}>
+                                  <Flex vertical flex={1} className={style['list-item-content']}>
+                                    <Flex justify="space-between" gap={8} className={style['list-item-header']}>
+                                      <Flex gap={8} className={style['list-title-area']}>
                                         <div className={style['conference-title']}>
                                           {item.name}({item.members.length}/{item.maxCount})
                                         </div>
-                                        <div>{item.status === 1 && <StateTag text="已结束" />}</div>
+                                        <div>
+                                          {item.status === 1 && <StateTag text={formatMessage({ id: 'Ended' })} />}
+                                          {item.status === 2 && <StateTag type="danger" text={formatMessage({ id: 'Canceled' })} />}
+                                        </div>
                                       </Flex>
                                       <div className={style['options-btn']}>
                                         <ButtonGroup
@@ -136,7 +172,7 @@ const ConferenceInfo = createWithRemoteLoader({
                                       </div>
                                     </Flex>
                                     <div className={style['time']}>
-                                      {dayjs(item.startTime).format('HH:mm')} - {dayjs(item.startTime).add(item.duration, 'minute').format('HH:mm')}
+                                      {dayjs(item.startTime).format('HH:mm')} - {dayjs(item.startTime).add(item.duration, 'second').format('HH:mm')}
                                     </div>
                                   </Flex>
                                 </List.Item>
@@ -171,6 +207,6 @@ const ConferenceInfo = createWithRemoteLoader({
       </div>
     </Flex>
   );
-});
+}));
 
 export default ConferenceInfo;
