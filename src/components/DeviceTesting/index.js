@@ -1,29 +1,31 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Alert, Button, Flex, Progress, Select, Spin } from 'antd';
 import { AudioOutlined, CameraOutlined, ReloadOutlined } from '@ant-design/icons';
+import withLocale from './withLocale';
+import { useIntl } from '@kne/react-intl';
 import style from './style.module.scss';
 
 const cleanStream = stream => {
   stream?.getTracks?.().forEach(track => track.stop());
 };
 
-const getDeviceErrorMessage = error => {
+const getDeviceErrorMessage = ({ error, formatMessage }) => {
   if (!error) {
-    return '设备检测失败，请检查浏览器权限和设备连接';
+    return formatMessage({ id: 'DeviceTestFailed' });
   }
   if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
-    return '未获得设备权限，请允许浏览器访问摄像头和麦克风';
+    return formatMessage({ id: 'PermissionDenied' });
   }
   if (error.name === 'NotFoundError' || error.name === 'DevicesNotFoundError') {
-    return '未检测到可用设备';
+    return formatMessage({ id: 'NoDeviceFound' });
   }
   if (error.name === 'NotReadableError' || error.name === 'TrackStartError') {
-    return '设备可能被其他应用占用，请关闭占用后重试';
+    return formatMessage({ id: 'DeviceInUse' });
   }
-  return error.message || '设备检测失败，请检查浏览器权限和设备连接';
+  return error.message || formatMessage({ id: 'DeviceTestFailed' });
 };
 
-const DeviceTesting = ({ defaultAudioDeviceId, defaultVideoDeviceId, onComplete }) => {
+const DeviceTesting = withLocale(({ defaultAudioDeviceId, defaultVideoDeviceId, onComplete }) => {
   const videoRef = useRef(null);
   const streamRef = useRef(null);
   const audioContextRef = useRef(null);
@@ -37,23 +39,24 @@ const DeviceTesting = ({ defaultAudioDeviceId, defaultVideoDeviceId, onComplete 
   const [volume, setVolume] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const { formatMessage } = useIntl();
 
   const audioOptions = useMemo(
     () =>
       audioDevices.map(device => ({
         value: device.deviceId,
-        label: device.label || '默认麦克风'
+        label: device.label || formatMessage({ id: 'DefaultMicrophone' })
       })),
-    [audioDevices]
+    [audioDevices, formatMessage]
   );
 
   const videoOptions = useMemo(
     () =>
       videoDevices.map(device => ({
         value: device.deviceId,
-        label: device.label || '默认摄像头'
+        label: device.label || formatMessage({ id: 'DefaultCamera' })
       })),
-    [videoDevices]
+    [videoDevices, formatMessage]
   );
 
   const stopVolumeDetection = useCallback(() => {
@@ -118,7 +121,7 @@ const DeviceTesting = ({ defaultAudioDeviceId, defaultVideoDeviceId, onComplete 
     setStream(null);
     try {
       if (!navigator.mediaDevices?.getUserMedia || !navigator.mediaDevices?.enumerateDevices) {
-        throw new Error('当前浏览器不支持设备检测');
+        throw new Error(formatMessage({ id: 'BrowserNotSupported' }));
       }
       await refreshDevices();
       const mediaStream = await navigator.mediaDevices.getUserMedia({
@@ -129,12 +132,12 @@ const DeviceTesting = ({ defaultAudioDeviceId, defaultVideoDeviceId, onComplete 
       setStream(mediaStream);
       startVolumeDetection(mediaStream);
       await refreshDevices();
-    } catch (error) {
-      setError(getDeviceErrorMessage(error));
+    } catch (err) {
+      setError(getDeviceErrorMessage({ error: err, formatMessage }));
     } finally {
       setLoading(false);
     }
-  }, [audioDeviceId, refreshDevices, startVolumeDetection, stopVolumeDetection, videoDeviceId]);
+  }, [audioDeviceId, refreshDevices, startVolumeDetection, stopVolumeDetection, videoDeviceId, formatMessage]);
 
   useEffect(() => {
     startTest();
@@ -178,40 +181,40 @@ const DeviceTesting = ({ defaultAudioDeviceId, defaultVideoDeviceId, onComplete 
     <div className={style['device-testing']}>
       <Flex gap={16} vertical>
         <div className={style['preview']}>
-          {stream ? <video ref={videoRef} autoPlay playsInline muted /> : <div className={style['preview-placeholder']}>{loading ? <Spin /> : '等待摄像头预览'}</div>}
+          {stream ? <video ref={videoRef} autoPlay playsInline muted /> : <div className={style['preview-placeholder']}>{loading ? <Spin /> : formatMessage({ id: 'WaitingCameraPreview' })}</div>}
         </div>
         {error && <Alert type="error" showIcon message={error} />}
         <Flex gap={12} className={style['device-row']}>
           <Flex vertical gap={6} flex={1}>
             <div className={style['device-label']}>
               <AudioOutlined />
-              麦克风
+              {formatMessage({ id: 'Microphone' })}
             </div>
-            <Select value={audioDeviceId} options={audioOptions} onChange={setAudioDeviceId} placeholder="选择麦克风" />
+            <Select value={audioDeviceId} options={audioOptions} onChange={setAudioDeviceId} placeholder={formatMessage({ id: 'SelectMicrophone' })} />
           </Flex>
           <Flex vertical gap={6} flex={1}>
             <div className={style['device-label']}>
               <CameraOutlined />
-              摄像头
+              {formatMessage({ id: 'Camera' })}
             </div>
-            <Select value={videoDeviceId} options={videoOptions} onChange={setVideoDeviceId} placeholder="选择摄像头" />
+            <Select value={videoDeviceId} options={videoOptions} onChange={setVideoDeviceId} placeholder={formatMessage({ id: 'SelectCamera' })} />
           </Flex>
         </Flex>
         <div>
-          <div className={style['device-label']}>麦克风音量</div>
+          <div className={style['device-label']}>{formatMessage({ id: 'MicrophoneVolume' })}</div>
           <Progress percent={volume} showInfo={false} />
         </div>
         <Flex justify="flex-end" gap={12}>
           <Button icon={<ReloadOutlined />} onClick={startTest} loading={loading}>
-            重新检测
+            {formatMessage({ id: 'Retest' })}
           </Button>
           <Button type="primary" onClick={handleComplete} disabled={!stream}>
-            检测完成
+            {formatMessage({ id: 'TestComplete' })}
           </Button>
         </Flex>
       </Flex>
     </div>
   );
-};
+});
 
 export default DeviceTesting;

@@ -13,10 +13,10 @@ import withLocale from './withLocale';
 import { useIntl } from '@kne/react-intl';
 
 const ConferenceInfo = createWithRemoteLoader({
-  modules: ['components-core:ButtonGroup', 'components-core:Icon', 'components-core:StateTag', 'components-core:Common@SimpleBar']
+  modules: ['components-core:ButtonGroup', 'components-core:Icon', 'components-core:StateTag', 'components-core:Common@SimpleBar', 'components-admin:Account@Language']
 })(withLocale(({ remoteModules, className, user, current = 1, pageSize = 20, onPageChange, getDetailUrl, data, reload, apis, actions }) => {
   const [conference, setConference] = useState(null);
-  const [ButtonGroup, Icon, StateTag, SimpleBar] = remoteModules;
+  const [ButtonGroup, Icon, StateTag, SimpleBar, Language] = remoteModules;
   const { message } = App.useApp();
   const { formatMessage } = useIntl();
   return (
@@ -73,7 +73,10 @@ const ConferenceInfo = createWithRemoteLoader({
           </EditConference>
         ) : (
           <Flex vertical className={style['right-panel']}>
-            <div className={style['title']}>{dayjs().format(formatMessage({ id: 'DateFormat' }))}</div>
+            <Flex className={style['title']} justify="space-between" align="center" gap={8}>
+              <div>{dayjs().format(formatMessage({ id: 'DateFormat' }))}</div>
+              <Language colorful={false} />
+            </Flex>
             <Divider className={style['divider']} />
             <Flex flex={1} vertical gap={10} className={style['list-content']}>
               <div className={style['list-scroller-outer']}>

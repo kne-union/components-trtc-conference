@@ -17,7 +17,7 @@ const BaseExample = createWithRemoteLoader({
           apis={preset.apis.conference}
           isAdmin
           onEnter={() => console.log('进入会议')}
-          onReload={() => console.log('刷新数据')}
+          onReload={() => {}}
           onEdit={() => console.log('编辑会议')}
         />
       </div>

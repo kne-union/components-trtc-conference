@@ -41,7 +41,7 @@ const BaseExample = createWithRemoteLoader({
           onPageChange={({ currentPage }) => setCurrent(currentPage)}
           getDetailUrl={item => &#96;/conference/detail?id=${item.id}&#96;}
           data={mockConferenceList}
-          reload={() => console.log('reload')}
+          reload={() => {}}
           apis={preset.apis.conference}
           actions={{
             remove: ({ id }) => console.log('删除会议', id),
@@ -114,7 +114,7 @@ const BaseExample = createWithRemoteLoader({
           apis={preset.apis.conference}
           isAdmin
           onEnter={() => console.log('进入会议')}
-          onReload={() => console.log('刷新数据')}
+          onReload={() => {}}
           onEdit={() => console.log('编辑会议')}
         />
       </div>
@@ -150,7 +150,7 @@ const BaseExample = createWithRemoteLoader({
           apis={preset.apis.conference}
           isAdmin
           aiTranscriptionContent={mockAiTranscriptionContent}
-          onReload={() => console.log('刷新数据')}
+          onReload={() => {}}
         />
       </div>
     </PureGlobal>

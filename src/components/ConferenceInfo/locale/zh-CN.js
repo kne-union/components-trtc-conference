@@ -2,6 +2,9 @@ const locale = {
   // ConferenceDetail.js
   Back: '返回',
   Edit: '编辑',
+  message: '消息',
+  delete: '删除',
+  cancel: '取消',
   StartMeeting: '开始会议',
   InviteMembers: '邀请成员',
   EnterMeeting: '进入会议',

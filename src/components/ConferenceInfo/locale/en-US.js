@@ -2,6 +2,9 @@ const locale = {
   // ConferenceDetail.js
   Back: 'Back',
   Edit: 'Edit',
+  message: 'Message',
+  delete: 'Delete',
+  cancel: 'Cancel',
   StartMeeting: 'Start Meeting',
   InviteMembers: 'Invite Members',
   EnterMeeting: 'Enter Meeting',
@@ -165,8 +168,8 @@ const locale = {
   // MenuBar.js
   UserInfo: 'User Info',
   Logout: 'Logout',
-  AddMeeting: 'Add Meeting',
-  QuickMeeting: 'Quick Meeting',
+  AddMeeting: 'Add',
+  QuickMeeting: 'Quick',
   Settings: 'Settings',
 
   // ConferenceInfo.js (list view)

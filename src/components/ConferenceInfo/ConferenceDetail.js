@@ -29,7 +29,8 @@ export const ConferenceDetailInner = createWithRemoteLoader({
     'components-core:FilePreview',
     'components-core:Common@SimpleBar',
     'components-core:Modal@useModal',
-    'components-thirdparty:Echart'
+    'components-thirdparty:Echart',
+    'components-admin:Account@Language'
   ]
 })(withLocale(({
   remoteModules,
@@ -55,7 +56,7 @@ export const ConferenceDetailInner = createWithRemoteLoader({
   isAdmin,
   aiTranscriptionContent
 }) => {
-  const [Icon, Image, InfoPage, Flow, StateTag, ConfirmButton, usePreset, LoadingButton, FilePreview, SimpleBar, useModal, Echart] = remoteModules;
+  const [Icon, Image, InfoPage, Flow, StateTag, ConfirmButton, usePreset, LoadingButton, FilePreview, SimpleBar, useModal, Echart, Language] = remoteModules;
   const { ajax } = usePreset();
   const { message } = App.useApp();
   const modal = useModal();
@@ -634,7 +635,8 @@ export const ConferenceDetailInner = createWithRemoteLoader({
             </Button>
           )}
         </Flex>
-        <Flex gap={8}>
+        <Flex gap={8} align="center">
+          <Language colorful={false} />
           {onCancel && isBeforeStart && (
             <ConfirmButton type="link" danger message={formatMessage({ id: 'CancelMeetingConfirm' })} okText={formatMessage({ id: 'CancelMeeting' })} onClick={onCancel}>
               {formatMessage({ id: 'CancelMeeting' })}
@@ -700,16 +702,16 @@ export const ConferenceDetailInner = createWithRemoteLoader({
                   icon={<Icon type="icon-setting" fontClassName="iconfont-ai" />}
                   onClick={() => {
                     const modalApi = modal({
-                      title: '设备检测',
+                      title: formatMessage({ id: 'DeviceTesting' }),
                       footer: null,
                       children: <DeviceTesting onComplete={() => {
-                        message.success('设备检测完成');
+                        message.success(formatMessage({ id: 'DeviceTestingComplete' }));
                         modalApi.close();
                       }} />
                     });
                   }}
                 >
-                  设备检测
+                  {formatMessage({ id: 'DeviceTesting' })}
                 </Button>
                 <Button
                   disabled={startTime && dayjs(startTime).isAfter(dayjs())}

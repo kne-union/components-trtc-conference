@@ -18,7 +18,7 @@ const BaseExample = createWithRemoteLoader({
           onPageChange={({ currentPage }) => setCurrent(currentPage)}
           getDetailUrl={item => `/conference/detail?id=${item.id}`}
           data={mockConferenceList}
-          reload={() => console.log('reload')}
+          reload={() => {}}
           apis={preset.apis.conference}
           actions={{
             remove: ({ id }) => console.log('删除会议', id),

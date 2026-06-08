@@ -17,7 +17,7 @@ const BaseExample = createWithRemoteLoader({
           apis={preset.apis.conference}
           isAdmin
           aiTranscriptionContent={mockAiTranscriptionContent}
-          onReload={() => console.log('刷新数据')}
+          onReload={() => {}}
         />
       </div>
     </PureGlobal>
