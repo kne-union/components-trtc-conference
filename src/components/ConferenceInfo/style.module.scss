@@ -137,7 +137,7 @@
 .menu-item {
   &:global(.ant-btn) {
     height: unset;
-    border: none;
+    border: none !important;
     width: auto;
   }
 
