@@ -5,6 +5,8 @@ import localStorage from '@kne/local-storage';
 import classnames from 'classnames';
 import { useContext } from '../context';
 import style from './style.module.scss';
+import withLocale from '../withLocale';
+import { useIntl } from '@kne/react-intl';
 
 const LEAPIN_VIDEO_CONFERENCE_WINDOW_SIZES = 'LEAPIN_VIDEO_CONFERENCE_WINDOW_SIZES';
 const LEAPIN_VIDEO_CONFERENCE_WINDOW_VERTICAL_SIZES = 'LEAPIN_VIDEO_CONFERENCE_WINDOW_VERTICAL_SIZES';
@@ -63,12 +65,54 @@ const WindowItem = createWithRemoteLoader({
   modules: ['components-core:Common@useResize', 'components-core:Icon']
 })(({ remoteModules, className, children, base = 'width', isSingle, ratio = 9 / 16, onMainView }) => {
   const [useResize, Icon] = remoteModules;
+  const itemRef = useRef(null);
   const [width, setWidth] = useState(0);
   const [height, setHeight] = useState(0);
+  const [singleSize, setSingleSize] = useState({ width: 0, height: 0 });
+  const updateSize = useCallback(dom => {
+    if (!dom) {
+      return;
+    }
+    if (isSingle) {
+      const containerWidth = dom.parentElement?.clientWidth || dom.clientWidth;
+      const containerHeight = dom.parentElement?.clientHeight || dom.clientHeight;
+      if (!containerWidth || !containerHeight) {
+        return;
+      }
+      const nextHeight = Math.min(Math.ceil(containerWidth * ratio), containerHeight);
+      const nextWidth = Math.min(containerWidth, Math.ceil(containerHeight / ratio));
+      setSingleSize(size => (size.width === nextWidth && size.height === nextHeight ? size : { width: nextWidth, height: nextHeight }));
+      return;
+    }
+    if (!dom.clientWidth || !dom.clientHeight) {
+      return;
+    }
+    const nextHeight = Math.ceil(dom.clientWidth * ratio);
+    const nextWidth = Math.ceil(dom.clientHeight / ratio);
+    setHeight(height => (height === nextHeight ? height : nextHeight));
+    setWidth(width => (width === nextWidth ? width : nextWidth));
+  }, [isSingle, ratio]);
   const ref = useResize(dom => {
-    setHeight(Math.ceil(dom.clientWidth * ratio));
-    setWidth(Math.ceil(dom.clientHeight / ratio));
+    itemRef.current = dom;
+    updateSize(dom);
   });
+  useEffect(() => {
+    const dom = itemRef.current;
+    if (!dom) {
+      return;
+    }
+    const onResize = () => {
+      updateSize(dom);
+    };
+    const resizeObserver = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(onResize) : null;
+    resizeObserver?.observe(dom.parentElement || dom);
+    dom.parentElement?.parentElement && resizeObserver?.observe(dom.parentElement.parentElement);
+    window.addEventListener('resize', onResize);
+    return () => {
+      resizeObserver?.disconnect();
+      window.removeEventListener('resize', onResize);
+    };
+  }, [updateSize]);
   return (
     <div
       ref={ref}
@@ -77,7 +121,12 @@ const WindowItem = createWithRemoteLoader({
         [style['window-item-main']]: isSingle
       })}
       style={
-        base === 'width'
+        isSingle
+          ? {
+              '--single-width': singleSize.width ? `${singleSize.width}px` : '100%',
+              '--single-height': singleSize.height ? `${singleSize.height}px` : '100%'
+            }
+          : base === 'width'
           ? {
               '--height': height ? `${height}px` : 'auto'
             }
@@ -115,7 +164,8 @@ const MainWindowItem = ({ children, className }) => {
   );
 };
 
-const MobileMemberItem = ({ children, Icon, onMainView }) => {
+const MobileMemberItem = withLocale(({ children, Icon, onMainView }) => {
+  const { formatMessage } = useIntl();
   return (
     <div className={classnames(style['window-item'], style['mobile-member-item'], 'mobile-member-item')}>
       {children}
@@ -123,7 +173,7 @@ const MobileMemberItem = ({ children, Icon, onMainView }) => {
         <Button
           type="text"
           size="small"
-          aria-label="切换到主窗口"
+          aria-label={formatMessage({ id: 'SwitchToMainWindow' })}
           icon={<Icon type="icon-quanping" fontClassName="iconfont-ai" />}
           onClick={() => {
             onMainView();
@@ -132,12 +182,13 @@ const MobileMemberItem = ({ children, Icon, onMainView }) => {
       </Flex>
     </div>
   );
-};
+});
 
 const MobileList = createWithRemoteLoader({
   modules: ['components-core:Common@SimpleBar', 'components-core:Icon']
-})(({ remoteModules, layoutType, list, onMainView }) => {
+})(withLocale(({ remoteModules, layoutType, list, onMainView }) => {
   const [SimpleBar, Icon] = remoteModules;
+  const { formatMessage } = useIntl();
   const placement = getMobileListPlacement(layoutType);
   const childrenList = list.slice(1),
     mainItem = list[0];
@@ -319,7 +370,7 @@ const MobileList = createWithRemoteLoader({
           <Button
             type="text"
             size="small"
-            aria-label={collapsed ? '展开成员列表' : '收起成员列表'}
+            aria-label={collapsed ? formatMessage({ id: 'ExpandMemberList' }) : formatMessage({ id: 'CollapseMemberList' })}
             icon={<Icon type={collapsed ? 'icon-arrow-thin-up' : 'icon-arrow-thin-down'} />}
             className={style['mobile-collapse-btn']}
             onClick={() => {
@@ -333,7 +384,7 @@ const MobileList = createWithRemoteLoader({
                 <Button
                   type="text"
                   size="small"
-                  aria-label="查看上一个成员窗口"
+                  aria-label={formatMessage({ id: 'ViewPrevMemberWindow' })}
                   icon={<Icon type="icon-arrow-thin-left" />}
                   className={classnames(style['mobile-scroll-btn'], style['mobile-scroll-btn-prev'])}
                   onClick={() => scrollToMember('prev')}
@@ -362,7 +413,7 @@ const MobileList = createWithRemoteLoader({
                 <Button
                   type="text"
                   size="small"
-                  aria-label="查看下一个成员窗口"
+                  aria-label={formatMessage({ id: 'ViewNextMemberWindow' })}
                   icon={<Icon type="icon-arrow-thin-right" />}
                   className={classnames(style['mobile-scroll-btn'], style['mobile-scroll-btn-next'])}
                   onClick={() => scrollToMember('next')}
@@ -374,15 +425,19 @@ const MobileList = createWithRemoteLoader({
       )}
     </div>
   );
-});
+}));
 
 const GridList = createWithRemoteLoader({
   modules: ['components-core:Common@SimpleBar']
 })(({ remoteModules, list }) => {
   const [SimpleBar] = remoteModules;
   return (
-    <SimpleBar className={style['list']}>
-      <Flex align="center" justify="center" flex={1}>
+    <SimpleBar
+      className={classnames(style['list'], {
+        [style['list-single']]: list.length === 1
+      })}
+    >
+      <Flex align="center" justify="center" flex={1} className={style['list-inner']}>
         <Row wrap gutter={[12, 12]} className={style['list-row']}>
           {list.map(({ view, index }) => {
             return (

@@ -3,6 +3,8 @@ import useControlValue from '@kne/use-control-value';
 import classnames from 'classnames';
 import style from './style.module.scss';
 import { forwardRef, useEffect, useImperativeHandle, useState } from 'react';
+import withLocale from '../../withLocale';
+import { useIntl } from '@kne/react-intl';
 
 const MOBILE_MEDIA_QUERY = '(max-width: 768px)';
 
@@ -99,7 +101,7 @@ const BottomListType = () => {
   );
 };
 
-const LayoutType = forwardRef((props, ref) => {
+const LayoutType = withLocale(forwardRef((props, ref) => {
   const isMobile = useIsMobile();
   const [value, onChange] = useControlValue(
     Object.assign(
@@ -110,28 +112,29 @@ const LayoutType = forwardRef((props, ref) => {
       props
     )
   );
+  const { formatMessage } = useIntl();
   const activeValue = isMobile && [2, 4].indexOf(value) === -1 ? 4 : value;
   const list = [
     {
       value: 1,
-      label: '网格',
+      label: formatMessage({ id: 'Grid' }),
       children: <GridType />,
       hiddenInMobile: true
     },
     {
       value: 2,
-      label: '顶部成员列表',
+      label: formatMessage({ id: 'TopMemberList' }),
       children: <TopListType />
     },
     {
       value: 3,
-      label: '左侧成员列表',
+      label: formatMessage({ id: 'LeftMemberList' }),
       children: <LeftListType />,
       hiddenInMobile: true
     },
     {
       value: 4,
-      label: '底部成员列表',
+      label: formatMessage({ id: 'BottomMemberList' }),
       children: <BottomListType />
     }
   ];
@@ -176,6 +179,6 @@ const LayoutType = forwardRef((props, ref) => {
       })}
     </Row>
   );
-});
+}));
 
 export default LayoutType;

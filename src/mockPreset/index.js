@@ -43,7 +43,7 @@ const apis = merge({}, baseApis, {
         return import('./invite-data.json').then(({ default: data }) => data);
       }
     },
-    inviteMemberFormUser: {
+    inviteMemberFromUser: {
       loader: () => {
         return import('./invite-data.json').then(({ default: data }) => data);
       }
@@ -60,9 +60,12 @@ const apis = merge({}, baseApis, {
       loader: () => null
     },
     enterConference: {
-      loader: () => ({ sdkParams: { sdkAppId: 1400000000, userSig: 'test_sig' } })
+      loader: () => ({ sign: { sdkAppId: 1400000000, userId: 'user-001', userSig: 'test_sig' } })
     },
     endConference: {
+      loader: () => null
+    },
+    cancelConference: {
       loader: () => null
     },
     getMemberShorten: {
@@ -76,6 +79,19 @@ const apis = merge({}, baseApis, {
     },
     recordAITranscription: {
       loader: () => null
+    },
+    recordClientEvents: {
+      loader: () => null
+    },
+    getAiTranscriptionContent: {
+      loader: () => {
+        return import('./ai-transcription-content.json').then(({ default: data }) => data);
+      }
+    },
+    getTrtcInstanceEvents: {
+      loader: () => {
+        return import('./trtc-instance-events.json').then(({ default: data }) => data);
+      }
     }
   },
   file: {
@@ -113,4 +129,6 @@ const preset = {
 export { default as mockConferenceList } from './conference-list.json';
 export { default as mockUserInfo } from './user-info.json';
 export { default as mockInviteData } from './invite-data.json';
+export { default as mockAiTranscriptionContent } from './ai-transcription-content.json';
+export { default as mockTrtcInstanceEvents } from './trtc-instance-events.json';
 export default preset;

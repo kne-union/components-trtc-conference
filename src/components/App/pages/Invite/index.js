@@ -2,9 +2,7 @@ import { createWithRemoteLoader } from '@kne/remote-loader';
 import { ConferenceDetail } from '@components/ConferenceInfo';
 import Fetch from '@kne/react-fetch';
 import style from '../../style.module.scss';
-import { useNavigate, useSearchParams, Navigate } from 'react-router-dom';
-import { getToken } from '@kne/token-storage';
-import localStorage from '@kne/local-storage';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useContext } from '../../context';
 
 const Invite = createWithRemoteLoader({
@@ -20,19 +18,11 @@ const Invite = createWithRemoteLoader({
     <div className={style['box']}>
       <Fetch
         {...Object.assign({}, apis[name].getConferenceDetail, {
-          options: {
-            headers: {
-              [headerName]: code
-            }
+          params: {
+            code
           }
         })}
         render={({ data, reload }) => {
-          const conferenceIdKey = 'CURRENT_CONFERENCE_ID';
-          const token = getToken(headerName);
-          if (localStorage.getItem(conferenceIdKey) === data.conference.id && token) {
-            return <Navigate to={`${baseUrl}/detail?code=${token}`} replace />;
-          }
-          const conferenceId = data.conference.id;
           return (
             <ConferenceDetail
               {...data.conference}
@@ -42,7 +32,6 @@ const Invite = createWithRemoteLoader({
               }}
               onReload={data => {
                 if (data?.shorten) {
-                  localStorage.setItem(conferenceIdKey, conferenceId);
                   window.location.href = `${window.location.origin}${baseUrl}/detail?code=${data.shorten}`;
                   return;
                 }

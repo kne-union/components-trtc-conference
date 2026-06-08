@@ -132,7 +132,7 @@ render(<BaseExample />);
 
 ```jsx
 const { ConferenceDetail } = _ConferenceInfo;
-const { default: preset, mockConferenceList } = _mockPreset;
+const { default: preset, mockConferenceList, mockAiTranscriptionContent } = _mockPreset;
 const { createWithRemoteLoader } = remoteLoader;
 
 const conference = mockConferenceList.pageData[2];
@@ -149,6 +149,7 @@ const BaseExample = createWithRemoteLoader({
           current={conference.members[0]}
           apis={preset.apis.conference}
           isAdmin
+          aiTranscriptionContent={mockAiTranscriptionContent}
           onReload={() => console.log('刷新数据')}
         />
       </div>

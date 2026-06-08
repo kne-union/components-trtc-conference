@@ -15,9 +15,9 @@
     height: 100dvh;
     justify-content: flex-start;
     align-items: stretch;
-    padding: 12px;
+    padding: 0;
     box-sizing: border-box;
     --box-width: calc(100vw - 24px);
-    --box-height: calc(100dvh - 24px);
+    --box-height: 100dvh;
   }
 }

@@ -1,18 +1,20 @@
 import RemoteLoader, { createWithRemoteLoader } from '@kne/remote-loader';
 import { Flex, App } from 'antd';
 import formatConferenceTime from './formatConferenceTime';
+import withLocale from './withLocale';
+import { useIntl } from '@kne/react-intl';
 
-const renderModal = ({ inviter, conference, shorten, message }) => {
+const renderModal = ({ inviter, conference, shorten, message, formatMessage }) => {
   const link = `${window.location.origin}/invite?code=${shorten}`;
   const text = `
-            ${inviter.nickname || inviter.email || '默认用户'} 邀请您参加视频会议
-            会议名称：${conference.name}
-            会议时间：${formatConferenceTime(conference)}
+            ${inviter.nickname || inviter.email || formatMessage({ id: 'DefaultUser' })} ${formatMessage({ id: 'InviteToVideoConference' })}
+            ${formatMessage({ id: 'MeetingNameLabel' })}：${conference.name}
+            ${formatMessage({ id: 'MeetingTime' })}：${formatConferenceTime({ startTime: conference.startTime, duration: conference.duration, formatMessage })}
 
-            点击链接直接加入会议：
+            ${formatMessage({ id: 'ClickLinkToJoin' })}：
             ${link}`;
   return {
-    title: '邀请参会人员',
+    title: formatMessage({ id: 'InviteParticipants' }),
     size: 'small',
     footer: null,
     children: (
@@ -30,19 +32,19 @@ const renderModal = ({ inviter, conference, shorten, message }) => {
             type="primary"
             onClick={async () => {
               await navigator.clipboard.writeText(text);
-              message.success('复制会议信息成功');
+              message.success(formatMessage({ id: 'CopyMeetingInfoSuccess' }));
             }}
           >
-            复制会议信息
+            {formatMessage({ id: 'CopyMeetingInfo' })}
           </RemoteLoader>
           <RemoteLoader
             module="components-core:LoadingButton"
             onClick={async () => {
               await navigator.clipboard.writeText(link);
-              message.success('复制会议链接成功');
+              message.success(formatMessage({ id: 'CopyMeetingLinkSuccess' }));
             }}
           >
-            复制会议链接
+            {formatMessage({ id: 'CopyMeetingLink' })}
           </RemoteLoader>
         </Flex>
       </Flex>
@@ -52,9 +54,10 @@ const renderModal = ({ inviter, conference, shorten, message }) => {
 
 const InviteMember = createWithRemoteLoader({
   modules: ['components-core:Modal@ModalButton']
-})(({ remoteModules, apis, id, ...props }) => {
+})(withLocale(({ remoteModules, apis, id, ...props }) => {
   const [ModalButton] = remoteModules;
   const { message } = App.useApp();
+  const { formatMessage } = useIntl();
   return (
     <ModalButton
       {...props}
@@ -62,11 +65,11 @@ const InviteMember = createWithRemoteLoader({
         data: { id }
       })}
       modalProps={({ data }) => {
-        return renderModal(Object.assign({}, data, { message }));
+        return renderModal(Object.assign({}, data, { message, formatMessage }));
       }}
     />
   );
-});
+}));
 
 InviteMember.renderModal = renderModal;
 

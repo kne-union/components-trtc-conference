@@ -12,10 +12,12 @@ const createCollector = (callback, options) => {
   return async data => {
     messages.push(data);
     if (messages.length >= options.maxLength) {
+      const targetMessages = messages;
+      messages = [];
       try {
-        await callback(messages);
-        messages = [];
+        await callback(targetMessages);
       } catch (e) {
+        messages = targetMessages.concat(messages);
         console.error(e);
       }
     }

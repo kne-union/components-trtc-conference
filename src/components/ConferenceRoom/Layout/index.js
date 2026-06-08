@@ -8,6 +8,8 @@ import style from './style.module.scss';
 import dayjs from 'dayjs';
 import classnames from 'classnames';
 import { useEffect, useRef, useState } from 'react';
+import withLocale from '../withLocale';
+import { useIntl } from '@kne/react-intl';
 
 const Layout = createWithRemoteLoader({
   modules: [
@@ -17,10 +19,12 @@ const Layout = createWithRemoteLoader({
     'components-iconfont:FontAi@path',
     'components-core:Modal@useModal'
   ]
-})(({ className, remoteModules, name = '在线会议', signalLevel, startTime, duration, toolbar, children }) => {
+})(withLocale(({ className, remoteModules, name, signalLevel, startTime, duration, toolbar, children }) => {
   const [Icon, ConfirmButton, FontLoader, fontAIPath, useModal] = remoteModules;
   const modal = useModal();
   const { isMaster, actions, setting, setSetting } = useContext();
+  const { formatMessage } = useIntl();
+  const displayName = name || formatMessage({ id: 'OnlineMeeting' });
   const toolbarOuterRef = useRef(null);
   const toolbarInnerRef = useRef(null);
   const [toolbarScale, setToolbarScale] = useState(1);
@@ -30,12 +34,12 @@ const Layout = createWithRemoteLoader({
         type="primary"
         danger
         size={mobile ? 'small' : undefined}
-        okText="结束"
-        message="结束会议后，其他人也将退出会议，如果只需要自己退出会议关掉页面即可"
+        okText={formatMessage({ id: 'End' })}
+        message={formatMessage({ id: 'EndMeetingConfirm' })}
         icon={<Icon type="icon-tuichuhuiyi" fontClassName="iconfont-ai" />}
         onClick={actions.end}
       >
-        结束会议
+        {formatMessage({ id: 'EndMeeting' })}
       </ConfirmButton>
     ) : (
       <Button
@@ -45,7 +49,7 @@ const Layout = createWithRemoteLoader({
         icon={<Icon type="icon-tuichuhuiyi" fontClassName="iconfont-ai" />}
         onClick={actions.leave}
       >
-        退出会议
+        {formatMessage({ id: 'LeaveMeeting' })}
       </Button>
     );
 
@@ -77,11 +81,11 @@ const Layout = createWithRemoteLoader({
       <Flex vertical className={classnames(style['layout'], className)}>
         <Flex className={style['header']} justify="space-between" align="center">
           <Flex align="center" justify="space-between" gap={8} className={style['mobile-title-row']}>
-            <div className={style['mobile-name']}>{name}</div>
+            <div className={style['mobile-name']}>{displayName}</div>
             <div className={style['mobile-leave-action']}>{renderLeaveButton({ mobile: true })}</div>
           </Flex>
           <Flex gap={8} align="center" className={style['header-info']}>
-            <div className={style['name']}>{name}</div>
+            <div className={style['name']}>{displayName}</div>
             <div className={style['timer']}>
               <Timer start={dayjs().diff(dayjs(startTime), 'second')} format="HH:mm:ss" />
             </div>
@@ -94,7 +98,7 @@ const Layout = createWithRemoteLoader({
               icon={<Icon type="icon-chuangkoubinglie" fontClassName="iconfont-ai" />}
               onClick={() => {
                 modal({
-                  title: '切换布局',
+                  title: formatMessage({ id: 'SwitchLayout' }),
                   children: ({ childrenRef }) => <LayoutType ref={childrenRef} defaultValue={setting.layoutType} />,
                   onConfirm: (e, { childrenRef }) => {
                     setSetting(setting => {
@@ -107,10 +111,10 @@ const Layout = createWithRemoteLoader({
                 });
               }}
             >
-              布局
+              {formatMessage({ id: 'Layout' })}
             </Button>
             <Button type="text" size="small" icon={<Icon type="icon-setting" fontClassName="iconfont-ai" />}>
-              设置
+              {formatMessage({ id: 'Settings' })}
             </Button>
           </Flex>
         </Flex>
@@ -127,7 +131,7 @@ const Layout = createWithRemoteLoader({
       <FontLoader path={`${fontAIPath}/iconfont.css`} />
     </>
   );
-});
+}));
 
 export default Layout;
 export { LayoutType };

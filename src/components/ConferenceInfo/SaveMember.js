@@ -1,20 +1,23 @@
 import { createWithRemoteLoader } from '@kne/remote-loader';
 import MemberFormInner from './MemberFormInner';
 import { App } from 'antd';
+import withLocale from './withLocale';
+import { useIntl } from '@kne/react-intl';
 
 const SaveMember = createWithRemoteLoader({
   modules: ['components-core:FormInfo', 'components-core:Global@usePreset']
-})(({ remoteModules, children, data, apis, onSuccess }) => {
+})(withLocale(({ remoteModules, children, data, apis, onSuccess }) => {
   const [FormInfo, usePreset] = remoteModules;
   const { useFormModal } = FormInfo;
   const formModal = useFormModal();
   const { ajax } = usePreset();
   const { message } = App.useApp();
+  const { formatMessage } = useIntl();
 
   return children({
     onClick: () => {
       const formModalApi = formModal({
-        title: '修改参会人信息',
+        title: formatMessage({ id: 'ModifyParticipantInfo' }),
         size: 'small',
         formProps: {
           data,
@@ -23,7 +26,7 @@ const SaveMember = createWithRemoteLoader({
             if (resData.code !== 0) {
               return;
             }
-            message.success('修改成功');
+            message.success(formatMessage({ id: 'ModifySuccess' }));
             formModalApi.close();
             onSuccess && onSuccess();
           }
@@ -32,6 +35,6 @@ const SaveMember = createWithRemoteLoader({
       });
     }
   });
-});
+}));
 
 export default SaveMember;

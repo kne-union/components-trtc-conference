@@ -1,24 +1,27 @@
 import { createWithRemoteLoader } from '@kne/remote-loader';
 import dayjs from 'dayjs';
 import range from 'lodash/range';
+import withLocale from './withLocale';
+import { useIntl } from '@kne/react-intl';
 
 const ConferenceFormInner = createWithRemoteLoader({
   modules: ['components-core:FormInfo']
-})(({ remoteModules, isEdit }) => {
+})(withLocale(({ remoteModules, isEdit }) => {
   const [FormInfo] = remoteModules;
   const { TableList, useFormContext } = FormInfo;
   const { Input, DatePicker, Select, Upload, Switch, InputNumber, Checkbox, RadioGroup } = FormInfo.fields;
   const { formData } = useFormContext();
+  const { formatMessage } = useIntl();
   return (
     <>
       <FormInfo
         column={1}
         list={[
-          <Input name="name" label="会议名称" rule="REQ LEN-0-100" />,
+          <Input name="name" label={formatMessage({ id: 'MeetingName' })} rule="REQ LEN-0-100" />,
           <DatePicker
             disabled={isEdit}
             name="startTime"
-            label="开始时间"
+            label={formatMessage({ id: 'StartTime' })}
             rule="REQ"
             inputReadOnly
             showTime
@@ -38,42 +41,42 @@ const ConferenceFormInner = createWithRemoteLoader({
           />,
           <Select
             name="duration"
-            label="时长"
-            defaultValue={60}
+            label={formatMessage({ id: 'Duration' })}
+            defaultValue={60 * 60}
             rule="REQ"
             options={[
-              { label: '15分钟', value: 15 },
-              { label: '30分钟', value: 30 },
+              { label: formatMessage({ id: 'FifteenMinutes' }), value: 15 * 60 },
+              { label: formatMessage({ id: 'ThirtyMinutes' }), value: 30 * 60 },
               {
-                label: '45分钟',
-                value: 45
+                label: formatMessage({ id: 'FortyFiveMinutes' }),
+                value: 45 * 60
               },
-              { label: '1小时', value: 60 },
-              { label: '1小时30分钟', value: 90 },
+              { label: formatMessage({ id: 'OneHour' }), value: 60 * 60 },
+              { label: formatMessage({ id: 'OneAndHalfHour' }), value: 90 * 60 },
               {
-                label: '2小时',
-                value: 120
+                label: formatMessage({ id: 'TwoHours' }),
+                value: 120 * 60
               },
-              { label: '3小时', value: 180 }
+              { label: formatMessage({ id: 'ThreeHours' }), value: 180 * 60 }
             ]}
           />,
           <Switch
             name="isInvitationAllowed"
-            label="是否允许邀请"
+            label={formatMessage({ id: 'IsInvitationAllowed' })}
             defaultValue={true}
-            tips="主持人可以邀请其他人进入会议，达到或超过最大参会成员数则不能继续邀请"
+            tips={formatMessage({ id: 'InvitationTips' })}
           />,
-          <InputNumber name="maxCount" label="最大参会成员数" defaultValue={2} display={formData.isInvitationAllowed} />,
+          <InputNumber name="maxCount" label={formatMessage({ id: 'MaxMemberCount' })} defaultValue={2} display={formData.isInvitationAllowed} />,
           <Upload
             name="options.document"
-            label="文档"
+            label={formatMessage({ id: 'Document' })}
             maxLength={10}
             accept={['.pdf', '.jpg', '.png', '.jpeg', '.doc', '.docx', '.xls', '.xlsx', '.html']}
           />,
           <Switch
             name="options.documentVisibleAll"
-            label="文档全员可见"
-            tips="默认仅主持人可见"
+            label={formatMessage({ id: 'DocumentVisibleAll' })}
+            tips={formatMessage({ id: 'DocumentVisibleAllTips' })}
             display={formData.options?.document && formData.options?.document.length > 0}
           />
         ]}
@@ -82,41 +85,41 @@ const ConferenceFormInner = createWithRemoteLoader({
         <>
           <TableList
             name="members"
-            title="成员"
+            title={formatMessage({ id: 'Members' })}
             column={1}
             list={[
-              <Input name="nickname" label="昵称" rule="LEN-0-100" />,
-              <Input name="email" label="邮箱" rule="EMAIL LEN-0-100" />,
-              <Switch name="isMaster" label="是否主持人" />
+              <Input name="nickname" label={formatMessage({ id: 'Nickname' })} rule="LEN-0-100" />,
+              <Input name="email" label={formatMessage({ id: 'Email' })} rule="EMAIL LEN-0-100" />,
+              <Switch name="isMaster" label={formatMessage({ id: 'IsHost' })} />
             ]}
           />
-          <Checkbox name="includingMe" label="我也参加" labelHidden defaultValue={true}>
-            我也参加
+          <Checkbox name="includingMe" label={formatMessage({ id: 'IncludingMe' })} labelHidden defaultValue={true}>
+            {formatMessage({ id: 'IncludingMe' })}
           </Checkbox>
         </>
       )}
       {!isEdit && (
         <FormInfo
-          title="高级设置"
+          title={formatMessage({ id: 'AdvancedSettings' })}
           column={1}
           list={[
             <RadioGroup
               name="options.setting.record"
-              label="是否录制会议"
+              label={formatMessage({ id: 'IsRecordMeeting' })}
               defaultValue=""
               options={[
-                { value: '', label: '不启用' },
-                { value: 'audio', label: '录制音频' },
-                { value: 'video', label: '录制视频' }
+                { value: '', label: formatMessage({ id: 'NotEnabled' }) },
+                { value: 'audio', label: formatMessage({ id: 'RecordAudio' }) },
+                { value: 'video', label: formatMessage({ id: 'RecordVideo' }) }
               ]}
             />,
             <RadioGroup
               name="options.setting.speech"
-              label="是否开启实时语音识别"
+              label={formatMessage({ id: 'IsSpeechRecognition' })}
               defaultValue={false}
               options={[
-                { value: false, label: '关闭' },
-                { value: true, label: '开启' }
+                { value: false, label: formatMessage({ id: 'Close' }) },
+                { value: true, label: formatMessage({ id: 'Open' }) }
               ]}
             />
           ]}
@@ -124,6 +127,6 @@ const ConferenceFormInner = createWithRemoteLoader({
       )}
     </>
   );
-});
+}));
 
 export default ConferenceFormInner;

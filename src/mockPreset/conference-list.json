@@ -6,7 +6,7 @@
       "shorten": "abc001",
       "name": "Q2季度产品规划评审会",
       "startTime": "2026-06-05T10:00:00.000Z",
-      "duration": 60,
+      "duration": 3600,
       "status": 0,
       "isInvitationAllowed": true,
       "maxCount": 10,
@@ -30,7 +30,7 @@
       "shorten": "abc002",
       "name": "前端技术分享会",
       "startTime": "2026-06-05T11:00:00.000Z",
-      "duration": 90,
+      "duration": 5400,
       "status": 0,
       "isInvitationAllowed": true,
       "maxCount": 20,
@@ -47,7 +47,7 @@
       "shorten": "abc003",
       "name": "客户需求对接会",
       "startTime": "2026-06-04T09:00:00.000Z",
-      "duration": 45,
+      "duration": 2700,
       "status": 1,
       "isInvitationAllowed": false,
       "maxCount": 5,
@@ -56,7 +56,7 @@
         { "id": "user-007", "nickname": "周伟", "email": "zhouwei@company.com", "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=zhou", "isMaster": false }
       ],
       "options": {
-        "setting": { "record": "video", "speech": false },
+        "setting": { "record": "video", "speech": true },
         "documentType": "files",
         "document": [
           { "filename": "需求文档v2.1.docx", "id": "file-003" }
@@ -74,7 +74,7 @@
       "shorten": "abc004",
       "name": "新员工入职培训",
       "startTime": "2026-06-07T14:00:00.000Z",
-      "duration": 120,
+      "duration": 7200,
       "status": 0,
       "isInvitationAllowed": true,
       "maxCount": 50,
@@ -97,7 +97,7 @@
       "shorten": "abc005",
       "name": "每日站会",
       "startTime": "2026-06-05T09:00:00.000Z",
-      "duration": 15,
+      "duration": 900,
       "status": 0,
       "isInvitationAllowed": false,
       "maxCount": 8,
