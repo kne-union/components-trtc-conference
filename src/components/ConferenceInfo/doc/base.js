@@ -10,7 +10,7 @@ const BaseExample = createWithRemoteLoader({
 
   return (
     <PureGlobal preset={preset}>
-      <div style={{ '--box-width': '100%' }}>
+      <div style={{ width: 980, maxWidth: '100%', margin: '0 auto', '--box-width': '900px' }}>
         <ConferenceInfo
           user={mockUserInfo}
           current={current}

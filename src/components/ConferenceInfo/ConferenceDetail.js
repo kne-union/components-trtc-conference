@@ -62,6 +62,7 @@ export const ConferenceDetailInner = createWithRemoteLoader({
   const modal = useModal();
   const { formatMessage } = useIntl();
   const isBeforeStart = status === 0 && startTime && dayjs().isBefore(dayjs(startTime));
+  const canViewTrtcRoomEvents = isAdmin || current?.isMaster;
   const renderMemberActions = member => {
     if (isAdmin) {
       return (
@@ -635,7 +636,7 @@ export const ConferenceDetailInner = createWithRemoteLoader({
             </Button>
           )}
         </Flex>
-        <Flex gap={8} align="center">
+        <Flex gap={8} align="center" className={style['title-actions']}>
           <Language colorful={false} />
           {onCancel && isBeforeStart && (
             <ConfirmButton type="link" danger message={formatMessage({ id: 'CancelMeetingConfirm' })} okText={formatMessage({ id: 'CancelMeeting' })} onClick={onCancel}>
@@ -818,7 +819,7 @@ export const ConferenceDetailInner = createWithRemoteLoader({
               )}
             </div>
           </Flex>
-          {status === 1 && apis?.getTrtcInstanceEvents && (
+          {status === 1 && apis?.getTrtcInstanceEvents && canViewTrtcRoomEvents && (
             <Flex vertical className={style['member-area']}>
               <Flex align="center" justify="space-between">
                 <div className={style['member-title']}>{formatMessage({ id: 'TrtcRoomEvents' })}</div>
