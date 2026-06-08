@@ -90,6 +90,20 @@ export const globalInit = async () => {
         remote: 'components-iconfont',
         defaultVersion: '0.2.1'
       },
+      'components-admin': {
+        ...registry,
+        //url: 'http://localhost:3016',
+        //tpl: '{{url}}',
+        remote: 'components-admin',
+        defaultVersion: '1.1.47'
+      },
+      'components-thirdparty': {
+        ...registry,
+        //url: 'http://localhost:3010',
+        //tpl: '{{url}}',
+        remote: 'components-thirdparty',
+        defaultVersion: '0.1.24'
+      },
       'components-trtc-conference':
         process.env.NODE_ENV === 'development'
           ? {

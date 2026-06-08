@@ -202,6 +202,8 @@ const locale = {
   // formatConferenceTime.js
   NoTimeLimit: '无时间限制',
   Start: '开始',
+  DeviceTesting: '设备检测',
+  DeviceTestingComplete: '设备检测完成',
 
   // MemberFormInner.js (labels are same as above: Avatar, Nickname, Email)
 };
