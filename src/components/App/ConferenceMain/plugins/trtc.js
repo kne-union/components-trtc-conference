@@ -25,7 +25,7 @@ class ConferenceSDK {
     this.localQuality = -1;
 
     this.trtc.on(TRTC.EVENT.REMOTE_USER_ENTER, ({ userId }) => {
-      if (/^robot/.test(String(userId))) {
+      if (this.isRobotUser(userId)) {
         return;
       }
       this.recordClientEvent('enter', { userId, userType: 'remote' });
@@ -34,12 +34,18 @@ class ConferenceSDK {
     });
 
     this.trtc.on(TRTC.EVENT.REMOTE_USER_EXIT, ({ userId }) => {
+      if (this.isRobotUser(userId)) {
+        return;
+      }
       this.recordClientEvent('exit', { userId, userType: 'remote' });
       this.events.onExitRoom?.({ userId, type: 'remote' });
       this.clientState[userId] = 0;
     });
 
     this.trtc.on(TRTC.EVENT.REMOTE_VIDEO_AVAILABLE, ({ userId, streamType, ...props }) => {
+      if (this.isRobotUser(userId)) {
+        return;
+      }
       this.runTask(userId, async () => {
         await this.trtc.startRemoteVideo({ userId, streamType });
         if (streamType === this.STREAM_TYPE_MAIN) {
@@ -49,6 +55,9 @@ class ConferenceSDK {
       });
     });
     this.trtc.on(TRTC.EVENT.REMOTE_VIDEO_UNAVAILABLE, ({ userId, streamType }) => {
+      if (this.isRobotUser(userId)) {
+        return;
+      }
       this.runTask(userId, async () => {
         await this.trtc.stopRemoteVideo({ userId, streamType });
         if (streamType === this.STREAM_TYPE_MAIN) {
@@ -58,10 +67,16 @@ class ConferenceSDK {
       });
     });
     this.trtc.on(TRTC.EVENT.REMOTE_AUDIO_AVAILABLE, ({ userId }) => {
+      if (this.isRobotUser(userId)) {
+        return;
+      }
       this.recordClientEvent('microphone-open', { userId, userType: 'remote' });
       this.events.onUpdate?.({ userId, type: 'remote', audioIsPlay: true });
     });
     this.trtc.on(TRTC.EVENT.REMOTE_AUDIO_UNAVAILABLE, ({ userId }) => {
+      if (this.isRobotUser(userId)) {
+        return;
+      }
       this.recordClientEvent('microphone-close', { userId, userType: 'remote' });
       this.events.onUpdate?.({ userId, type: 'remote', audioIsPlay: false });
     });
@@ -118,6 +133,11 @@ class ConferenceSDK {
         }, 1000);
       }
     });
+  }
+
+  // 服务端任务机器人（AI转写/录制）userId 形如 ai_transcription_<roomId>、record_<roomId>
+  isRobotUser(userId) {
+    return /^(robot|ai_transcription_|record_)/.test(String(userId));
   }
 
   async runTask(id, task) {

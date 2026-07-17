@@ -491,7 +491,7 @@ const Conference = createWithRemoteLoader({
         }
         return Object.assign({}, currentSetting, { mainWindowKey: activeShare.key });
       }
-      if (currentSetting.mainWindowKey && targetList.every(item => item.key !== currentSetting.mainWindowKey)) {
+      if (currentSetting.mainWindowKey && currentSetting.mainWindowKey !== '__document__' && targetList.every(item => item.key !== currentSetting.mainWindowKey)) {
         const fallbackKey = `${currentSdk.sdkParams.userId}:${currentSdk.STREAM_TYPE_MAIN}`;
         return Object.assign({}, currentSetting, { mainWindowKey: fallbackKey });
       }
@@ -508,9 +508,10 @@ const Conference = createWithRemoteLoader({
   }
 
   return (
-    <Flex vertical gap={8} className={style['conference-main']}>
+    <>
       {showExtendBanner && (
         <Alert
+          className={style['extend-banner']}
           type="warning"
           showIcon
           message={formatMessage({ id: 'InterviewExtendReminder' })}
@@ -547,109 +548,108 @@ const Conference = createWithRemoteLoader({
         />
       )}
       <ConferenceRoom
-      {...props}
-      conference={conferenceState}
-      isMaster={current.isMaster}
-      isInvitationAllowed={conference.isInvitationAllowed && current.isMaster}
-      signalLevel={signalLevel}
-      devices={devices}
-      value={setting}
-      onChange={setSetting}
-      document={
-        conference.options?.documentType &&
-        (conference.options?.documentVisibleAll || current.isMaster) && (
-          <ConferenceDocument
-            type={conference.options.documentType}
-            moduleProps={conference.options.moduleProps}
-            getSpeechInput={onSpeechInput => {
-              speechInputRef.current = onSpeechInput;
-            }}
-            getEndConferenceCallback={callback => {
-              endConferenceCallbackRef.current = callback;
-            }}
-            onSpeechStart={onSpeechStart}
-            onSpeechEnd={async () => {
-              const { data: resData } = await ajax(
-                Object.assign({}, apis.stopAITranscription)
-              );
-              if (resData.code !== 0) {
-                return;
-              }
-              message.success(formatMessage({ id: 'StopSpeechRecognition' }));
-            }}
-            files={conference.options.document}
-            module={conference.options.module}
-          />
-        )
-      }
-      actions={{
-        setMicrophoneOpen: async open => {
-          await currentSdk.setLocalAudioOpen({ open, microphoneId: setting.microphoneId });
-          setSetting(setting => {
-            return Object.assign({}, setting, { microphoneOpen: open });
-          });
-        },
-        setCameraOpen: async open => {
-          await currentSdk.setLocalVideoOpen({ open, el: localVideoElementRef.current, cameraId: setting.cameraId });
-          setSetting(setting => {
-            return Object.assign({}, setting, { cameraOpen: open });
-          });
-        },
-        setMicrophoneId: async microphoneId => {
-          if (setting.microphoneOpen) {
-            await currentSdk.switchLocalAudioDevice({ microphoneId });
-          }
-          setSetting(setting => {
-            return Object.assign({}, setting, { microphoneId });
-          });
-        },
-        setCameraId: async cameraId => {
-          if (setting.cameraOpen) {
-            await currentSdk.switchLocalVideoDevice({ cameraId });
-          }
-          setSetting(setting => {
-            return Object.assign({}, setting, { cameraId });
-          });
-        },
-        shareScreen: async () => {
-          if (setting.shareScreenOpen) {
-            await currentSdk.stopShareScreen();
-            setSetting(setting => {
-              return Object.assign({}, setting, { shareScreenOpen: false });
-            });
-          } else {
-            await currentSdk.shareScreen();
-            setSetting(setting => {
-              return Object.assign({}, setting, { shareScreenOpen: true });
-            });
-          }
-        },
-        invite: async () => {
-          const { data: resData } = await ajax(Object.assign({}, apis.inviteMember));
-          if (resData.code !== 0) {
-            return;
-          }
-          modal(InviteMember.renderModal(Object.assign({}, resData.data, { message, formatMessage })));
-        },
-        leave: () => {
-          navigate(baseUrl + '/detail');
-        },
-        end: async () => {
-          const { data: resData } = await ajax(
-            Object.assign({}, apis.endConference, {
-              data: { id: conferenceState.id }
-            })
-          );
-          if (resData.code !== 0) {
-            return;
-          }
-          endConferenceCallbackRef.current && (await endConferenceCallbackRef.current());
-          navigate(baseUrl + '/detail');
+        {...props}
+        conference={conferenceState}
+        isMaster={current.isMaster}
+        isInvitationAllowed={conference.isInvitationAllowed && current.isMaster}
+        signalLevel={signalLevel}
+        devices={devices}
+        value={setting}
+        onChange={setSetting}
+        document={
+          conference.options?.documentType &&
+          (conference.options?.documentVisibleAll || current.isMaster) && (
+            <ConferenceDocument
+              type={conference.options.documentType}
+              moduleProps={conference.options.moduleProps}
+              getSpeechInput={onSpeechInput => {
+                speechInputRef.current = onSpeechInput;
+              }}
+              getEndConferenceCallback={callback => {
+                endConferenceCallbackRef.current = callback;
+              }}
+              onSpeechStart={onSpeechStart}
+              onSpeechEnd={async () => {
+                const { data: resData } = await ajax(Object.assign({}, apis.stopAITranscription));
+                if (resData.code !== 0) {
+                  return;
+                }
+                message.success(formatMessage({ id: 'StopSpeechRecognition' }));
+              }}
+              files={conference.options.document}
+              url={conference.options.documentUrl}
+              module={conference.options.module}
+            />
+          )
         }
-      }}
-      list={targetList}
-    />
-    </Flex>
+        actions={{
+          setMicrophoneOpen: async open => {
+            await currentSdk.setLocalAudioOpen({ open, microphoneId: setting.microphoneId });
+            setSetting(setting => {
+              return Object.assign({}, setting, { microphoneOpen: open });
+            });
+          },
+          setCameraOpen: async open => {
+            await currentSdk.setLocalVideoOpen({ open, el: localVideoElementRef.current, cameraId: setting.cameraId });
+            setSetting(setting => {
+              return Object.assign({}, setting, { cameraOpen: open });
+            });
+          },
+          setMicrophoneId: async microphoneId => {
+            if (setting.microphoneOpen) {
+              await currentSdk.switchLocalAudioDevice({ microphoneId });
+            }
+            setSetting(setting => {
+              return Object.assign({}, setting, { microphoneId });
+            });
+          },
+          setCameraId: async cameraId => {
+            if (setting.cameraOpen) {
+              await currentSdk.switchLocalVideoDevice({ cameraId });
+            }
+            setSetting(setting => {
+              return Object.assign({}, setting, { cameraId });
+            });
+          },
+          shareScreen: async () => {
+            if (setting.shareScreenOpen) {
+              await currentSdk.stopShareScreen();
+              setSetting(setting => {
+                return Object.assign({}, setting, { shareScreenOpen: false });
+              });
+            } else {
+              await currentSdk.shareScreen();
+              setSetting(setting => {
+                return Object.assign({}, setting, { shareScreenOpen: true });
+              });
+            }
+          },
+          invite: async () => {
+            const { data: resData } = await ajax(Object.assign({}, apis.inviteMember));
+            if (resData.code !== 0) {
+              return;
+            }
+            modal(InviteMember.renderModal(Object.assign({}, resData.data, { message, formatMessage })));
+          },
+          leave: () => {
+            navigate(baseUrl + '/detail');
+          },
+          end: async () => {
+            const { data: resData } = await ajax(
+              Object.assign({}, apis.endConference, {
+                data: { id: conferenceState.id }
+              })
+            );
+            if (resData.code !== 0) {
+              return;
+            }
+            endConferenceCallbackRef.current && (await endConferenceCallbackRef.current());
+            navigate(baseUrl + '/detail');
+          }
+        }}
+        list={targetList}
+      />
+    </>
   );
 }));
 
