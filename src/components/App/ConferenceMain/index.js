@@ -577,6 +577,7 @@ const Conference = createWithRemoteLoader({
                 message.success(formatMessage({ id: 'StopSpeechRecognition' }));
               }}
               files={conference.options.document}
+              url={conference.options.documentUrl}
               module={conference.options.module}
             />
           )

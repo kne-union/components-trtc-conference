@@ -64,27 +64,56 @@ export const ConferenceDetailInner = createWithRemoteLoader({
   const { formatMessage } = useIntl();
   const isBeforeStart = status === 0 && startTime && dayjs().isBefore(dayjs(startTime));
   const canViewTrtcRoomEvents = isAdmin || current?.isMaster;
-  const transcriptionItems = useMemo(() => {
-    const items = [];
-    (aiTranscriptionContent?.content || []).forEach((item, index) => {
-      items.push(Object.assign({}, item, { key: `content-${item.member?.id || item.sender || 'message'}-${index}` }));
-    });
-    (aiTranscriptionContent?.rounds || []).forEach((round, index) => {
-      items.push({
-        key: `round-${round.roundId || round.userId || index}`,
-        member: { nickname: round.userId },
-        message: round.text,
-        time: round.startTime
+  const transcriptionGroups = useMemo(() => {
+    const findMemberName = userId => {
+      const member = (members || []).find(item => String(item.id) === String(userId));
+      return member?.nickname || member?.email || userId;
+    };
+    const sortByTime = items => {
+      return items.slice().sort((a, b) => {
+        const aTime = a.time ? dayjs(a.time).valueOf() : 0;
+        const bTime = b.time ? dayjs(b.time).valueOf() : 0;
+        return aTime - bTime;
       });
-    });
-    if (items.length === 0 && aiTranscriptionContent?.text) {
-      items.push({
-        key: 'text-summary',
-        message: aiTranscriptionContent.text
+    };
+    const groups = [];
+    const contentItems = (aiTranscriptionContent?.content || []).map((item, index) => ({
+      key: `content-${item.member?.id || item.sender || 'message'}-${index}`,
+      name: item.member?.nickname || (item.sender && findMemberName(item.sender)) || item.sender,
+      message: item.message,
+      time: item.time
+    }));
+    if (contentItems.length > 0) {
+      groups.push({
+        key: 'realtime',
+        title: formatMessage({ id: 'TranscriptionRealtimeGroup' }),
+        items: sortByTime(contentItems)
       });
     }
-    return items;
-  }, [aiTranscriptionContent]);
+    const roundItems = (aiTranscriptionContent?.rounds || []).map((round, index) => ({
+      key: `round-${round.roundId || index}`,
+      name: findMemberName(round.userId),
+      message: round.text,
+      time: round.startTime,
+      endTime: round.endTime
+    }));
+    if (roundItems.length > 0) {
+      groups.push({
+        key: 'task',
+        title: formatMessage({ id: 'TranscriptionTaskGroup' }),
+        items: sortByTime(roundItems)
+      });
+    }
+    if (groups.length === 0 && aiTranscriptionContent?.text) {
+      groups.push({
+        key: 'text',
+        title: formatMessage({ id: 'TranscriptionTextGroup' }),
+        items: [{ key: 'text-summary', message: aiTranscriptionContent.text }]
+      });
+    }
+    return groups;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [aiTranscriptionContent, members]);
   const renderMemberActions = member => {
     if (isAdmin) {
       return (
@@ -143,10 +172,18 @@ export const ConferenceDetailInner = createWithRemoteLoader({
     return get(options, `recordFiles.${memberId}`) || [];
   };
   const renderRecordFile = ({ fileId }) => {
-    if (get(options, 'setting.record') === 'audio') {
+    const recordType = get(options, 'setting.record');
+    if (recordType === 'audio') {
       return (
         <FilePreview id={fileId}>
           {({ url }) => <audio controls src={url} className={style['preview-audio']} />}
+        </FilePreview>
+      );
+    }
+    if (recordType === 'video') {
+      return (
+        <FilePreview id={fileId}>
+          {({ url }) => <video controls src={url} className={style['preview-video']} />}
         </FilePreview>
       );
     }
@@ -806,6 +843,7 @@ export const ConferenceDetailInner = createWithRemoteLoader({
                             conferenceStep: 'waiting'
                           })}
                           files={options?.document}
+                          url={options?.documentUrl}
                           module={options?.module}
                         />
                       )
@@ -891,21 +929,38 @@ export const ConferenceDetailInner = createWithRemoteLoader({
           {isAdmin && status === 1 && get(options, 'setting.speech') && (
             <Flex vertical className={style['member-area']}>
               <div className={style['member-title']}>{formatMessage({ id: 'AiTranscriptionContent' })}</div>
-              <div className={style['transcription-list']}>
-                {transcriptionItems.length > 0 ? (
-                  transcriptionItems.map(item => (
-                    <div className={style['transcription-item']} key={item.key}>
-                      <Flex justify="space-between" gap={12}>
-                        <div className={style['transcription-member']}>{item.member?.nickname || item.sender || formatMessage({ id: 'DefaultUser' })}</div>
-                        {item.time && <div className={style['transcription-time']}>{dayjs(item.time).format('HH:mm:ss')}</div>}
-                      </Flex>
-                      <div className={style['transcription-message']}>{item.message}</div>
-                    </div>
-                  ))
-                ) : (
+              {transcriptionGroups.length > 0 ? (
+                <Tabs
+                  className={style['transcription-tabs']}
+                  size="small"
+                  items={transcriptionGroups.map(group => ({
+                    key: group.key,
+                    label: `${group.title}(${group.items.length})`,
+                    children: (
+                      <div className={style['transcription-list']}>
+                        {group.items.map(item => (
+                          <div className={style['transcription-item']} key={item.key}>
+                            <Flex justify="space-between" gap={12}>
+                              <div className={style['transcription-member']}>{item.name || formatMessage({ id: 'DefaultUser' })}</div>
+                              {item.time && (
+                                <div className={style['transcription-time']}>
+                                  {dayjs(item.time).format('HH:mm:ss')}
+                                  {item.endTime ? ` - ${dayjs(item.endTime).format('HH:mm:ss')}` : ''}
+                                </div>
+                              )}
+                            </Flex>
+                            <div className={style['transcription-message']}>{item.message}</div>
+                          </div>
+                        ))}
+                      </div>
+                    )
+                  }))}
+                />
+              ) : (
+                <div className={style['transcription-list']}>
                   <Empty description={formatMessage({ id: 'NoAiTranscriptionContent' })} />
-                )}
-              </div>
+                </div>
+              )}
             </Flex>
           )}
           {isAdmin && (

@@ -34,6 +34,9 @@ const ConferenceDocument = ({ type, ...props }) => {
   if (type === 'files') {
     return <Files {...props} />;
   }
+  if (type === 'iframe') {
+    return <iframe src={props.url} title="conference-document" className={style['main-iframe']} allow="clipboard-write" />;
+  }
   if (type === 'remote-module') {
     const { module, moduleProps, getSpeechInput, onSpeechStart, onSpeechEnd, getEndConferenceCallback } = props;
     return (
