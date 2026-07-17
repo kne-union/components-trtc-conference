@@ -50,7 +50,18 @@ const Home = createWithRemoteLoader({
                 save: apis[name].saveConference,
                 inviteMember: Object.assign(apis[name].inviteMemberFromUser),
                 getMemberShorten: apis[name].getMemberShorten,
-                getTrtcInstanceEvents: apis[name].getTrtcInstanceEvents
+                getTrtcInstanceEvents: apis[name].getTrtcInstanceEvents,
+                getAiTranscriptionContent: async ({ id }) => {
+                  const { data: resData } = await ajax(
+                    Object.assign({}, apis[name].getAiTranscriptionContent, {
+                      params: { id }
+                    })
+                  );
+                  if (resData.code !== 0) {
+                    throw new Error(resData.msg);
+                  }
+                  return resData.data;
+                }
               }}
               actions={{
                 getMemberShorten: async ({ id }) => {

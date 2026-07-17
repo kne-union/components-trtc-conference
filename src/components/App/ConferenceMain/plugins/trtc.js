@@ -3,6 +3,7 @@ import TRTC from 'trtc-sdk-v5';
 class ConferenceSDK {
   STREAM_TYPE_MAIN = TRTC.TYPE.STREAM_TYPE_MAIN;
   STREAM_TYPE_SUB = TRTC.TYPE.STREAM_TYPE_SUB;
+  STREAM_TYPE_SHARE = 'share';
 
   constructor({ sdkParams, conference, current, events = {} }) {
     this.sdkParams = {
@@ -220,14 +221,15 @@ class ConferenceSDK {
   }
 
   async updateRemote({ userId, streamType, el }) {
-    await this.taskPromise;
-    this.clientState[this.sdkParams.userId] === 1 &&
-      this.clientState[userId] === 1 &&
-      (await this.trtc.updateRemoteVideo({
-        userId,
-        streamType,
-        view: el
-      }));
+    await this.runTask(userId, async () => {
+      this.clientState[this.sdkParams.userId] === 1 &&
+        this.clientState[userId] === 1 &&
+        (await this.trtc.updateRemoteVideo({
+          userId,
+          streamType,
+          view: el
+        }));
+    });
   }
 
   async shareScreen() {

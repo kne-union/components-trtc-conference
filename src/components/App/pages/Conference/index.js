@@ -32,7 +32,8 @@ const Conference = createWithRemoteLoader({
               stopAITranscription: apis[name].stopAITranscription,
               recordAITranscription: apis[name].recordAITranscription,
               recordClientEvents: apis[name].recordClientEvents,
-              getAiTranscriptionContent: apis[name].getAiTranscriptionContent
+              getAiTranscriptionContent: apis[name].getAiTranscriptionContent,
+              extendDuration: apis[name].extendDuration
             }}
           />
         );

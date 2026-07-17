@@ -1,5 +1,5 @@
 import { createWithRemoteLoader } from '@kne/remote-loader';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Flex, List, Card, Button, Divider, Pagination, App, Empty } from 'antd';
 import dayjs from 'dayjs';
 import classnames from 'classnames';
@@ -16,9 +16,34 @@ const ConferenceInfo = createWithRemoteLoader({
   modules: ['components-core:ButtonGroup', 'components-core:Icon', 'components-core:StateTag', 'components-core:Common@SimpleBar', 'components-admin:Account@Language']
 })(withLocale(({ remoteModules, className, user, current = 1, pageSize = 20, onPageChange, getDetailUrl, data, reload, apis, actions }) => {
   const [conference, setConference] = useState(null);
+  const [aiTranscriptionContent, setAiTranscriptionContent] = useState(null);
   const [ButtonGroup, Icon, StateTag, SimpleBar, Language] = remoteModules;
   const { message } = App.useApp();
   const { formatMessage } = useIntl();
+
+  useEffect(() => {
+    if (!conference?.id || !apis?.getAiTranscriptionContent) {
+      setAiTranscriptionContent(null);
+      return;
+    }
+    let cancelled = false;
+    apis
+      .getAiTranscriptionContent({ id: conference.id })
+      .then(content => {
+        if (!cancelled) {
+          setAiTranscriptionContent(content || null);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setAiTranscriptionContent(null);
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [apis, conference?.id]);
+
   return (
     <Flex className={classnames(className, style['info'])}>
       <MenuBar
@@ -47,6 +72,7 @@ const ConferenceInfo = createWithRemoteLoader({
                 <ConferenceDetailInner
                   isAdmin
                   {...Object.assign({}, conference)}
+                  aiTranscriptionContent={aiTranscriptionContent}
                   apis={apis}
                   onDetailEnter={async item => {
                     const { shorten } = await actions.getMemberShorten(item);
