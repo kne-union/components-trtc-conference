@@ -24,6 +24,10 @@ const locale = {
   CopyMeetingInfo: 'Copy Meeting Info',
   CopyMeetingLinkSuccess: 'Meeting link copied',
   CopyMeetingLink: 'Copy Meeting Link',
+  InterviewExtendReminder: 'Less than 15 minutes remaining. Extend the interview by 15 minutes?',
+  InterviewExtendAction: 'Extend 15 min',
+  InterviewExtendSuccess: 'Extended by 15 minutes',
+  InterviewExtendFailed: 'Failed to extend, please try again later'
 };
 
 export default locale;

@@ -81,6 +81,10 @@ const getApis = options => {
     getMemberShorten: {
       url: `${prefix}/getMemberShorten`,
       method: 'GET'
+    },
+    extendDuration: {
+      url: `${prefix}/extendDuration`,
+      method: 'POST'
     }
   };
 };

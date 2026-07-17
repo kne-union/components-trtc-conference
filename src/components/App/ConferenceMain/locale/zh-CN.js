@@ -24,6 +24,10 @@ const locale = {
   CopyMeetingInfo: '复制会议信息',
   CopyMeetingLinkSuccess: '复制会议链接成功',
   CopyMeetingLink: '复制会议链接',
+  InterviewExtendReminder: '距离面试结束不足 15 分钟，是否延长 15 分钟？',
+  InterviewExtendAction: '延长 15 分钟',
+  InterviewExtendSuccess: '已延长 15 分钟',
+  InterviewExtendFailed: '延长失败，请稍后重试'
 };
 
 export default locale;

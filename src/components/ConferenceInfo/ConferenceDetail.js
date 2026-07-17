@@ -1,4 +1,5 @@
 import { createWithRemoteLoader } from '@kne/remote-loader';
+import { useMemo } from 'react';
 import { Flex, Card, Divider, Button, Alert, App, Empty, Descriptions, Tabs } from 'antd';
 import dayjs from 'dayjs';
 import classnames from 'classnames';
@@ -63,6 +64,27 @@ export const ConferenceDetailInner = createWithRemoteLoader({
   const { formatMessage } = useIntl();
   const isBeforeStart = status === 0 && startTime && dayjs().isBefore(dayjs(startTime));
   const canViewTrtcRoomEvents = isAdmin || current?.isMaster;
+  const transcriptionItems = useMemo(() => {
+    const items = [];
+    (aiTranscriptionContent?.content || []).forEach((item, index) => {
+      items.push(Object.assign({}, item, { key: `content-${item.member?.id || item.sender || 'message'}-${index}` }));
+    });
+    (aiTranscriptionContent?.rounds || []).forEach((round, index) => {
+      items.push({
+        key: `round-${round.roundId || round.userId || index}`,
+        member: { nickname: round.userId },
+        message: round.text,
+        time: round.startTime
+      });
+    });
+    if (items.length === 0 && aiTranscriptionContent?.text) {
+      items.push({
+        key: 'text-summary',
+        message: aiTranscriptionContent.text
+      });
+    }
+    return items;
+  }, [aiTranscriptionContent]);
   const renderMemberActions = member => {
     if (isAdmin) {
       return (
@@ -870,9 +892,9 @@ export const ConferenceDetailInner = createWithRemoteLoader({
             <Flex vertical className={style['member-area']}>
               <div className={style['member-title']}>{formatMessage({ id: 'AiTranscriptionContent' })}</div>
               <div className={style['transcription-list']}>
-                {(aiTranscriptionContent?.content || []).length > 0 ? (
-                  aiTranscriptionContent.content.map((item, index) => (
-                    <div className={style['transcription-item']} key={`${item.member?.id || item.sender || 'message'}-${index}`}>
+                {transcriptionItems.length > 0 ? (
+                  transcriptionItems.map(item => (
+                    <div className={style['transcription-item']} key={item.key}>
                       <Flex justify="space-between" gap={12}>
                         <div className={style['transcription-member']}>{item.member?.nickname || item.sender || formatMessage({ id: 'DefaultUser' })}</div>
                         {item.time && <div className={style['transcription-time']}>{dayjs(item.time).format('HH:mm:ss')}</div>}

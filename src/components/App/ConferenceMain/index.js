@@ -1,7 +1,8 @@
 import ConferenceRoom from '@components/ConferenceRoom';
 import plugins from './plugins';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { App, Flex, Spin } from 'antd';
+import dayjs from 'dayjs';
+import { App, Flex, Spin, Alert, Button } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import style from './style.module.scss';
 import { createWithRemoteLoader } from '@kne/remote-loader';
@@ -132,11 +133,15 @@ const Conference = createWithRemoteLoader({
   const navigate = useNavigate();
   const modal = useModal();
   const confirmModal = useConfirmModal();
+  const [conferenceState, setConferenceState] = useState(conference);
+  const [now, setNow] = useState(() => dayjs());
+  const [extending, setExtending] = useState(false);
   const [currentSdk, setCurrentSdk] = useState(null);
   const [signalLevel, setSignalLevel] = useState(-1);
   const [setting, setSetting] = useState({
     layoutType: get(conference, 'options.setting.layoutType') || 1,
     mainIndex: 0,
+    mainWindowKey: null,
     microphoneOpen: true,
     cameraOpen: true,
     documentInside: true,
@@ -146,6 +151,7 @@ const Conference = createWithRemoteLoader({
     return new Map((conference.members || []).map(item => [item.id, item]));
   }, [conference.members]);
   const speechInputRef = useRef(null);
+  const collectorsRef = useRef(null);
   const endConferenceCallbackRef = useRef(null);
   const localVideoElementRef = useRef(null);
   const settingRef = useRef(setting);
@@ -153,6 +159,23 @@ const Conference = createWithRemoteLoader({
   const [list, setList] = useState([]);
   const [devices, setDevices] = useState({ cameras: [], microphones: [] });
   const { formatMessage } = useIntl();
+  useEffect(() => {
+    setConferenceState(conference);
+  }, [conference]);
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      setNow(dayjs());
+    }, 30000);
+    return () => window.clearInterval(timer);
+  }, []);
+  const remainingSeconds = useMemo(() => {
+    if (!conferenceState?.startTime || !conferenceState?.duration) {
+      return Number.POSITIVE_INFINITY;
+    }
+    return dayjs(conferenceState.startTime).add(conferenceState.duration, 'second').diff(now, 'second');
+  }, [conferenceState, now]);
+  const showExtendBanner =
+    current.isMaster && conferenceState?.options?.allowExtend && remainingSeconds > 0 && remainingSeconds <= 15 * 60;
   const buildClientDeviceInfo = useCallback(({ cameras = [], microphones = [], setting = {} } = {}) => {
     const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
     return {
@@ -272,6 +295,7 @@ const Conference = createWithRemoteLoader({
       },
       { maxLength: 1 }
     );
+    collectorsRef.current = { collector, clientEventCollector };
     return plugins('trtc').then(sdk => {
       const currentSdk = sdk({
         sdkParams: {
@@ -348,11 +372,27 @@ const Conference = createWithRemoteLoader({
       return currentSdk;
     });
     return () => {
-      promise.then(currentSdk => {
+      promise.then(async currentSdk => {
+        await collectorsRef.current?.collector?.flush?.();
+        await collectorsRef.current?.clientEventCollector?.flush?.();
+        collectorsRef.current?.collector?.destroy?.();
+        collectorsRef.current?.clientEventCollector?.destroy?.();
+        collectorsRef.current = null;
         return currentSdk.exitRoom();
       });
     };
   }, [buildClientDeviceInfo, conference.id, initSdk, updateDevices]);
+
+  useEffect(() => {
+    const flushCollectors = () => {
+      collectorsRef.current?.collector?.flush?.();
+      collectorsRef.current?.clientEventCollector?.flush?.();
+    };
+    window.addEventListener('beforeunload', flushCollectors);
+    return () => {
+      window.removeEventListener('beforeunload', flushCollectors);
+    };
+  }, []);
 
   useEffect(() => {
     if (!navigator.mediaDevices?.addEventListener) {
@@ -369,15 +409,23 @@ const Conference = createWithRemoteLoader({
       return [];
     }
 
+    const pushWindow = (result, key, view, extra = {}) => {
+      result.push(Object.assign({ key, view }, extra));
+    };
+
     return transform(
       list,
       (result, item) => {
         const { userId, type, videoView, audioIsPlay } = item;
         const currentUser = currentSdk.conference.members.find(item => item.id === userId);
+        const mainKey = `${userId}:${currentSdk.STREAM_TYPE_MAIN}`;
 
         if (type === 'local') {
-          result.push(
+          pushWindow(
+            result,
+            mainKey,
             <CurrentView
+              key={mainKey}
               sdk={currentSdk}
               roomId={currentSdk.roomId}
               current={currentUser}
@@ -387,8 +435,11 @@ const Conference = createWithRemoteLoader({
             />
           );
         } else {
-          result.push(
+          pushWindow(
+            result,
+            mainKey,
             <RemoteView
+              key={mainKey}
               sdk={currentSdk}
               userId={userId}
               current={currentUser}
@@ -402,11 +453,15 @@ const Conference = createWithRemoteLoader({
         videoView &&
           Object.keys(videoView).forEach(streamType => {
             if (streamType !== currentSdk.STREAM_TYPE_MAIN && videoView[streamType]) {
-              result.push(
+              const shareKey = `${userId}:${streamType}`;
+              pushWindow(
+                result,
+                shareKey,
                 type === 'local' ? (
-                  <CurrentShareScreenView sdk={currentSdk} current={currentUser} />
+                  <CurrentShareScreenView key={shareKey} sdk={currentSdk} current={currentUser} />
                 ) : (
                   <RemoteView
+                    key={shareKey}
                     sdk={currentSdk}
                     userId={userId}
                     streamType={streamType}
@@ -414,7 +469,8 @@ const Conference = createWithRemoteLoader({
                     videoIsPlay={videoView && videoView[streamType]}
                     shareScreen
                   />
-                )
+                ),
+                { isShare: true }
               );
             }
           });
@@ -422,6 +478,26 @@ const Conference = createWithRemoteLoader({
       []
     );
   }, [list, currentSdk, setting.cameraOpen, setting.microphoneOpen, onLocalVideoElementChange]);
+
+  useEffect(() => {
+    if (!currentSdk) {
+      return;
+    }
+    const activeShare = targetList.find(item => item.isShare);
+    setSetting(currentSetting => {
+      if (activeShare) {
+        if (currentSetting.mainWindowKey === activeShare.key) {
+          return currentSetting;
+        }
+        return Object.assign({}, currentSetting, { mainWindowKey: activeShare.key });
+      }
+      if (currentSetting.mainWindowKey && targetList.every(item => item.key !== currentSetting.mainWindowKey)) {
+        const fallbackKey = `${currentSdk.sdkParams.userId}:${currentSdk.STREAM_TYPE_MAIN}`;
+        return Object.assign({}, currentSetting, { mainWindowKey: fallbackKey });
+      }
+      return currentSetting;
+    });
+  }, [currentSdk, targetList]);
 
   if (!currentSdk) {
     return (
@@ -432,9 +508,47 @@ const Conference = createWithRemoteLoader({
   }
 
   return (
-    <ConferenceRoom
+    <Flex vertical gap={8} className={style['conference-main']}>
+      {showExtendBanner && (
+        <Alert
+          type="warning"
+          showIcon
+          message={formatMessage({ id: 'InterviewExtendReminder' })}
+          action={
+            <Button
+              size="small"
+              type="primary"
+              loading={extending}
+              onClick={async () => {
+                if (!apis.extendDuration) {
+                  return;
+                }
+                setExtending(true);
+                try {
+                  const { data: resData } = await ajax(
+                    Object.assign({}, apis.extendDuration, {
+                      data: { extendSeconds: 900 }
+                    })
+                  );
+                  if (resData.code !== 0) {
+                    message.error(resData.msg || formatMessage({ id: 'InterviewExtendFailed' }));
+                    return;
+                  }
+                  setConferenceState(resData.data || conferenceState);
+                  message.success(formatMessage({ id: 'InterviewExtendSuccess' }));
+                } finally {
+                  setExtending(false);
+                }
+              }}
+            >
+              {formatMessage({ id: 'InterviewExtendAction' })}
+            </Button>
+          }
+        />
+      )}
+      <ConferenceRoom
       {...props}
-      conference={conference}
+      conference={conferenceState}
       isMaster={current.isMaster}
       isInvitationAllowed={conference.isInvitationAllowed && current.isMaster}
       signalLevel={signalLevel}
@@ -523,7 +637,7 @@ const Conference = createWithRemoteLoader({
         end: async () => {
           const { data: resData } = await ajax(
             Object.assign({}, apis.endConference, {
-              data: { id: conference.id }
+              data: { id: conferenceState.id }
             })
           );
           if (resData.code !== 0) {
@@ -535,6 +649,7 @@ const Conference = createWithRemoteLoader({
       }}
       list={targetList}
     />
+    </Flex>
   );
 }));
 

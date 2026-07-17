@@ -357,7 +357,7 @@ const MobileList = createWithRemoteLoader({
       })}
       onClick={keepActive}
       onTouchStart={keepActive}>
-      <MainWindowItem key={mainItem.index} className={style['mobile-main-item']}>
+      <MainWindowItem key={mainItem.key} className={style['mobile-main-item']}>
         {mainItem.view}
       </MainWindowItem>
       {childrenList.length > 0 && (
@@ -400,9 +400,9 @@ const MobileList = createWithRemoteLoader({
                   style={{
                     '--mobile-member-list-height': `${listSize}px`
                   }}>
-                  {childrenList.map(({ view, index }) => {
+                  {childrenList.map(({ view, key }) => {
                     return (
-                      <MobileMemberItem key={index} Icon={Icon} onMainView={() => onMainView(index)}>
+                      <MobileMemberItem key={key} Icon={Icon} onMainView={() => onMainView(key)}>
                         {view}
                       </MobileMemberItem>
                     );
@@ -439,9 +439,9 @@ const GridList = createWithRemoteLoader({
     >
       <Flex align="center" justify="center" flex={1} className={style['list-inner']}>
         <Row wrap gutter={[12, 12]} className={style['list-row']}>
-          {list.map(({ view, index }) => {
+          {list.map(({ view, key }) => {
             return (
-              <Col span={list.length >= 3 ? 8 : Math.round(24 / list.length)} key={index}>
+              <Col span={list.length >= 3 ? 8 : Math.round(24 / list.length)} key={key}>
                 <WindowItem isSingle={list.length === 1}>{view}</WindowItem>
               </Col>
             );
@@ -467,9 +467,9 @@ const VerticalList = createWithRemoteLoader({
     <Splitter.Panel collapsible size={sizes[type === 'top' ? 0 : 1]}>
       <SimpleBar className={style['vertical-scroller']}>
         <Flex gap={12} className={style['vertical-content']}>
-          {childrenList.map(({ view, index }) => {
+          {childrenList.map(({ view, key }) => {
             return (
-              <WindowItem isSingle={list.length === 1} key={index} base="height" onMainView={() => onMainView(index)}>
+              <WindowItem isSingle={list.length === 1} key={key} base="height" onMainView={() => onMainView(key)}>
                 {view}
               </WindowItem>
             );
@@ -480,7 +480,7 @@ const VerticalList = createWithRemoteLoader({
   );
   const mainPanel = (
     <Splitter.Panel size={sizes[type === 'top' ? 1 : 0]}>
-      <MainWindowItem key={mainItem.index}>{mainItem.view}</MainWindowItem>
+      <MainWindowItem key={mainItem.key}>{mainItem.view}</MainWindowItem>
     </Splitter.Panel>
   );
   return (
@@ -522,9 +522,9 @@ const HorizontalList = createWithRemoteLoader({
       <div className={style['horizontal-scroller-inner']}>
         <SimpleBar className={style['horizontal-scroller']}>
           <Flex gap={12} vertical className={style['horizontal-content']}>
-            {childrenList.map(({ view, index }) => {
+            {childrenList.map(({ view, key }) => {
               return (
-                <WindowItem isSingle={list.length === 1} key={index} base="width" onMainView={() => onMainView(index)}>
+                <WindowItem isSingle={list.length === 1} key={key} base="width" onMainView={() => onMainView(key)}>
                   {view}
                 </WindowItem>
               );
@@ -537,7 +537,7 @@ const HorizontalList = createWithRemoteLoader({
 
   const mainPanel = (
     <Splitter.Panel size={sizes[type === 'left' ? 1 : 0]}>
-      <MainWindowItem key={mainItem.index}>{mainItem.view}</MainWindowItem>
+      <MainWindowItem key={mainItem.key}>{mainItem.view}</MainWindowItem>
     </Splitter.Panel>
   );
 
@@ -586,22 +586,41 @@ const layoutTypeMap = {
   4: BottomList
 };
 
+const normalizeWindowItem = (item, index) => {
+  if (item && Object.prototype.hasOwnProperty.call(item, 'view')) {
+    return Object.assign({ index, key: item.key || `window-${index}` }, item);
+  }
+  return {
+    index,
+    key: `window-${index}`,
+    view: item
+  };
+};
+
+const buildWindowList = (list, document) => {
+  const sourceList = document ? [{ key: '__document__', view: <div className={style['document-item']}>{document}</div> }, ...list] : list;
+  return sourceList.map(normalizeWindowItem);
+};
+
 const WindowList = ({ layoutType, list, document, isMobile }) => {
   const { setting, setSetting } = useContext();
-  const windowList = document ? [<div className={style['document-item']}>{document}</div>, ...list] : list;
-  const newList = windowList.map((view, index) => {
-    return {
-      view,
-      index
-    };
-  });
-
-  const [mainItem] = newList.splice(setting.mainIndex, 1);
-  const currentList = [Object.assign({}, { index: setting.mainIndex, view: null }, mainItem), ...newList];
+  const normalizedList = buildWindowList(list, document);
+  const mainWindowKey = setting.mainWindowKey;
+  let mainItemIndex = Math.min(setting.mainIndex || 0, Math.max(normalizedList.length - 1, 0));
+  if (mainWindowKey) {
+    const matchedIndex = normalizedList.findIndex(item => item.key === mainWindowKey);
+    if (matchedIndex >= 0) {
+      mainItemIndex = matchedIndex;
+    }
+  }
+  const mainItem = normalizedList[mainItemIndex];
+  const currentList = mainItem
+    ? [Object.assign({}, mainItem, { index: mainItemIndex }), ...normalizedList.filter((_, index) => index !== mainItemIndex)]
+    : normalizedList;
 
   useEffect(() => {
     if (!mainItem) {
-      setSetting(setting => Object.assign({}, setting, { mainIndex: 0 }));
+      setSetting(setting => Object.assign({}, setting, { mainIndex: 0, mainWindowKey: null }));
     }
   }, [mainItem, setSetting]);
 
@@ -610,9 +629,9 @@ const WindowList = ({ layoutType, list, document, isMobile }) => {
     <WindowInner
       layoutType={layoutType}
       list={currentList}
-      onMainView={index => {
+      onMainView={windowKey => {
         setSetting(setting => {
-          return Object.assign({}, setting, { mainIndex: index });
+          return Object.assign({}, setting, { mainWindowKey: windowKey, mainIndex: normalizedList.findIndex(item => item.key === windowKey) });
         });
       }}
     />
