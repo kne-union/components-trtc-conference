@@ -10,11 +10,18 @@
   --recorder-voice-right: -10px;
 }
 
-.main-iframe {
-  display: block;
+.main-iframe-scroller {
   width: 100%;
   height: 100%;
-  min-height: 400px;
+  overflow: auto;
+}
+
+.main-iframe {
+  display: block;
+  // iframe-resizer 推荐写法：宽度用 min-width 撑满，避免 iOS 下无法正确调整大小
+  width: 1px;
+  min-width: 100%;
+  min-height: 100%;
   border: none;
 }
 
