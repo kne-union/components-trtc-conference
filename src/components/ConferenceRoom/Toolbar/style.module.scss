@@ -1,3 +1,14 @@
+@use '~@kne/responsive-utils/scss' as resp;
+
+@mixin mobile-both {
+  @include resp.mobile-container {
+    @content;
+  }
+  @include resp.mobile {
+    @content;
+  }
+}
+
 .toolbar-item-wrapper {
   display: inline-flex;
   align-items: stretch;
@@ -54,7 +65,7 @@
   background: var(--bg-color-grey-2);
 }
 
-@media (max-width: 768px) {
+@include mobile-both {
   .toolbar-item-wrapper {
     flex: none;
   }

@@ -61,23 +61,49 @@ const ConferenceFormInner = createWithRemoteLoader({
             ]}
           />,
           <Switch
+            name="options.allowExtend"
+            label={formatMessage({ id: 'AllowExtend' })}
+            defaultValue={true}
+            tips={formatMessage({ id: 'AllowExtendTips' })}
+          />,
+          <Switch
             name="isInvitationAllowed"
             label={formatMessage({ id: 'IsInvitationAllowed' })}
             defaultValue={true}
             tips={formatMessage({ id: 'InvitationTips' })}
           />,
           <InputNumber name="maxCount" label={formatMessage({ id: 'MaxMemberCount' })} defaultValue={2} display={formData.isInvitationAllowed} />,
+          <RadioGroup
+            name="options.documentType"
+            label={formatMessage({ id: 'DocumentType' })}
+            defaultValue="files"
+            options={[
+              { value: 'files', label: formatMessage({ id: 'DocumentTypeFiles' }) },
+              { value: 'iframe', label: formatMessage({ id: 'DocumentTypeIframe' }) }
+            ]}
+          />,
           <Upload
             name="options.document"
             label={formatMessage({ id: 'Document' })}
             maxLength={10}
             accept={['.pdf', '.jpg', '.png', '.jpeg', '.doc', '.docx', '.xls', '.xlsx', '.html']}
+            display={formData.options?.documentType !== 'iframe'}
+          />,
+          <Input
+            name="options.documentUrl"
+            label={formatMessage({ id: 'DocumentUrl' })}
+            rule={formData.options?.documentType === 'iframe' ? 'REQ' : ''}
+            display={formData.options?.documentType === 'iframe'}
           />,
           <Switch
             name="options.documentVisibleAll"
             label={formatMessage({ id: 'DocumentVisibleAll' })}
             tips={formatMessage({ id: 'DocumentVisibleAllTips' })}
-            display={formData.options?.document && formData.options?.document.length > 0}
+            display={
+              formData.options?.documentType === 'iframe'
+                ? !!formData.options?.documentUrl
+                : formData.options?.document && formData.options?.document.length > 0
+            }
           />
         ]}
       />

@@ -41,9 +41,12 @@
 | name | string | 会议名称（必填，最长100字） |
 | startTime | Date | 开始时间（必填，创建后不可修改） |
 | duration | number | 会议时长，可选15/30/45/60/90/120/180分钟 |
+| options.allowExtend | boolean | 是否允许主持人延长会议（默认开启；开启后剩余不足15分钟时可延长15分钟） |
 | isInvitationAllowed | boolean | 是否允许邀请（默认允许） |
 | maxCount | number | 最大参会成员数（默认2） |
-| options.document | array | 会议文档（最多10个文件） |
+| options.documentType | string | 文档类型：`'files'` 文件列表、`'iframe'` 内嵌页面 |
+| options.document | array | 会议文档文件列表（最多10个，type为 files 时使用） |
+| options.documentUrl | string | 内嵌页面地址（type为 iframe 时使用） |
 | options.documentVisibleAll | boolean | 文档是否全员可见（默认仅主持人可见） |
 | members | array | 参会成员列表（仅创建时可编辑） |
 | includingMe | boolean | 我也参加（默认选中，仅创建时显示） |

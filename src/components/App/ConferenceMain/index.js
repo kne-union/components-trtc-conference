@@ -2,7 +2,7 @@ import ConferenceRoom from '@components/ConferenceRoom';
 import plugins from './plugins';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import dayjs from 'dayjs';
-import { App, Flex, Spin, Alert, Button } from 'antd';
+import { App, Flex, Spin, Button, Tooltip } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import style from './style.module.scss';
 import { createWithRemoteLoader } from '@kne/remote-loader';
@@ -174,8 +174,33 @@ const Conference = createWithRemoteLoader({
     }
     return dayjs(conferenceState.startTime).add(conferenceState.duration, 'second').diff(now, 'second');
   }, [conferenceState, now]);
-  const showExtendBanner =
-    current.isMaster && conferenceState?.options?.allowExtend && remainingSeconds > 0 && remainingSeconds <= 15 * 60;
+  const showExtendAction =
+    current.isMaster &&
+    conferenceState?.options?.allowExtend &&
+    remainingSeconds > 0 &&
+    remainingSeconds <= 15 * 60;
+
+  const onExtendDuration = useCallback(async () => {
+    if (!apis.extendDuration) {
+      return;
+    }
+    setExtending(true);
+    try {
+      const { data: resData } = await ajax(
+        Object.assign({}, apis.extendDuration, {
+          data: { extendSeconds: 900 }
+        })
+      );
+      if (resData.code !== 0) {
+        message.error(resData.msg || formatMessage({ id: 'InterviewExtendFailed' }));
+        return;
+      }
+      setConferenceState(resData.data || conferenceState);
+      message.success(formatMessage({ id: 'InterviewExtendSuccess' }));
+    } finally {
+      setExtending(false);
+    }
+  }, [ajax, apis.extendDuration, conferenceState, formatMessage, message]);
   const buildClientDeviceInfo = useCallback(({ cameras = [], microphones = [], setting = {} } = {}) => {
     const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
     return {
@@ -509,44 +534,6 @@ const Conference = createWithRemoteLoader({
 
   return (
     <>
-      {showExtendBanner && (
-        <Alert
-          className={style['extend-banner']}
-          type="warning"
-          showIcon
-          message={formatMessage({ id: 'InterviewExtendReminder' })}
-          action={
-            <Button
-              size="small"
-              type="primary"
-              loading={extending}
-              onClick={async () => {
-                if (!apis.extendDuration) {
-                  return;
-                }
-                setExtending(true);
-                try {
-                  const { data: resData } = await ajax(
-                    Object.assign({}, apis.extendDuration, {
-                      data: { extendSeconds: 900 }
-                    })
-                  );
-                  if (resData.code !== 0) {
-                    message.error(resData.msg || formatMessage({ id: 'InterviewExtendFailed' }));
-                    return;
-                  }
-                  setConferenceState(resData.data || conferenceState);
-                  message.success(formatMessage({ id: 'InterviewExtendSuccess' }));
-                } finally {
-                  setExtending(false);
-                }
-              }}
-            >
-              {formatMessage({ id: 'InterviewExtendAction' })}
-            </Button>
-          }
-        />
-      )}
       <ConferenceRoom
         {...props}
         conference={conferenceState}
@@ -556,6 +543,15 @@ const Conference = createWithRemoteLoader({
         devices={devices}
         value={setting}
         onChange={setSetting}
+        headerExtra={
+          showExtendAction ? (
+            <Tooltip title={formatMessage({ id: 'InterviewExtendReminder' })}>
+              <Button size="small" type="primary" loading={extending} onClick={onExtendDuration}>
+                {formatMessage({ id: 'InterviewExtendAction' })}
+              </Button>
+            </Tooltip>
+          ) : null
+        }
         document={
           conference.options?.documentType &&
           (conference.options?.documentVisibleAll || current.isMaster) && (

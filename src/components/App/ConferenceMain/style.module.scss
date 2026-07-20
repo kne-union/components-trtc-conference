@@ -1,11 +1,12 @@
-.extend-banner {
-  position: fixed;
-  top: 48px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 100;
-  max-width: calc(100vw - 32px);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+@use '~@kne/responsive-utils/scss' as resp;
+
+@mixin mobile-both {
+  @include resp.mobile-container {
+    @content;
+  }
+  @include resp.mobile {
+    @content;
+  }
 }
 
 .view-item {
@@ -64,7 +65,7 @@
   }
 }
 
-@media (max-width: 768px) {
+@include mobile-both {
   .view-item-bar {
     height: 26px;
     padding: 0 6px;

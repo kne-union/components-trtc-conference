@@ -26,9 +26,50 @@
   font-weight: bold;
 }
 
+.header-extra {
+  flex: none;
+}
+
+.header-extra-mobile {
+  display: none;
+  flex: none;
+}
+
+.mobile-name-wrap {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+
 .timer {
-  min-width: 60px;
-  text-align: center;
+  flex: none;
+  text-align: left;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+
+.timer-warning {
+  .timer-value {
+    color: var(--ant-color-error);
+    font-weight: bold;
+  }
+}
+
+.timer-label {
+  flex: none;
+  color: var(--font-color-grey-2);
+  font-size: 12px;
+  font-weight: normal;
+}
+
+.timer-value {
+  flex: none;
+  width: 8ch;
+  text-align: left;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
 }
 
 .main {
@@ -69,10 +110,9 @@
   flex: none;
 }
 
-@media (max-width: 768px) {
-  .layout {
-    min-height: 100dvh;
-  }
+// 与 useIsMobile 对齐；不要在 .layout 上挂 container-type（会破坏 MobileList 高度）
+.layout-mobile {
+  min-height: 100dvh;
 
   .header {
     flex-wrap: wrap;
@@ -93,6 +133,15 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+  }
+
+  .header-extra {
+    display: none;
+  }
+
+  .header-extra-mobile {
+    display: inline-flex;
+    flex: none;
   }
 
   .mobile-leave-action {
@@ -121,6 +170,8 @@
   .main {
     flex: 1;
     min-height: 360px;
+    align-items: stretch;
+    justify-content: stretch;
     --main-height: 100%;
   }
 

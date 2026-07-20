@@ -90,7 +90,8 @@ const MenuBar = createWithRemoteLoader({
                 startTime: new Date(),
                 duration: 60 * 60,
                 isInvitationAllowed: true,
-                includingMe: true
+                includingMe: true,
+                options: { allowExtend: true }
               }
             })
           );

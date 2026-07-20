@@ -136,10 +136,32 @@
     overflow: hidden;
   }
 
-  &:not(.window-item-single) {
+  // 仅桌面侧边/列表项用 aspect-ratio；主画面与移动端成员条排除，避免绝对定位主窗被压扁
+  &:not(.window-item-single):not(.window-item-main):not(.mobile-member-item) {
     width: var(--width, auto);
     height: var(--height, auto);
     aspect-ratio: 16 / 9;
+  }
+
+  &.window-item-grid {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 9;
+
+    > :not(.window-tools) {
+      width: 100%;
+      height: 100%;
+    }
+
+    video,
+    canvas,
+    img,
+    iframe,
+    object,
+    embed {
+      width: 100%;
+      height: 100%;
+    }
   }
 
   &.window-item-single {
@@ -255,6 +277,9 @@
   flex-direction: column;
   gap: 8px;
   width: 100%;
+  height: 100%;
+  flex: 1;
+  min-height: 0;
 }
 
 .mobile-document-panel {
@@ -381,7 +406,7 @@
         min-width: 28px !important;
         height: 28px !important;
         padding: 0 !important;
-        background: rgba(255, 255, 255, 0.18) !important;
+        background: var(--primary-color) !important;
         backdrop-filter: blur(10px) saturate(140%);
         -webkit-backdrop-filter: blur(10px) saturate(140%);
         border-radius: 999px !important;
@@ -434,7 +459,7 @@
   height: 28px !important;
   padding: 0 !important;
   color: #ffffff !important;
-  background: rgba(255, 255, 255, 0.18) !important;
+  background: var(--primary-color) !important;
   backdrop-filter: blur(10px) saturate(140%);
   -webkit-backdrop-filter: blur(10px) saturate(140%);
   border-radius: 999px !important;
@@ -459,7 +484,7 @@
   height: 32px !important;
   padding: 0 !important;
   color: #ffffff !important;
-  background: rgba(255, 255, 255, 0.18) !important;
+  background: var(--primary-color) !important;
   backdrop-filter: blur(10px) saturate(140%);
   -webkit-backdrop-filter: blur(10px) saturate(140%);
   border-radius: 999px !important;
@@ -476,13 +501,13 @@
   right: 12px;
 }
 
-@media (max-width: 768px) {
-  .window-outer {
-    min-height: 360px;
+.window-outer-mobile {
+  min-height: 360px;
+  align-self: stretch;
+  width: 100%;
 
-    &.only-list {
-      justify-content: stretch;
-    }
+  &.only-list {
+    justify-content: stretch;
   }
 
   .list {
