@@ -1,10 +1,14 @@
 import { createWithRemoteLoader } from '@kne/remote-loader';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Flex, List, Card, Button, Divider, Pagination, App, Empty } from 'antd';
 import dayjs from 'dayjs';
 import classnames from 'classnames';
 import transform from 'lodash/transform';
 import groupBy from 'lodash/groupBy';
+import get from 'lodash/get';
+import ScrollLoader from '@kne/scroll-loader';
+import '@kne/scroll-loader/dist/index.css';
+import { useIsMobile } from '@kne/responsive-utils';
 import style from './style.module.scss';
 import MenuBar from './MenuBar';
 import { ConferenceDetailInner } from './ConferenceDetail';
@@ -12,14 +16,137 @@ import EditConference, { EditConferenceButton } from './EditConference';
 import withLocale from './withLocale';
 import { useIntl } from '@kne/react-intl';
 
+const isStandalonePwa = () => {
+  if (typeof window === 'undefined') {
+    return false;
+  }
+  return (
+    window.navigator.standalone === true ||
+    (typeof window.matchMedia === 'function' && window.matchMedia('(display-mode: standalone)').matches)
+  );
+};
+
+const toAbsoluteUrl = url => {
+  if (/^https?:\/\//i.test(url)) {
+    return url;
+  }
+  const path = url.startsWith('/') ? url : `/${url}`;
+  return `${window.location.origin}${path}`;
+};
+
+/** iOS Safari/PWA 会拦截 async 后的 window.open；PWA standalone 下新窗口也不可用，改为当前页跳转 */
+const openDetailUrl = async getUrl => {
+  const isPwa = isStandalonePwa();
+  const popup = isPwa ? null : window.open('about:blank', '_blank');
+  try {
+    const url = typeof getUrl === 'function' ? await getUrl() : getUrl;
+    const href = toAbsoluteUrl(url);
+    if (popup) {
+      popup.location.href = href;
+      return;
+    }
+    window.location.assign(href);
+  } catch (e) {
+    popup?.close();
+    throw e;
+  }
+};
+
+const mergeConferenceList = (prev, next) => {
+  return Object.assign({}, next, {
+    pageData: [...(prev?.pageData || []), ...(next?.pageData || [])]
+  });
+};
+
+const buildFilterItems = (filterValue, formatMessage) => {
+  const items = [];
+  if (filterValue.keyword) {
+    items.push({
+      name: 'keyword',
+      label: formatMessage({ id: 'FilterKeywordLabel' }),
+      value: { label: filterValue.keyword, value: filterValue.keyword }
+    });
+  }
+  if (filterValue.date) {
+    const date = dayjs(filterValue.date);
+    items.push({
+      name: 'date',
+      label: formatMessage({ id: 'FilterDateLabel' }),
+      value: {
+        label: filterValue.date,
+        value: date.isValid() ? date.toDate() : filterValue.date
+      }
+    });
+  }
+  return items;
+};
+
 const ConferenceInfo = createWithRemoteLoader({
-  modules: ['components-core:ButtonGroup', 'components-core:Icon', 'components-core:StateTag', 'components-core:Common@SimpleBar', 'components-admin:Account@Language']
-})(withLocale(({ remoteModules, className, user, current = 1, pageSize = 20, onPageChange, getDetailUrl, data, reload, apis, actions }) => {
+  modules: [
+    'components-core:ButtonGroup',
+    'components-core:Icon',
+    'components-core:StateTag',
+    'components-core:Common@SimpleBar',
+    'components-core:Filter',
+    'components-core:Filter@FilterOuter',
+    'components-core:Filter@FilterLines',
+    'components-core:Filter@FilterValueDisplay',
+    'components-core:Filter@SearchInput',
+    'components-admin:Account@Language'
+  ]
+})(withLocale(({
+  remoteModules,
+  className,
+  user,
+  current = 1,
+  pageSize = 20,
+  onPageChange,
+  getDetailUrl,
+  data,
+  reload,
+  loadMore,
+  isComplete = true,
+  requestParams,
+  filterValue = {},
+  onFilterChange,
+  apis,
+  actions
+}) => {
   const [conference, setConference] = useState(null);
   const [aiTranscriptionContent, setAiTranscriptionContent] = useState(null);
-  const [ButtonGroup, Icon, StateTag, SimpleBar, Language] = remoteModules;
+  const [ButtonGroup, Icon, StateTag, SimpleBar, Filter, FilterOuter, FilterLines, FilterValueDisplay, SearchInput, Language] = remoteModules;
+  const { DatePickerFilterItem } = Filter.fields;
   const { message } = App.useApp();
   const { formatMessage } = useIntl();
+  const isMobile = useIsMobile();
+  const useLoadMoreMode = isMobile && typeof loadMore === 'function';
+  const filterItems = useMemo(() => buildFilterItems(filterValue, formatMessage), [filterValue, formatMessage]);
+  const hasValueDisplay = filterItems.length > 0;
+  const filterList = useMemo(
+    () => [
+      {
+        type: DatePickerFilterItem,
+        props: {
+          name: 'date',
+          label: formatMessage({ id: 'FilterDateLabel' }),
+          format: 'YYYY-MM-DD'
+        }
+      }
+    ],
+    [DatePickerFilterItem, formatMessage]
+  );
+  const handleFilterItemsChange = useCallback(
+    items => {
+      const params = Filter.getFilterValue(items);
+      onFilterChange?.({
+        keyword: params.keyword || '',
+        date: params.date ? dayjs(params.date).format('YYYY-MM-DD') : ''
+      });
+    },
+    [Filter, onFilterChange]
+  );
+  const currentPageNum = Number(get(requestParams, ['params', 'currentPage'], current)) || 1;
+  const loadMoreNoMore = !data?.totalCount || currentPageNum * pageSize >= data.totalCount;
 
   const openConference = useCallback(item => {
     setConference(item);
@@ -28,6 +155,35 @@ const ConferenceInfo = createWithRemoteLoader({
   const reloadConference = useCallback(() => {
     reload && reload();
   }, [reload]);
+
+  const handleLoadMore = useCallback(async () => {
+    if (!loadMore) {
+      return;
+    }
+    const listParams = get(requestParams, 'params', {});
+    await loadMore(
+      {
+        params: Object.assign({}, listParams, {
+          perPage: pageSize,
+          currentPage: currentPageNum + 1
+        })
+      },
+      mergeConferenceList
+    );
+  }, [loadMore, pageSize, currentPageNum, requestParams]);
+
+  const groupedList = useMemo(() => {
+    if (!data?.pageData?.length) {
+      return [];
+    }
+    return transform(
+      groupBy(data.pageData, item => dayjs(item.startTime).format('YYYY-MM-DD')),
+      (result, value) => {
+        result.push(value.slice().sort((a, b) => dayjs(b.startTime).valueOf() - dayjs(a.startTime).valueOf()));
+      },
+      []
+    ).sort((a, b) => dayjs(b[0]?.startTime).valueOf() - dayjs(a[0]?.startTime).valueOf());
+  }, [data?.pageData]);
 
   useEffect(() => {
     if (!conference?.id || !data?.pageData) {
@@ -69,6 +225,98 @@ const ConferenceInfo = createWithRemoteLoader({
     };
   }, [apis, conference?.id, conference?.status, conference?.options?.setting?.speech]);
 
+  const listNode =
+    groupedList.length > 0 ? (
+      groupedList.map(item => {
+        const time = dayjs(item[0]?.startTime).format('YYYY-MM-DD');
+        return (
+          <Card key={time} className={style['date-card']} size="small" title={time}>
+            <List
+              size="small"
+              dataSource={item}
+              renderItem={item => {
+                const isBeforeStart = item.status === 0 && item.startTime && dayjs().isBefore(dayjs(item.startTime));
+                const options = [
+                  {
+                    type: 'primary',
+                    size: 'small',
+                    shape: 'round',
+                    children: formatMessage({ id: 'View' }),
+                    onClick: () => {
+                      openConference(item);
+                    }
+                  }
+                ];
+                if (item.status === 0) {
+                  options.push({
+                    buttonComponent: EditConferenceButton,
+                    data: item,
+                    apis,
+                    onSuccess: reload,
+                    size: 'small',
+                    shape: 'round',
+                    children: formatMessage({ id: 'Edit' })
+                  });
+                }
+                if (isBeforeStart) {
+                  options.push({
+                    danger: true,
+                    size: 'small',
+                    shape: 'round',
+                    children: formatMessage({ id: 'CancelMeeting' }),
+                    confirm: true,
+                    message: formatMessage({ id: 'CancelMeetingConfirm' }),
+                    onClick: async () => {
+                      await actions.cancel({ id: item.id });
+                    }
+                  });
+                }
+                if ([1, 2].indexOf(item.status) > -1) {
+                  options.push({
+                    size: 'small',
+                    shape: 'round',
+                    children: formatMessage({ id: 'Delete' }),
+                    confirm: true,
+                    onClick: async () => {
+                      await actions.remove({ id: item.id });
+                    }
+                  });
+                }
+                return (
+                  <List.Item className={style['list-item']} key={item.id}>
+                    <Flex vertical flex={1} className={style['list-item-content']}>
+                      <Flex justify="space-between" gap={8} className={style['list-item-header']}>
+                        <Flex gap={8} className={style['list-title-area']}>
+                          <div className={style['conference-title']}>
+                            {item.name}({item.members.length}/{item.maxCount})
+                          </div>
+                          <div>
+                            {item.status === 1 && <StateTag text={formatMessage({ id: 'Ended' })} />}
+                            {item.status === 2 && <StateTag type="danger" text={formatMessage({ id: 'Canceled' })} />}
+                          </div>
+                        </Flex>
+                        <div className={style['options-btn']}>
+                          <ButtonGroup
+                            list={options}
+                            more={<Button icon={<Icon type="icon-gengduo2" />} className="btn-no-padding" type="link" />}
+                          />
+                        </div>
+                      </Flex>
+                      <div className={style['time']}>
+                        {dayjs(item.startTime).format('HH:mm')} - {dayjs(item.startTime).add(item.duration, 'second').format('HH:mm')}
+                      </div>
+                    </Flex>
+                  </List.Item>
+                );
+              }}
+            />
+          </Card>
+        );
+      })
+    ) : (
+      <Empty />
+    );
+
   return (
     <Flex className={classnames(className, style['info'])}>
       <MenuBar
@@ -78,9 +326,7 @@ const ConferenceInfo = createWithRemoteLoader({
           reload && reload();
           data && openConference(data);
         }}
-        onDetailEnter={item => {
-          window.open(getDetailUrl(item), '_blank');
-        }}
+        onDetailEnter={item => openDetailUrl(getDetailUrl(item))}
       />
       <div className={style['right-panel-outer']}>
         {conference ? (
@@ -101,8 +347,10 @@ const ConferenceInfo = createWithRemoteLoader({
                   apis={apis}
                   onReload={reloadConference}
                   onDetailEnter={async item => {
-                    const { shorten } = await actions.getMemberShorten(item);
-                    window.open(getDetailUrl({ shorten }), '_blank');
+                    await openDetailUrl(async () => {
+                      const { shorten } = await actions.getMemberShorten(item);
+                      return getDetailUrl({ shorten });
+                    });
                   }}
                   onEdit={conference.status === 0 ? onEdit : undefined}
                   onCancel={async () => {
@@ -125,137 +373,96 @@ const ConferenceInfo = createWithRemoteLoader({
           </EditConference>
         ) : (
           <Flex vertical className={style['right-panel']}>
-            <Flex className={style['title']} justify="space-between" align="center" gap={8}>
-              <div>{dayjs().format(formatMessage({ id: 'DateFormat' }))}</div>
-              <Language colorful={false} />
-            </Flex>
+            <div className={style['list-header']}>
+              <FilterOuter value={filterItems} onChange={handleFilterItemsChange} className={style['list-filter-outer']}>
+                {() => (
+                  <div
+                    className={classnames(style['list-header-section'], {
+                      [style['has-mobile-search']]: isMobile,
+                      [style['has-value-display']]: hasValueDisplay
+                    })}
+                  >
+                    {isMobile ? (
+                      <div className={style['list-search-row']}>
+                        <SearchInput
+                          name="keyword"
+                          label={formatMessage({ id: 'FilterKeywordLabel' })}
+                          placeholder={formatMessage({ id: 'FilterKeywordPlaceholder' })}
+                          allowClear
+                          style={{ width: '100%', maxWidth: '100%' }}
+                        />
+                      </div>
+                    ) : null}
+                    <Flex className={style['title']} justify="space-between" align="center" gap={8}>
+                      <div className={style['title-date']}>{dayjs().format(formatMessage({ id: 'DateFormat' }))}</div>
+                      <div className={classnames(style['list-toolbar'], { [style['is-mobile']]: isMobile })}>
+                        <div className={style['list-filter']}>
+                          <div className={style['list-filter-inner']}>
+                            <FilterLines list={filterList} label="" displayLine={1} />
+                          </div>
+                        </div>
+                        {isMobile ? (
+                          <div className={style['list-toolbar-actions']}>
+                            <Language colorful={false} />
+                          </div>
+                        ) : (
+                          <div className={style['list-toolbar-actions']}>
+                              <SearchInput
+                                name="keyword"
+                                label={formatMessage({ id: 'FilterKeywordLabel' })}
+                                placeholder={formatMessage({ id: 'FilterKeywordPlaceholder' })}
+                                allowClear
+                                className={style['list-filter-keyword']}
+                              />
+                              <Language colorful={false} />
+                            </div>
+                        )}
+                      </div>
+                    </Flex>
+                    {hasValueDisplay ? (
+                      <div className={style['list-value-display']}>
+                        <FilterValueDisplay value={filterItems} onChange={handleFilterItemsChange} />
+                      </div>
+                    ) : null}
+                  </div>
+                )}
+              </FilterOuter>
+            </div>
             <Divider className={style['divider']} />
-            <Flex flex={1} vertical gap={10} className={style['list-content']}>
+            <Flex vertical flex={isMobile ? undefined : 1} gap={10} className={style['list-content']}>
               <div className={style['list-scroller-outer']}>
-                <SimpleBar className={classnames(style['scroller'], style['list-scroller'])}>
-                  {data.pageData.length > 0 ? (
-                    transform(
-                      groupBy(data.pageData, item => {
-                        return dayjs(item.startTime).format('YYYY-MM-DD');
-                      }),
-                      (result, value) => {
-                        result.push(
-                          value.slice().sort((a, b) => {
-                            return dayjs(b.startTime).valueOf() - dayjs(a.startTime).valueOf();
-                          })
-                        );
-                      },
-                      []
-                    )
-                      .sort((a, b) => {
-                        return dayjs(b[0]?.startTime).valueOf() - dayjs(a[0]?.startTime).valueOf();
-                      })
-                      .map(item => {
-                      const time = dayjs(item[0]?.startTime).format('YYYY-MM-DD');
-                      return (
-                        <Card key={time} className={style['date-card']} size="small" title={time}>
-                          <List
-                            size="small"
-                            dataSource={item}
-                            renderItem={item => {
-                              const isBeforeStart = item.status === 0 && item.startTime && dayjs().isBefore(dayjs(item.startTime));
-                              const options = [
-                                {
-                                  type: 'primary',
-                                  size: 'small',
-                                  shape: 'round',
-                                  children: formatMessage({ id: 'View' }),
-                                  onClick: () => {
-                                    openConference(item);
-                                  }
-                                }
-                              ];
-                              if (item.status === 0) {
-                                options.push({
-                                  buttonComponent: EditConferenceButton,
-                                  data: item,
-                                  apis,
-                                  onSuccess: reload,
-                                  size: 'small',
-                                  shape: 'round',
-                                  children: formatMessage({ id: 'Edit' })
-                                });
-                              }
-                              if (isBeforeStart) {
-                                options.push({
-                                  danger: true,
-                                  size: 'small',
-                                  shape: 'round',
-                                  children: formatMessage({ id: 'CancelMeeting' }),
-                                  confirm: true,
-                                  message: formatMessage({ id: 'CancelMeetingConfirm' }),
-                                  onClick: async () => {
-                                    await actions.cancel({ id: item.id });
-                                  }
-                                });
-                              }
-                              if ([1, 2].indexOf(item.status) > -1) {
-                                options.push({
-                                  size: 'small',
-                                  shape: 'round',
-                                  children: formatMessage({ id: 'Delete' }),
-                                  confirm: true,
-                                  onClick: async () => {
-                                    await actions.remove({ id: item.id });
-                                  }
-                                });
-                              }
-                              return (
-                                <List.Item className={style['list-item']} key={item.id}>
-                                  <Flex vertical flex={1} className={style['list-item-content']}>
-                                    <Flex justify="space-between" gap={8} className={style['list-item-header']}>
-                                      <Flex gap={8} className={style['list-title-area']}>
-                                        <div className={style['conference-title']}>
-                                          {item.name}({item.members.length}/{item.maxCount})
-                                        </div>
-                                        <div>
-                                          {item.status === 1 && <StateTag text={formatMessage({ id: 'Ended' })} />}
-                                          {item.status === 2 && <StateTag type="danger" text={formatMessage({ id: 'Canceled' })} />}
-                                        </div>
-                                      </Flex>
-                                      <div className={style['options-btn']}>
-                                        <ButtonGroup
-                                          list={options}
-                                          more={<Button icon={<Icon type="icon-gengduo2" />} className="btn-no-padding" type="link" />}
-                                        />
-                                      </div>
-                                    </Flex>
-                                    <div className={style['time']}>
-                                      {dayjs(item.startTime).format('HH:mm')} - {dayjs(item.startTime).add(item.duration, 'second').format('HH:mm')}
-                                    </div>
-                                  </Flex>
-                                </List.Item>
-                              );
-                            }}
-                          />
-                        </Card>
-                      );
-                    })
-                  ) : (
-                    <Empty />
-                  )}
-                </SimpleBar>
+                {useLoadMoreMode ? (
+                  <ScrollLoader
+                    className={classnames(style['scroller'], style['list-scroller'], style['mobile-load-more'])}
+                    useSimpleBar={false}
+                    isLoading={!isComplete}
+                    noMore={loadMoreNoMore}
+                    onLoader={handleLoadMore}
+                    completeTips={data.totalCount > 0 ? undefined : null}
+                  >
+                    {listNode}
+                  </ScrollLoader>
+                ) : (
+                  <SimpleBar className={classnames(style['scroller'], style['list-scroller'])}>{listNode}</SimpleBar>
+                )}
               </div>
             </Flex>
-            <Flex justify={'center'}>
-              <Pagination
-                hideOnSinglePage
-                className={style['list-pagination']}
-                total={data.totalCount}
-                pageSize={pageSize}
-                current={current}
-                onChange={(currentPage, pageSize) => {
-                  onPageChange({ currentPage, pageSize });
-                }}
-                showLessItems
-                showSizeChanger={false}
-              />
-            </Flex>
+            {!useLoadMoreMode && (
+              <Flex justify={'center'} className={style['list-pagination-wrap']}>
+                <Pagination
+                  hideOnSinglePage
+                  className={style['list-pagination']}
+                  total={data.totalCount}
+                  pageSize={pageSize}
+                  current={current}
+                  onChange={(currentPage, nextPageSize) => {
+                    onPageChange({ currentPage, pageSize: nextPageSize });
+                  }}
+                  showLessItems
+                  showSizeChanger={false}
+                />
+              </Flex>
+            )}
           </Flex>
         )}
       </div>

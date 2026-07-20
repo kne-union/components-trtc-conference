@@ -157,10 +157,23 @@ class ConferenceSDK {
   }
 
   async enterRoom() {
+    let videoStarted = false;
+    let audioStarted = false;
     await this.runTask(this.sdkParams.userId, async () => {
       await this.trtc.enterRoom(this.sdkParams);
-      await this.trtc.startLocalVideo();
-      await this.trtc.startLocalAudio();
+      // iOS PWA 上 getUserMedia 可能失败；不阻塞入会，由后续设备开关再试
+      try {
+        await this.trtc.startLocalVideo();
+        videoStarted = true;
+      } catch (e) {
+        console.warn('[trtc] startLocalVideo failed', e);
+      }
+      try {
+        await this.trtc.startLocalAudio();
+        audioStarted = true;
+      } catch (e) {
+        console.warn('[trtc] startLocalAudio failed', e);
+      }
     });
     this.clientState[this.sdkParams.userId] = 1;
     this.events.onLocalStateChange?.(this.clientState[this.sdkParams.userId]);
@@ -168,7 +181,8 @@ class ConferenceSDK {
     this.events.onEnterRoom?.({
       userId: this.sdkParams.userId,
       type: 'local',
-      videoView: { [this.STREAM_TYPE_MAIN]: true }
+      videoView: { [this.STREAM_TYPE_MAIN]: videoStarted },
+      audioIsPlay: audioStarted
     });
   }
 

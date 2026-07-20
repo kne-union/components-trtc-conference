@@ -5,6 +5,7 @@ import AddConference from './AddConference';
 import { removeToken } from '@kne/token-storage';
 import withLocale from './withLocale';
 import { useIntl } from '@kne/react-intl';
+import resolveAvatarProps from './resolveAvatarProps';
 
 const MenuBar = createWithRemoteLoader({
   modules: [
@@ -26,7 +27,7 @@ const MenuBar = createWithRemoteLoader({
         className={style['menu-item']}
         type="primary"
         shape={'circle'}
-        icon={<Image.Avatar id={user.value.avatar} size={40} />}
+        icon={<Image.Avatar size={40} {...resolveAvatarProps(user.value.avatar)} />}
         onClick={() => {
           const modalApi = modal({
             title: formatMessage({ id: 'UserInfo' }),
@@ -35,7 +36,7 @@ const MenuBar = createWithRemoteLoader({
             children: (
               <Card className={style['current-user']}>
                 <Flex vertical gap={12} align="center">
-                  <Image.Avatar size={100} id={user.value.avatar} />
+                  <Image.Avatar size={100} {...resolveAvatarProps(user.value.avatar)} />
                   <div>{user.value.email}</div>
                   <div>{user.value.nickname}</div>
                   <Button
