@@ -638,6 +638,12 @@
       width: 100% !important;
       max-width: 100%;
     }
+
+    // iOS Safari zooms the page when focused input font-size < 16px
+    :global(.ant-input),
+    :global(.ant-input-affix-wrapper input) {
+      font-size: 16px !important;
+    }
   }
 
   .list-toolbar.is-mobile {
