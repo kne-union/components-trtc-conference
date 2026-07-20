@@ -11,6 +11,7 @@ const locale = {
 
   // Layout/index.js
   OnlineMeeting: '在线会议',
+  RemainingTime: '会议剩余时间',
   End: '结束',
   EndMeetingConfirm: '结束会议后，其他人也将退出会议，如果只需要自己退出会议关掉页面即可',
   EndMeeting: '结束会议',

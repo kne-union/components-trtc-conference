@@ -1,6 +1,7 @@
 import { createWithRemoteLoader } from '@kne/remote-loader';
 import { Flex, Button, App, Dropdown } from 'antd';
 import { CaretDownFilled } from '@ant-design/icons';
+import { useIsMobile } from '@kne/responsive-utils';
 import { useContext as useRoomContext } from '../context';
 import style from './style.module.scss';
 import withLocale from '../withLocale';
@@ -13,6 +14,7 @@ const Toolbar = createWithRemoteLoader({
   const { isInvitationAllowed, actions, setting, setSetting, devices } = useRoomContext();
   const { message } = App.useApp();
   const { formatMessage } = useIntl();
+  const isMobile = useIsMobile();
 
   const cameraList = devices?.cameras || [];
   const microphoneList = devices?.microphones || [];
@@ -115,18 +117,20 @@ const Toolbar = createWithRemoteLoader({
           </Dropdown>
         )}
       </div>
-      <LoadingButton
-        className={style['toolbar-item']}
-        type="text"
-        onClick={async () => {
-          await actions.shareScreen();
-        }}
-      >
-        <Flex vertical align="center" justify="center">
-          <Icon type="icon-share-screen" fontClassName="iconfont-ai" size={28} />
-          <div className={style['item-text']}>{setting.shareScreenOpen ? formatMessage({ id: 'StopShare' }) : formatMessage({ id: 'ShareScreen' })}</div>
-        </Flex>
-      </LoadingButton>
+      {!isMobile && (
+        <LoadingButton
+          className={style['toolbar-item']}
+          type="text"
+          onClick={async () => {
+            await actions.shareScreen();
+          }}
+        >
+          <Flex vertical align="center" justify="center">
+            <Icon type="icon-share-screen" fontClassName="iconfont-ai" size={28} />
+            <div className={style['item-text']}>{setting.shareScreenOpen ? formatMessage({ id: 'StopShare' }) : formatMessage({ id: 'ShareScreen' })}</div>
+          </Flex>
+        </LoadingButton>
+      )}
       {isInvitationAllowed && (
         <LoadingButton
           className={style['toolbar-item']}

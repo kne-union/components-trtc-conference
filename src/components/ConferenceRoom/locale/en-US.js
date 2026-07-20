@@ -11,6 +11,7 @@ const locale = {
 
   // Layout/index.js
   OnlineMeeting: 'Online Meeting',
+  RemainingTime: 'Meeting Remaining',
   End: 'End',
   EndMeetingConfirm: 'After ending the meeting, all participants will be disconnected. If you only want to leave, just close the page.',
   EndMeeting: 'End Meeting',

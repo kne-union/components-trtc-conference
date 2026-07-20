@@ -105,8 +105,9 @@ render(<BaseExample />);
 
 | 属性名 | 类型 | 必填 | 默认值 | 说明 |
 |--------|------|------|--------|------|
-| type | string | 是 | - | 文档类型：`'files'` 文件列表模式、`'remote-module'` 远程模块模式 |
+| type | string | 是 | - | 文档类型：`'files'` 文件列表模式、`'iframe'` 内嵌页面模式、`'remote-module'` 远程模块模式 |
 | files | array | 否 | - | 文件列表（type为'files'时使用） |
+| url | string | 否 | - | 内嵌页面地址（type为'iframe'时使用） |
 | module | string | 否 | - | 远程模块路径（type为'remote-module'时使用） |
 | moduleProps | object | 否 | - | 传递给远程模块的属性 |
 | getSpeechInput | function | 否 | - | 获取语音输入回调函数的函数，参数为回调函数 |

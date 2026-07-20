@@ -1,8 +1,9 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { createWithRemoteLoader } from '@kne/remote-loader';
 import { Splitter, Row, Col, Flex, Button } from 'antd';
 import localStorage from '@kne/local-storage';
 import classnames from 'classnames';
+import { useIsMobile } from '@kne/responsive-utils';
 import { useContext } from '../context';
 import style from './style.module.scss';
 import withLocale from '../withLocale';
@@ -12,34 +13,11 @@ const LEAPIN_VIDEO_CONFERENCE_WINDOW_SIZES = 'LEAPIN_VIDEO_CONFERENCE_WINDOW_SIZ
 const LEAPIN_VIDEO_CONFERENCE_WINDOW_VERTICAL_SIZES = 'LEAPIN_VIDEO_CONFERENCE_WINDOW_VERTICAL_SIZES';
 const LEAPIN_VIDEO_CONFERENCE_WINDOW_HORIZONTAL_SIZES = 'LEAPIN_VIDEO_CONFERENCE_WINDOW_HORIZONTAL_SIZES';
 const LEAPIN_VIDEO_CONFERENCE_WINDOW_MOBILE_LIST_SIZE = 'LEAPIN_VIDEO_CONFERENCE_WINDOW_MOBILE_LIST_SIZE_V3';
-const MOBILE_MEDIA_QUERY = '(max-width: 768px)';
 const MOBILE_MEMBER_PANEL_MARGIN = 16;
 const MOBILE_MEMBER_CONTENT_PADDING_LEFT = 8;
 const MOBILE_MEMBER_CONTENT_PADDING_RIGHT = 8;
 const MOBILE_MEMBER_CONTENT_PADDING_VERTICAL = 16;
 const MOBILE_MEMBER_SCROLL_EDGE_TOLERANCE = 4;
-
-const getIsMobile = () => typeof window !== 'undefined' && window.matchMedia(MOBILE_MEDIA_QUERY).matches;
-
-const useIsMobile = () => {
-  const [isMobile, setIsMobile] = useState(getIsMobile);
-
-  useEffect(() => {
-    if (typeof window === 'undefined') {
-      return;
-    }
-    const mediaQueryList = window.matchMedia(MOBILE_MEDIA_QUERY);
-    const onChange = event => {
-      setIsMobile(event.matches);
-    };
-    mediaQueryList.addEventListener('change', onChange);
-    return () => {
-      mediaQueryList.removeEventListener('change', onChange);
-    };
-  }, []);
-
-  return isMobile;
-};
 
 const getMobileListPlacement = layoutType => {
   return layoutType === 2 ? 'top' : 'bottom';
@@ -62,78 +40,120 @@ const getDefaultMobileListSize = containerWidth => {
 };
 
 const WindowItem = createWithRemoteLoader({
-  modules: ['components-core:Common@useResize', 'components-core:Icon']
+  modules: ['components-core:Icon']
 })(({ remoteModules, className, children, base = 'width', isSingle, ratio = 9 / 16, onMainView }) => {
-  const [useResize, Icon] = remoteModules;
+  const [Icon] = remoteModules;
   const itemRef = useRef(null);
-  const [width, setWidth] = useState(0);
-  const [height, setHeight] = useState(0);
-  const [singleSize, setSingleSize] = useState({ width: 0, height: 0 });
-  const updateSize = useCallback(dom => {
-    if (!dom) {
-      return;
-    }
+  const [sizeStyle, setSizeStyle] = useState(() => {
     if (isSingle) {
-      const containerWidth = dom.parentElement?.clientWidth || dom.clientWidth;
-      const containerHeight = dom.parentElement?.clientHeight || dom.clientHeight;
-      if (!containerWidth || !containerHeight) {
+      return {
+        '--single-width': '100%',
+        '--single-height': '100%'
+      };
+    }
+    return {};
+  });
+
+  const updateSize = useCallback(
+    dom => {
+      if (!dom) {
         return;
       }
-      const nextHeight = Math.min(Math.ceil(containerWidth * ratio), containerHeight);
-      const nextWidth = Math.min(containerWidth, Math.ceil(containerHeight / ratio));
-      setSingleSize(size => (size.width === nextWidth && size.height === nextHeight ? size : { width: nextWidth, height: nextHeight }));
-      return;
-    }
-    if (!dom.clientWidth || !dom.clientHeight) {
-      return;
-    }
-    const nextHeight = Math.ceil(dom.clientWidth * ratio);
-    const nextWidth = Math.ceil(dom.clientHeight / ratio);
-    setHeight(height => (height === nextHeight ? height : nextHeight));
-    setWidth(width => (width === nextWidth ? width : nextWidth));
-  }, [isSingle, ratio]);
-  const ref = useResize(dom => {
-    itemRef.current = dom;
-    updateSize(dom);
-  });
-  useEffect(() => {
+      const parent = dom.parentElement;
+      if (!parent) {
+        return;
+      }
+
+      // 多人网格：交由 CSS width:100% + aspect-ratio，避免 JS 固定高度偶发不更新
+      if (!isSingle && base === 'width') {
+        setSizeStyle(current => (Object.keys(current).length ? {} : current));
+        return;
+      }
+
+      if (isSingle) {
+        const containerWidth = parent.clientWidth;
+        const containerHeight = parent.clientHeight;
+        if (!containerWidth || !containerHeight) {
+          return;
+        }
+        const nextHeight = Math.min(Math.ceil(containerWidth * ratio), containerHeight);
+        const nextWidth = Math.min(containerWidth, Math.ceil(containerHeight / ratio));
+        setSizeStyle(current => {
+          const next = {
+            '--single-width': `${nextWidth}px`,
+            '--single-height': `${nextHeight}px`
+          };
+          return current['--single-width'] === next['--single-width'] && current['--single-height'] === next['--single-height'] ? current : next;
+        });
+        return;
+      }
+
+      const containerHeight = parent.clientHeight;
+      if (!containerHeight) {
+        return;
+      }
+      const nextWidth = `${Math.ceil(containerHeight / ratio)}px`;
+      setSizeStyle(current => (current['--width'] === nextWidth ? current : { '--width': nextWidth }));
+    },
+    [base, isSingle, ratio]
+  );
+
+  const setItemRef = useCallback(
+    dom => {
+      itemRef.current = dom;
+      if (dom) {
+        updateSize(dom);
+      }
+    },
+    [updateSize]
+  );
+
+  useLayoutEffect(() => {
     const dom = itemRef.current;
     if (!dom) {
       return;
     }
+
     const onResize = () => {
       updateSize(dom);
     };
+
     const resizeObserver = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(onResize) : null;
-    resizeObserver?.observe(dom.parentElement || dom);
-    dom.parentElement?.parentElement && resizeObserver?.observe(dom.parentElement.parentElement);
+    let current = dom.parentElement;
+    let depth = 0;
+    while (current && depth < 10) {
+      resizeObserver?.observe(current);
+      if (current.classList?.contains(style['window-outer']) || current.classList?.contains(style['list'])) {
+        break;
+      }
+      current = current.parentElement;
+      depth += 1;
+    }
+
     window.addEventListener('resize', onResize);
+    onResize();
+    // 布局稳定后再量一次，覆盖 SimpleBar / Splitter 延迟撑开的情况
+    const rafId = window.requestAnimationFrame(onResize);
+    const timerId = window.setTimeout(onResize, 100);
+
     return () => {
       resizeObserver?.disconnect();
       window.removeEventListener('resize', onResize);
+      window.cancelAnimationFrame(rafId);
+      window.clearTimeout(timerId);
     };
   }, [updateSize]);
+
   return (
     <div
-      ref={ref}
+      ref={setItemRef}
       className={classnames(style['window-item'], className, {
         [style['window-item-single']]: isSingle,
-        [style['window-item-main']]: isSingle
+        [style['window-item-main']]: isSingle,
+        [style['window-item-grid']]: !isSingle && base === 'width'
       })}
-      style={
-        isSingle
-          ? {
-              '--single-width': singleSize.width ? `${singleSize.width}px` : '100%',
-              '--single-height': singleSize.height ? `${singleSize.height}px` : '100%'
-            }
-          : base === 'width'
-          ? {
-              '--height': height ? `${height}px` : 'auto'
-            }
-          : {
-              '--width': width ? `${width}px` : 'auto'
-            }
-      }>
+      style={sizeStyle}
+    >
       {children}
       {onMainView && (
         <Flex gap={8} className={style['window-tools']}>
@@ -349,6 +369,10 @@ const MobileList = createWithRemoteLoader({
     document.addEventListener('touchend', onResizeEnd);
   };
 
+  if (!mainItem) {
+    return null;
+  }
+
   return (
     <div
       ref={mobileListRef}
@@ -463,6 +487,10 @@ const VerticalList = createWithRemoteLoader({
   const childrenList = list.slice(1),
     mainItem = list[0];
 
+  if (!mainItem) {
+    return null;
+  }
+
   const listPanel = (
     <Splitter.Panel collapsible size={sizes[type === 'top' ? 0 : 1]}>
       <SimpleBar className={style['vertical-scroller']}>
@@ -516,6 +544,10 @@ const HorizontalList = createWithRemoteLoader({
   const [SimpleBar] = remoteModules;
   const childrenList = list.slice(1),
     mainItem = list[0];
+
+  if (!mainItem) {
+    return null;
+  }
 
   const listPanel = (
     <Splitter.Panel collapsible className={style['horizontal-scroller-outer']} size={sizes[type === 'left' ? 0 : 1]}>
@@ -624,6 +656,7 @@ const WindowList = ({ layoutType, list, document, isMobile }) => {
     }
   }, [mainItem, setSetting]);
 
+  // 移动端特殊布局 = MobileList（主画面全屏 + 顶/底可折叠成员条）
   const WindowInner = isMobile ? MobileList : currentList.length < 2 ? GridList : layoutTypeMap[layoutType] || GridList;
   return (
     <WindowInner
@@ -638,28 +671,33 @@ const WindowList = ({ layoutType, list, document, isMobile }) => {
   );
 };
 
-const Window = ({ layoutType, documentInside = true, document, list = [] }) => {
-  const isMobile = useIsMobile();
+const Window = ({ layoutType, documentInside = true, document, list = [], isMobile: isMobileProp }) => {
+  const contextIsMobile = useIsMobile();
+  const isMobile = typeof isMobileProp === 'boolean' ? isMobileProp : contextIsMobile;
   const [sizes, setSizes] = useState(localStorage.getItem(LEAPIN_VIDEO_CONFERENCE_WINDOW_SIZES) || ['50%', '50%']);
+
   if (!document) {
     return (
-      <div className={classnames(style['window-outer'], style['only-list'])}>
+      <div className={classnames(style['window-outer'], style['only-list'], { [style['window-outer-mobile']]: isMobile })}>
         <WindowList layoutType={layoutType} list={list} isMobile={isMobile} />
       </div>
     );
   }
 
-  if (document && layoutType !== 1 && documentInside) {
+  // 与原先一致：非网格 + documentInside 时，文档作为窗口项进入列表。
+  // 移动端因此会进 MobileList：文档/视频可切主画面，成员条才能出现；切换上下布局才有可见差异。
+  if (layoutType !== 1 && documentInside) {
     return (
-      <div className={classnames(style['window-outer'], style['only-list'])}>
+      <div className={classnames(style['window-outer'], style['only-list'], { [style['window-outer-mobile']]: isMobile })}>
         <WindowList layoutType={layoutType} list={list} document={document} isMobile={isMobile} />
       </div>
     );
   }
 
+  // 文档外置时：移动端上下分栏，桌面端 Splitter
   if (isMobile) {
     return (
-      <div className={classnames(style['window-outer'], style['mobile-document-layout'])}>
+      <div className={classnames(style['window-outer'], style['mobile-document-layout'], style['window-outer-mobile'])}>
         <div className={style['mobile-document-panel']}>
           <div className={style['document-item']}>{document}</div>
         </div>
@@ -669,6 +707,7 @@ const Window = ({ layoutType, documentInside = true, document, list = [] }) => {
       </div>
     );
   }
+
   return (
     <Splitter
       className={style['window-outer']}

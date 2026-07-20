@@ -2,33 +2,10 @@ import { Flex, Row, Col } from 'antd';
 import useControlValue from '@kne/use-control-value';
 import classnames from 'classnames';
 import style from './style.module.scss';
-import { forwardRef, useEffect, useImperativeHandle, useState } from 'react';
+import { forwardRef, useImperativeHandle } from 'react';
+import { useIsMobile } from '@kne/responsive-utils';
 import withLocale from '../../withLocale';
 import { useIntl } from '@kne/react-intl';
-
-const MOBILE_MEDIA_QUERY = '(max-width: 768px)';
-
-const getIsMobile = () => typeof window !== 'undefined' && window.matchMedia(MOBILE_MEDIA_QUERY).matches;
-
-const useIsMobile = () => {
-  const [isMobile, setIsMobile] = useState(getIsMobile);
-
-  useEffect(() => {
-    if (typeof window === 'undefined') {
-      return;
-    }
-    const mediaQueryList = window.matchMedia(MOBILE_MEDIA_QUERY);
-    const onChange = event => {
-      setIsMobile(event.matches);
-    };
-    mediaQueryList.addEventListener('change', onChange);
-    return () => {
-      mediaQueryList.removeEventListener('change', onChange);
-    };
-  }, []);
-
-  return isMobile;
-};
 
 const GridType = () => {
   return (
@@ -102,14 +79,17 @@ const BottomListType = () => {
 };
 
 const LayoutType = withLocale(forwardRef((props, ref) => {
-  const isMobile = useIsMobile();
+  const { isMobile: isMobileProp, ...controlProps } = props;
+  // Modal portal 可能脱离房间内 ResponsiveProvider，优先用外层传入的 isMobile
+  const contextIsMobile = useIsMobile();
+  const isMobile = typeof isMobileProp === 'boolean' ? isMobileProp : contextIsMobile;
   const [value, onChange] = useControlValue(
     Object.assign(
       {},
       {
         defaultValue: 1
       },
-      props
+      controlProps
     )
   );
   const { formatMessage } = useIntl();
@@ -142,18 +122,19 @@ const LayoutType = withLocale(forwardRef((props, ref) => {
   useImperativeHandle(ref, () => {
     return { value: activeValue, onChange };
   }, [activeValue, onChange]);
+
+  const visibleList = isMobile ? list.filter(item => !item.hiddenInMobile) : list;
+
   return (
     <Row wrap gutter={[12, 12]}>
-      {list.map((item, index) => {
+      {visibleList.map((item, index) => {
         return (
           <Col
             xs={12}
             sm={12}
             md={12}
-            key={index}
-            className={classnames(style['layout-item-outer'], {
-              [style['hide-in-mobile']]: item.hiddenInMobile
-            })}
+            key={item.value}
+            className={style['layout-item-outer']}
             onClick={() => {
               onChange(item.value);
             }}
