@@ -11,11 +11,13 @@
       "isInvitationAllowed": true,
       "maxCount": 10,
       "members": [
-        { "id": "user-001", "nickname": "陈建国", "email": "chenjianguo@company.com", "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=chen", "isMaster": true },
-        { "id": "user-002", "nickname": "李明辉", "email": "liminghui@company.com", "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=li", "isMaster": false },
-        { "id": "user-003", "nickname": "王芳", "email": "wangfang@company.com", "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=wang", "isMaster": false }
+        { "id": "user-001", "nickname": "陈建国", "email": "chenjianguo@company.com", "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=chen", "isMaster": true, "attended": true },
+        { "id": "user-002", "nickname": "李明辉", "email": "liminghui@company.com", "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=li", "isMaster": false, "attended": true },
+        { "id": "user-003", "nickname": "王芳", "email": "wangfang@company.com", "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=wang", "isMaster": false, "attended": false }
       ],
       "options": {
+        "allowExtend": true,
+        "attention": "<ul><li>请准时进入会议</li><li>发言时请开启麦克风，请选择安静的环境进行会议</li><li>如需共享屏幕，请提前准备好相关材料</li><li>请提前进行设备检测，确保摄像头和麦克风正常</li></ul>",
         "setting": { "record": "audio", "speech": true, "layoutType": 1 },
         "documentType": "files",
         "document": [
@@ -35,10 +37,12 @@
       "isInvitationAllowed": true,
       "maxCount": 20,
       "members": [
-        { "id": "user-004", "nickname": "赵磊", "email": "zhaolei@company.com", "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=zhao", "isMaster": true },
-        { "id": "user-005", "nickname": "刘洋", "email": "liuyang@company.com", "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=liuyang", "isMaster": false }
+        { "id": "user-004", "nickname": "赵磊", "email": "zhaolei@company.com", "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=zhao", "isMaster": true, "attended": false },
+        { "id": "user-005", "nickname": "刘洋", "email": "liuyang@company.com", "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=liuyang", "isMaster": false, "attended": false }
       ],
       "options": {
+        "allowExtend": true,
+        "attention": "<ul><li>请准时进入会议</li><li>发言时请开启麦克风，请选择安静的环境进行会议</li><li>请提前进行设备检测，确保摄像头和麦克风正常</li></ul>",
         "setting": { "record": "", "speech": false, "layoutType": 2 }
       }
     },
@@ -52,10 +56,12 @@
       "isInvitationAllowed": false,
       "maxCount": 5,
       "members": [
-        { "id": "user-006", "nickname": "孙婷", "email": "sunting@company.com", "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=sun", "isMaster": true },
-        { "id": "user-007", "nickname": "周伟", "email": "zhouwei@company.com", "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=zhou", "isMaster": false }
+        { "id": "user-006", "nickname": "孙婷", "email": "sunting@company.com", "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=sun", "isMaster": true, "attended": true },
+        { "id": "user-007", "nickname": "周伟", "email": "zhouwei@company.com", "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=zhou", "isMaster": false, "attended": true }
       ],
       "options": {
+        "allowExtend": false,
+        "attention": "<ul><li>请准时进入会议</li><li>发言时请开启麦克风，请选择安静的环境进行会议</li><li>如需共享屏幕，请提前准备好相关材料</li><li>请提前进行设备检测，确保摄像头和麦克风正常</li></ul>",
         "setting": { "record": "video", "speech": true },
         "documentType": "files",
         "document": [
@@ -79,9 +85,11 @@
       "isInvitationAllowed": true,
       "maxCount": 50,
       "members": [
-        { "id": "user-008", "nickname": "吴晓燕", "email": "wuxiaoyan@company.com", "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=wu", "isMaster": true }
+        { "id": "user-008", "nickname": "吴晓燕", "email": "wuxiaoyan@company.com", "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=wu", "isMaster": true, "attended": false }
       ],
       "options": {
+        "allowExtend": true,
+        "attention": "<ul><li>请准时进入会议</li><li>发言时请开启麦克风，请选择安静的环境进行会议</li><li>请提前进行设备检测，确保摄像头和麦克风正常</li></ul>",
         "setting": { "record": "video", "speech": true, "layoutType": 4 },
         "documentType": "files",
         "document": [
@@ -102,12 +110,13 @@
       "isInvitationAllowed": false,
       "maxCount": 8,
       "members": [
-        { "id": "user-009", "nickname": "郑浩", "email": "zhenghao@company.com", "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=zheng", "isMaster": true },
-        { "id": "user-010", "nickname": "黄丽", "email": "huangli@company.com", "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=huang", "isMaster": false },
-        { "id": "user-011", "nickname": "马超", "email": "machao@company.com", "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=ma", "isMaster": false },
-        { "id": "user-012", "nickname": "林小燕", "email": "linxiaoyan@company.com", "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=lin", "isMaster": false }
+        { "id": "user-009", "nickname": "郑浩", "email": "zhenghao@company.com", "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=zheng", "isMaster": true, "attended": true },
+        { "id": "user-010", "nickname": "黄丽", "email": "huangli@company.com", "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=huang", "isMaster": false, "attended": true },
+        { "id": "user-011", "nickname": "马超", "email": "machao@company.com", "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=ma", "isMaster": false, "attended": false },
+        { "id": "user-012", "nickname": "林小燕", "email": "linxiaoyan@company.com", "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=lin", "isMaster": false, "attended": false }
       ],
       "options": {
+        "allowExtend": true,
         "setting": { "record": "", "speech": false, "layoutType": 1 }
       }
     }

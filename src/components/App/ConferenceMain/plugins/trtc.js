@@ -147,7 +147,7 @@ class ConferenceSDK {
   }
 
   recordClientEvent(type, data = {}) {
-    this.events.onClientEvent?.({
+    return this.events.onClientEvent?.({
       type,
       userId: data.userId || this.sdkParams.userId,
       roomId: this.roomId,
@@ -181,7 +181,7 @@ class ConferenceSDK {
     });
     this.clientState[this.sdkParams.userId] = 0;
     this.events.onLocalStateChange?.(this.clientState[this.sdkParams.userId]);
-    this.recordClientEvent('exit', { userId: this.sdkParams.userId, userType: 'local' });
+    await this.recordClientEvent('exit', { userId: this.sdkParams.userId, userType: 'local' });
     this.events.onExitRoom?.({ userId: this.sdkParams.userId, type: 'local' });
   }
 

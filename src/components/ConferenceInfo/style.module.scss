@@ -1,3 +1,5 @@
+@use '~@kne/responsive-utils/scss' as resp;
+
 .info {
   margin: 0 auto;
   background: var(--bg-color-grey);
@@ -121,6 +123,12 @@
 }
 
 .conference-title {
+  flex: 1;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   font-size: 14px;
   font-weight: bold;
 }
@@ -191,6 +199,94 @@
   color: var(--font-color-grey);
 }
 
+.attention-content {
+  margin-top: 10px;
+  padding: 12px 16px;
+  border-radius: 10px;
+  background: #fffbe6;
+  border-left: 3px solid #faad14;
+  color: var(--font-color);
+  line-height: 1.6;
+  word-break: break-word;
+
+  :global {
+    ul {
+      margin: 0;
+      padding-left: 1.2em;
+    }
+
+    li + li {
+      margin-top: 6px;
+    }
+
+    p {
+      margin: 0;
+    }
+  }
+}
+
+.meeting-settings-collapse {
+  width: 100%;
+
+  :global {
+    .ant-collapse-header {
+      display: flex !important;
+      align-items: center !important;
+      justify-content: space-between !important;
+      padding: 0 !important;
+      flex-direction: row !important;
+    }
+
+    .ant-collapse-header-text {
+      flex: 1;
+      min-width: 0;
+      text-align: left;
+    }
+
+    .ant-collapse-expand-icon {
+      margin-inline-start: 8px !important;
+      padding-inline-end: 0 !important;
+      order: 1;
+    }
+
+    .ant-collapse-content-box {
+      padding: 10px 0 0 !important;
+    }
+  }
+
+  .member-title {
+    margin: 0;
+    text-align: left;
+  }
+}
+
+.meeting-settings {
+  padding: 4px 16px;
+  border-radius: 10px;
+  background: #ffffff;
+
+  :global {
+    .ant-descriptions-item {
+      padding-bottom: 10px;
+    }
+
+    .ant-descriptions-item-label {
+      width: 42%;
+      color: var(--font-color-grey);
+    }
+
+    .ant-descriptions-item-content {
+      color: var(--font-color);
+      text-align: right;
+      justify-content: flex-end;
+    }
+
+    .ant-descriptions-item-container {
+      justify-content: space-between;
+    }
+  }
+}
+
 .member-list {
   display: flex;
   flex-direction: column;
@@ -214,6 +310,10 @@
 }
 
 .member-profile {
+  min-width: 0;
+}
+
+.member-tags {
   min-width: 0;
 }
 
@@ -270,29 +370,6 @@
   }
 }
 
-.transcription-tabs {
-  margin-top: 4px;
-
-  :global(.ant-tabs-nav) {
-    margin-bottom: 8px;
-  }
-}
-
-.transcription-list {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin-top: 10px;
-  max-height: 360px;
-  overflow-y: auto;
-}
-
-.transcription-item {
-  padding: 10px 12px;
-  border-radius: 10px;
-  background: #ffffff;
-}
-
 .transcription-member {
   font-weight: bold;
 }
@@ -303,161 +380,63 @@
   font-size: 12px;
 }
 
-.transcription-message {
-  margin-top: 4px;
-  line-height: 1.6;
-}
-
-.event-modal-scroller {
-  max-height: 620px;
-}
-
-.event-timeline {
+.transcription-chat {
   display: flex;
   flex-direction: column;
   gap: 12px;
+  margin-top: 10px;
+  max-height: 360px;
+  overflow-y: auto;
+  padding: 4px 2px;
 }
 
-.event-chart-list {
+.transcription-bubble-row {
   display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.event-analysis-list {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.event-device-info {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.event-device-tabs {
-  :global {
-    .ant-tabs-nav {
-      margin-bottom: 8px;
-    }
-
-    .ant-tabs-content-holder {
-      min-height: 120px;
-    }
-  }
-}
-
-.event-device-card {
-  word-break: break-all;
-
-  :global {
-    .ant-descriptions-title {
-      font-size: 13px;
-    }
-
-    .ant-descriptions-item-label,
-    .ant-descriptions-item-content {
-      padding: 6px 8px !important;
-      font-size: 12px;
-    }
-  }
-}
-
-.event-chart-card {
-  padding: 12px;
-  border-radius: 10px;
-  background: var(--bg-color-grey);
-}
-
-.event-timeline {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.event-chart-title {
-  margin-bottom: 8px;
-  font-weight: bold;
-}
-
-.event-flow {
-  :global {
-    .ant-descriptions {
-      margin-top: 8px;
-    }
-
-    .ant-descriptions-item-label,
-    .ant-descriptions-item-content {
-      padding: 6px 8px !important;
-      font-size: 12px;
-    }
-  }
-}
-
-.event-item {
-  display: grid;
-  grid-template-columns: 160px minmax(0, 1fr);
-  gap: 12px;
   align-items: flex-start;
+  gap: 10px;
+
+  &.is-host {
+    flex-direction: row-reverse;
+
+    .transcription-bubble-main {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+    }
+  }
 }
 
-.event-time {
-  color: var(--font-color-grey);
-  font-size: 12px;
-  line-height: 32px;
-  text-align: right;
+.transcription-bubble-main {
+  flex: 1;
+  min-width: 0;
 }
 
-.event-card {
-  position: relative;
-  padding: 10px 12px;
-  border-radius: 10px;
-  background: var(--bg-color-grey);
+.transcription-bubble-meta {
+  margin-bottom: 4px;
+}
 
-  &::before {
-    content: '';
-    position: absolute;
-    top: 16px;
-    left: -18px;
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
+.transcription-bubble {
+  display: inline-block;
+  max-width: 100%;
+  padding: 8px 12px;
+  border-radius: 4px 12px 12px 12px;
+  background: #ffffff;
+  line-height: 1.6;
+  word-break: break-word;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+
+  &.is-host {
+    border-radius: 12px 4px 12px 12px;
     background: var(--primary-color);
+    color: #ffffff;
   }
 }
 
-.event-code {
-  font-weight: bold;
-}
-
-.event-detail-collapse {
-  margin-top: 6px;
-
-  :global {
-    .ant-collapse-header {
-      padding: 4px 0 !important;
-      color: var(--primary-color) !important;
-      font-size: 12px;
-    }
-
-    .ant-collapse-content-box {
-      padding: 6px 0 0 !important;
-    }
-
-    .ant-descriptions-item-label,
-    .ant-descriptions-item-content {
-      padding: 6px 8px !important;
-      font-size: 12px;
-    }
-  }
-}
-
-@media (max-width: 768px) {
+@include resp.mobile-container {
   .info {
     width: 100%;
-    height: var(--box-height, 100dvh);
-    min-height: var(--box-height, 100dvh);
+    height: var(--box-height, var(--kne-viewport-height, 100vh));
+    min-height: var(--box-height, var(--kne-viewport-height, 100vh));
     border-radius: 0;
     box-shadow: none;
     flex-direction: column;
@@ -473,7 +452,7 @@
   .right-panel {
     height: 100%;
     min-height: 0;
-    padding: 16px;
+    padding: 12px 16px 16px;
     display: flex;
     flex-direction: column;
   }
@@ -487,6 +466,19 @@
   .title {
     padding: 0;
     font-size: 16px;
+    flex-wrap: wrap;
+    row-gap: 4px;
+  }
+
+  .title-info,
+  .title-actions {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .title-actions {
+    flex-wrap: wrap;
+    justify-content: flex-end;
   }
 
   .detail-summary {
@@ -495,6 +487,11 @@
 
   .detail-name {
     font-size: 16px;
+    word-break: break-word;
+  }
+
+  .detail-time {
+    word-break: break-word;
   }
 
   .divider {
@@ -530,9 +527,6 @@
 
   .conference-title {
     max-width: 100%;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
   }
 
   .list-content {
@@ -545,7 +539,7 @@
   }
 
   .scroller {
-    max-height: calc(var(--box-height, 100dvh) - 120px);
+    max-height: calc(var(--box-height, var(--kne-viewport-height, 100vh)) - 120px);
   }
 
   .list-scroller {
@@ -565,6 +559,7 @@
   .current-user {
     gap: 16px !important;
     padding: 8px 0;
+    width: 100%;
   }
 
   .current-actions {
@@ -574,8 +569,8 @@
     > :global(.ant-btn),
     > :global(.ant-btn-default),
     > :global(.ant-btn-primary) {
-      flex: 1 1 calc(50% - 10px);
-      min-width: 128px;
+      flex: 1 1 100%;
+      min-width: 0;
     }
   }
 
@@ -609,25 +604,32 @@
     justify-content: flex-end;
   }
 
+  .meeting-settings {
+    padding: 4px 12px;
+
+    :global {
+      .ant-descriptions-item-label {
+        width: auto;
+        max-width: 48%;
+      }
+    }
+  }
+
+  .transcription-chat {
+    max-height: min(360px, 50vh);
+  }
+
+  .transcription-bubble-meta {
+    flex-wrap: wrap;
+    row-gap: 4px;
+  }
+
   .preview-file {
     width: 100% !important;
   }
 
   .preview-video {
     width: 100%;
-  }
-
-  .event-item {
-    grid-template-columns: 1fr;
-  }
-
-  .event-time {
-    text-align: left;
-    line-height: 1.5;
-  }
-
-  .event-card::before {
-    display: none;
   }
 
   .list-pagination {

@@ -1,0 +1,43 @@
+{
+  "isFull": false,
+  "list": [
+    {
+      "title": "基础用法",
+      "description": "传入 mock 房间事件与成员数据，展示房间概览、摘要与成员详情",
+      "code": "./base.js",
+      "scope": [
+        {
+          "name": "_RoomEvents",
+          "packageName": "@components/RoomEvents"
+        },
+        {
+          "name": "_mockPreset",
+          "packageName": "@root/mockPreset"
+        },
+        {
+          "name": "remoteLoader",
+          "packageName": "@kne/remote-loader"
+        }
+      ]
+    },
+    {
+      "title": "空数据",
+      "description": "未传入事件时展示空状态",
+      "code": "./empty.js",
+      "scope": [
+        {
+          "name": "_RoomEvents",
+          "packageName": "@components/RoomEvents"
+        },
+        {
+          "name": "_mockPreset",
+          "packageName": "@root/mockPreset"
+        },
+        {
+          "name": "remoteLoader",
+          "packageName": "@kne/remote-loader"
+        }
+      ]
+    }
+  ]
+}

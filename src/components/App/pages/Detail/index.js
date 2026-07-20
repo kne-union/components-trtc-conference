@@ -27,32 +27,34 @@ const Detail = createWithRemoteLoader({
     }
   }, [searchParams, setSearchParams, headerName]);
   return (
-    <div className={style['box']}>
-      <Fetch
-        {...Object.assign({}, apis[name].getConferenceDetail)}
-        render={({ data, reload }) => {
-          return (
-            <ConferenceDetail
-              {...data.conference}
-              current={data.member}
-              onEnter={() => {
-                navigate(`${baseUrl}/conference`);
-              }}
-              onReload={() => {
-                console.log('---->reload');
-                reload();
-              }}
-              apis={{
-                saveMember: apis[name].saveMember,
-                inviteMember: apis[name].inviteMember,
-                removeMember: apis[name].removeMember,
-                joinConference: apis[name].joinConference,
-                getTrtcInstanceEvents: apis[name].getTrtcInstanceEvents
-              }}
-            />
-          );
-        }}
-      />
+    <div className={style['page']}>
+      <div className={style['box']}>
+        <Fetch
+          {...Object.assign({}, apis[name].getConferenceDetail)}
+          render={({ data, reload }) => {
+            return (
+              <ConferenceDetail
+                {...data.conference}
+                current={data.member}
+                onEnter={() => {
+                  navigate(`${baseUrl}/conference`);
+                }}
+                onReload={() => {
+                  console.log('---->reload');
+                  reload();
+                }}
+                apis={{
+                  saveMember: apis[name].saveMember,
+                  inviteMember: apis[name].inviteMember,
+                  removeMember: apis[name].removeMember,
+                  joinConference: apis[name].joinConference,
+                  getTrtcInstanceEvents: apis[name].getTrtcInstanceEvents
+                }}
+              />
+            );
+          }}
+        />
+      </div>
     </div>
   );
 });

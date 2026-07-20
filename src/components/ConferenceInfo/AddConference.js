@@ -17,7 +17,7 @@ const AddConference = createWithRemoteLoader({
     onClick: () => {
       const formModalApi = formModal({
         title: formatMessage({ id: 'AddMeetingTitle' }),
-        size: 'small',
+        size: 'large',
         formProps: {
           onSubmit: async data => {
             const options = Object.assign({}, data.options);

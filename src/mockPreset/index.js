@@ -12,11 +12,14 @@ const apis = merge({}, baseApis, {
       }
     },
     getConferenceDetail: {
-      loader: ({ params }) => {
+      loader: props => {
         return import('./conference-list.json').then(({ default: data }) => {
-          const id = params?.id || 'conf-001';
-          const conference = data.pageData.find(item => item.id === id);
-          return conference || data.pageData[0];
+          const id = props?.params?.id || props?.data?.id;
+          const conference = (id && data.pageData.find(item => item.id === id)) || null;
+          if (!conference) {
+            return null;
+          }
+          return { conference, member: conference.members?.[0] };
         });
       }
     },

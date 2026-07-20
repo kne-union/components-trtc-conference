@@ -21,6 +21,29 @@
       ]
     },
     {
+      "title": "剩余时间与延长会议",
+      "description": "切换普通时间 / 15分钟以内，以及是否允许延长，预览倒计时预警与延长按钮",
+      "code": "./remaining-time.js",
+      "scope": [
+        {
+          "name": "_ConferenceRoom",
+          "packageName": "@components/ConferenceRoom"
+        },
+        {
+          "name": "_mockPreset",
+          "packageName": "@root/mockPreset"
+        },
+        {
+          "name": "remoteLoader",
+          "packageName": "@kne/remote-loader"
+        },
+        {
+          "name": "antd",
+          "packageName": "antd"
+        }
+      ]
+    },
+    {
       "title": "布局类型选择器",
       "description": "展示LayoutType布局类型选择器，支持四种布局模式切换",
       "code": "./layout-type.js",

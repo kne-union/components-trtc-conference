@@ -102,7 +102,7 @@ export const globalInit = async () => {
         //url: 'http://localhost:3010',
         //tpl: '{{url}}',
         remote: 'components-thirdparty',
-        defaultVersion: '0.1.24'
+        defaultVersion: '0.1.25'
       },
       'components-trtc-conference':
         process.env.NODE_ENV === 'development'

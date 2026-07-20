@@ -337,7 +337,7 @@ const Conference = createWithRemoteLoader({
             setSignalLevel(level);
           },
           onClientEvent: event => {
-            clientEventCollector(event);
+            return clientEventCollector(event);
           },
           onKickedOut: ({ reason }) => {
             switch (reason) {
@@ -398,12 +398,16 @@ const Conference = createWithRemoteLoader({
     });
     return () => {
       promise.then(async currentSdk => {
-        await collectorsRef.current?.collector?.flush?.();
-        await collectorsRef.current?.clientEventCollector?.flush?.();
-        collectorsRef.current?.collector?.destroy?.();
-        collectorsRef.current?.clientEventCollector?.destroy?.();
-        collectorsRef.current = null;
-        return currentSdk.exitRoom();
+        try {
+          // 先退出房间并写入 exit 事件，再 flush；否则 collector 已 destroy 会导致退出事件丢失
+          await currentSdk.exitRoom();
+        } finally {
+          await collectorsRef.current?.collector?.flush?.();
+          await collectorsRef.current?.clientEventCollector?.flush?.();
+          await collectorsRef.current?.collector?.destroy?.();
+          await collectorsRef.current?.clientEventCollector?.destroy?.();
+          collectorsRef.current = null;
+        }
       });
     };
   }, [buildClientDeviceInfo, conference.id, initSdk, updateDevices]);

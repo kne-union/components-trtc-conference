@@ -43,12 +43,14 @@ const createCollector = (callback, options) => {
   };
 
   collect.flush = flush;
-  collect.destroy = () => {
-    destroyed = true;
+  collect.destroy = async () => {
     if (flushTimer) {
       clearInterval(flushTimer);
       flushTimer = null;
     }
+    // destroy 前先把残留事件发出去（如 exit），避免页面卸载丢上报
+    await flush();
+    destroyed = true;
   };
 
   return collect;

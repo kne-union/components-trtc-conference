@@ -1,5 +1,5 @@
 import { createWithRemoteLoader } from '@kne/remote-loader';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Flex, List, Card, Button, Divider, Pagination, App, Empty } from 'antd';
 import dayjs from 'dayjs';
 import classnames from 'classnames';
@@ -21,8 +21,33 @@ const ConferenceInfo = createWithRemoteLoader({
   const { message } = App.useApp();
   const { formatMessage } = useIntl();
 
+  const openConference = useCallback(item => {
+    setConference(item);
+  }, []);
+
+  const reloadConference = useCallback(() => {
+    reload && reload();
+  }, [reload]);
+
   useEffect(() => {
-    if (!conference?.id || !apis?.getAiTranscriptionContent) {
+    if (!conference?.id || !data?.pageData) {
+      return;
+    }
+    const latest = data.pageData.find(item => String(item.id) === String(conference.id));
+    if (latest) {
+      setConference(prev => {
+        if (!prev || String(prev.id) !== String(latest.id)) {
+          return prev;
+        }
+        return Object.assign({}, prev, latest);
+      });
+    }
+  }, [data, conference?.id]);
+
+  useEffect(() => {
+    const shouldLoadTranscription =
+      conference?.id && conference?.status === 1 && conference?.options?.setting?.speech && apis?.getAiTranscriptionContent;
+    if (!shouldLoadTranscription) {
       setAiTranscriptionContent(null);
       return;
     }
@@ -42,7 +67,7 @@ const ConferenceInfo = createWithRemoteLoader({
     return () => {
       cancelled = true;
     };
-  }, [apis, conference?.id]);
+  }, [apis, conference?.id, conference?.status, conference?.options?.setting?.speech]);
 
   return (
     <Flex className={classnames(className, style['info'])}>
@@ -51,7 +76,7 @@ const ConferenceInfo = createWithRemoteLoader({
         user={user}
         reload={data => {
           reload && reload();
-          data && setConference(data);
+          data && openConference(data);
         }}
         onDetailEnter={item => {
           window.open(getDetailUrl(item), '_blank');
@@ -74,11 +99,12 @@ const ConferenceInfo = createWithRemoteLoader({
                   {...Object.assign({}, conference)}
                   aiTranscriptionContent={aiTranscriptionContent}
                   apis={apis}
+                  onReload={reloadConference}
                   onDetailEnter={async item => {
                     const { shorten } = await actions.getMemberShorten(item);
                     window.open(getDetailUrl({ shorten }), '_blank');
                   }}
-                  onEdit={onEdit}
+                  onEdit={conference.status === 0 ? onEdit : undefined}
                   onCancel={async () => {
                     await actions.cancel({ id: conference.id });
                     reload && reload();
@@ -140,10 +166,12 @@ const ConferenceInfo = createWithRemoteLoader({
                                   shape: 'round',
                                   children: formatMessage({ id: 'View' }),
                                   onClick: () => {
-                                    setConference(item);
+                                    openConference(item);
                                   }
-                                },
-                                {
+                                }
+                              ];
+                              if (item.status === 0) {
+                                options.push({
                                   buttonComponent: EditConferenceButton,
                                   data: item,
                                   apis,
@@ -151,8 +179,8 @@ const ConferenceInfo = createWithRemoteLoader({
                                   size: 'small',
                                   shape: 'round',
                                   children: formatMessage({ id: 'Edit' })
-                                }
-                              ];
+                                });
+                              }
                               if (isBeforeStart) {
                                 options.push({
                                   danger: true,

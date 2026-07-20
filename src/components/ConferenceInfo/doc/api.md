@@ -44,6 +44,7 @@
 | options.allowExtend | boolean | 是否允许主持人延长会议（默认开启；开启后剩余不足15分钟时可延长15分钟） |
 | isInvitationAllowed | boolean | 是否允许邀请（默认允许） |
 | maxCount | number | 最大参会成员数（默认2） |
+| options.attention | string | 会议注意事项（富文本 HTML，使用 CKEditor 编辑） |
 | options.documentType | string | 文档类型：`'files'` 文件列表、`'iframe'` 内嵌页面 |
 | options.document | array | 会议文档文件列表（最多10个，type为 files 时使用） |
 | options.documentUrl | string | 内嵌页面地址（type为 iframe 时使用） |
@@ -67,7 +68,7 @@
 
 ### ConferenceDetail
 
-会议详情组件，展示会议完整信息，包括当前用户状态、参会人员列表、会议文档和录制资源。
+会议详情组件，展示会议完整信息，包括当前用户状态、注意事项、参会人员列表、会议文档和录制资源。
 
 #### 属性说明
 
@@ -83,7 +84,7 @@
 | status | number | 是 | - | 会议状态：0-进行中/待开始、1-已结束 |
 | isInvitationAllowed | boolean | 否 | - | 是否允许邀请成员 |
 | maxCount | number | 否 | - | 最大参会成员数 |
-| members | array | 否 | `[]` | 参会成员列表 |
+| members | array | 否 | `[]` | 参会成员列表，成员含 `attended`（是否参加过会议） |
 | options | object | 否 | - | 会议选项配置 |
 | apis | object | 否 | - | API接口配置 |
 | onReload | function | 否 | - | 数据刷新回调 |
