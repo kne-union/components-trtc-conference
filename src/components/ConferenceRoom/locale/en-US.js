@@ -10,6 +10,7 @@ const locale = {
   Chat: 'Chat',
 
   // Layout/index.js
+  Back: 'Back',
   OnlineMeeting: 'Online Meeting',
   RemainingTime: 'Meeting Remaining',
   End: 'End',
@@ -31,7 +32,7 @@ const locale = {
   ExpandMemberList: 'Expand member list',
   CollapseMemberList: 'Collapse member list',
   ViewPrevMemberWindow: 'View previous member window',
-  ViewNextMemberWindow: 'View next member window',
+  ViewNextMemberWindow: 'View next member window'
 };
 
 export default locale;

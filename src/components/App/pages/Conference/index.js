@@ -1,6 +1,6 @@
 import { createWithRemoteLoader } from '@kne/remote-loader';
 import Fetch from '@kne/react-fetch';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
 import ConferenceRoom from '../../ConferenceMain';
 import { useContext } from '../../context';
 import style from './style.module.scss';
@@ -11,6 +11,7 @@ const Conference = createWithRemoteLoader({
   const [usePreset] = remoteModules;
   const { apis } = usePreset();
   const { baseUrl, name } = useContext();
+  const navigate = useNavigate();
   return (
     <Fetch
       {...Object.assign({}, apis[name].enterConference)}
@@ -20,6 +21,9 @@ const Conference = createWithRemoteLoader({
             className={style['conference-room']}
             conference={data.conference}
             current={data.member}
+            onBack={() => {
+              navigate(baseUrl);
+            }}
             sdkParams={data.sign}
             baseUrl={baseUrl}
             apis={{

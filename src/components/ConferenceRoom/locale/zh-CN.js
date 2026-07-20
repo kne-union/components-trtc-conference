@@ -10,6 +10,7 @@ const locale = {
   Chat: '聊天',
 
   // Layout/index.js
+  Back: '返回',
   OnlineMeeting: '在线会议',
   RemainingTime: '会议剩余时间',
   End: '结束',
@@ -31,7 +32,7 @@ const locale = {
   ExpandMemberList: '展开成员列表',
   CollapseMemberList: '收起成员列表',
   ViewPrevMemberWindow: '查看上一个成员窗口',
-  ViewNextMemberWindow: '查看下一个成员窗口',
+  ViewNextMemberWindow: '查看下一个成员窗口'
 };
 
 export default locale;

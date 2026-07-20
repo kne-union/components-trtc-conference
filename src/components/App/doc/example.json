@@ -23,6 +23,56 @@
           "packageName": "react-router-dom"
         }
       ]
+    },
+    {
+      "title": "详情页返回首页",
+      "description": "登录用户进入 /detail 时，左侧显示返回按钮，点击回到系统首页（会议列表）",
+      "code": "./detail.js",
+      "scope": [
+        {
+          "name": "_App",
+          "packageName": "@components/App"
+        },
+        {
+          "name": "_mockPreset",
+          "packageName": "@root/mockPreset"
+        },
+        {
+          "name": "remoteLoader",
+          "packageName": "@kne/remote-loader"
+        },
+        {
+          "name": "reactRouterDom",
+          "packageName": "react-router-dom"
+        }
+      ]
+    },
+    {
+      "title": "会议页返回首页",
+      "description": "进入会议后，会议名称左侧显示返回按钮，点击回到系统首页（会议列表）。示例用会议房间 UI 演示返回按钮，避免文档环境连真实 TRTC",
+      "code": "./conference.js",
+      "scope": [
+        {
+          "name": "_App",
+          "packageName": "@components/App"
+        },
+        {
+          "name": "_ConferenceRoom",
+          "packageName": "@components/ConferenceRoom"
+        },
+        {
+          "name": "_mockPreset",
+          "packageName": "@root/mockPreset"
+        },
+        {
+          "name": "remoteLoader",
+          "packageName": "@kne/remote-loader"
+        },
+        {
+          "name": "reactRouterDom",
+          "packageName": "react-router-dom"
+        }
+      ]
     }
   ]
 }
