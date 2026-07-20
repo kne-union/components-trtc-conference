@@ -15,6 +15,7 @@ import get from 'lodash/get';
 import createCollector from './createCollector';
 import withLocale from './withLocale';
 import { useIntl } from '@kne/react-intl';
+import resolveAvatarProps from '@components/ConferenceInfo/resolveAvatarProps';
 
 const ViewBar = createWithRemoteLoader({
   modules: ['components-core:Image', 'components-core:Icon']
@@ -24,7 +25,7 @@ const ViewBar = createWithRemoteLoader({
   return (
     <Flex className={style['view-item-bar']} justify="space-between" align="center" gap={8}>
       <Flex gap={8}>
-        <Image.Avatar className={style['avatar']} id={current.avatar} />
+        <Image.Avatar className={style['avatar']} {...resolveAvatarProps(current.avatar)} />
         <div>
           {current.nickname || formatMessage({ id: 'Unnamed' })}
           {shareScreen ? formatMessage({ id: 'ScreenShareOf' }) : ''}

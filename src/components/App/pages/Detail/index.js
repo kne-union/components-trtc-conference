@@ -6,6 +6,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useEffect } from 'react';
 import { setToken } from '@kne/token-storage';
 import { useContext } from '../../context';
+import prepareMediaPermission from '../../prepareMediaPermission';
 
 const Detail = createWithRemoteLoader({
   modules: ['components-core:Global@usePreset']
@@ -36,7 +37,9 @@ const Detail = createWithRemoteLoader({
               <ConferenceDetail
                 {...data.conference}
                 current={data.member}
-                onEnter={() => {
+                onEnter={async () => {
+                  // iOS PWA：必须在点击手势内先拿媒体权限，否则入会后 startLocal* 会被拦截
+                  await prepareMediaPermission();
                   navigate(`${baseUrl}/conference`);
                 }}
                 onReload={() => {

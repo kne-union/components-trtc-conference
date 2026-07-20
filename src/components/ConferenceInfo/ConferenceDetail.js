@@ -16,6 +16,7 @@ import RoomEvents from '@components/RoomEvents';
 import withLocale from './withLocale';
 import { useIntl } from '@kne/react-intl';
 import { useIsMobile } from '@kne/responsive-utils';
+import resolveAvatarProps from './resolveAvatarProps';
 
 export const ConferenceDetailInner = createWithRemoteLoader({
   modules: [
@@ -29,6 +30,7 @@ export const ConferenceDetailInner = createWithRemoteLoader({
     'components-core:FilePreview',
     'components-core:Common@SimpleBar',
     'components-core:Modal@useModal',
+    'components-core:ButtonGroup@ButtonFooter',
     'components-thirdparty:CKEditor',
     'components-admin:Account@Language'
   ]
@@ -56,12 +58,13 @@ export const ConferenceDetailInner = createWithRemoteLoader({
   isAdmin,
   aiTranscriptionContent
 }) => {
-  const [Icon, Image, InfoPage, StateTag, ConfirmButton, usePreset, LoadingButton, FilePreview, SimpleBar, useModal, CKEditor, Language] = remoteModules;
+  const [Icon, Image, InfoPage, StateTag, ConfirmButton, usePreset, LoadingButton, FilePreview, SimpleBar, useModal, ButtonFooter, CKEditor, Language] = remoteModules;
   const { ajax } = usePreset();
   const { message } = App.useApp();
   const modal = useModal();
   const { formatMessage } = useIntl();
   const isMobile = useIsMobile();
+  const DetailScroller = isMobile ? 'div' : SimpleBar;
   const isBeforeStart = status === 0 && startTime && dayjs().isBefore(dayjs(startTime));
   const canViewTrtcRoomEvents = isAdmin || current?.isMaster;
   const recordType = get(options, 'setting.record');
@@ -146,7 +149,7 @@ export const ConferenceDetailInner = createWithRemoteLoader({
             })}
             key={item.key}
           >
-            <Image.Avatar size={32} id={item.avatar} />
+            <Image.Avatar size={32} {...resolveAvatarProps(item.avatar)} />
             <div className={style['transcription-bubble-main']}>
               <Flex
                 align="center"
@@ -273,8 +276,26 @@ export const ConferenceDetailInner = createWithRemoteLoader({
     });
   };
 
+  const canInviteAsMaster =
+    status === 0 && !!current && isInvitationAllowed && members.length < maxCount && current?.isMaster;
+  const canInviteAsAdmin = isAdmin && status === 0 && isInvitationAllowed;
+  const showInviteMember = canInviteAsMaster || canInviteAsAdmin;
+  const inviteMemberButton = showInviteMember ? (
+    <InviteMember
+      type={canInviteAsAdmin || isMobile ? 'primary' : undefined}
+      size="large"
+      shape="round"
+      apis={apis}
+      id={id}
+      disabled={members.length >= maxCount}
+      className={isMobile ? style['invite-footer-btn'] : undefined}
+    >
+      {formatMessage({ id: 'InviteMembers' })}({members.length}/{maxCount})
+    </InviteMember>
+  ) : null;
+
   return (
-    <Flex vertical flex={1} className={style['right-panel']}>
+    <Flex vertical flex={isMobile ? undefined : 1} className={style['right-panel']}>
       <Flex className={style['title']} gap={8} justify="space-between">
         <Flex gap={8} className={style['title-info']}>
           {onBack && (
@@ -310,13 +331,13 @@ export const ConferenceDetailInner = createWithRemoteLoader({
         <div className={style['detail-name']}>{name}</div>
         <div className={style['detail-time']}>({formatConferenceTime({ startTime, duration, formatMessage })})</div>
       </div>
-      <SimpleBar className={style['scroller']}>
+      <DetailScroller className={style['scroller']}>
         <Flex vertical align="center" className={style['current-user']} gap={30}>
           {status === 0 && current && (
             <>
               <Card variant={'borderless'}>
                 <Flex vertical gap={12} align="center">
-                  <Image.Avatar size={100} id={current.avatar} />
+                  <Image.Avatar size={100} {...resolveAvatarProps(current.avatar)} />
                   <div>{current.nickname}</div>
                 </Flex>
                 <SaveMember
@@ -383,11 +404,7 @@ export const ConferenceDetailInner = createWithRemoteLoader({
 
           {status === 0 && current && (
             <Flex gap={12} className={style['current-actions']}>
-              {isInvitationAllowed && members.length < maxCount && current?.isMaster && (
-                <InviteMember size="large" shape="round" apis={apis}>
-                  {formatMessage({ id: 'InviteMembers' })}({members.length}/{maxCount})
-                </InviteMember>
-              )}
+              {!isMobile && canInviteAsMaster && inviteMemberButton}
               <Button
                 size="large"
                 shape="round"
@@ -410,18 +427,18 @@ export const ConferenceDetailInner = createWithRemoteLoader({
               >
                 {formatMessage({ id: 'DeviceTesting' })}
               </Button>
-              <Button
+              <LoadingButton
                 disabled={startTime && dayjs(startTime).isAfter(dayjs())}
                 size="large"
                 type="primary"
                 shape="round"
                 icon={<Icon type="icon-fasongduihua" />}
-                onClick={() => {
-                  onEnter && onEnter();
+                onClick={async () => {
+                  await onEnter?.();
                 }}
               >
                 {formatMessage({ id: 'EnterMeeting' })}
-              </Button>
+              </LoadingButton>
             </Flex>
           )}
 
@@ -482,7 +499,7 @@ export const ConferenceDetailInner = createWithRemoteLoader({
                 members.map(member => (
                   <div className={style['member-item']} key={member.id || member.email || member.nickname}>
                     <Flex align="center" gap={10} className={style['member-info']}>
-                      <Image.Avatar size={36} id={member.avatar} />
+                      <Image.Avatar size={36} {...resolveAvatarProps(member.avatar)} />
                       <div className={style['member-profile']}>
                         <div className={style['member-name']}>{member.nickname || member.email || '-'}</div>
                         <Flex gap={4} wrap className={style['member-tags']}>
@@ -646,15 +663,14 @@ export const ConferenceDetailInner = createWithRemoteLoader({
             </Flex>
           )}
 
-          {isAdmin && status === 0 && isInvitationAllowed && (
+          {!isMobile && canInviteAsAdmin && (
             <Flex justify="center">
-              <InviteMember type="primary" size="large" shape="round" apis={apis} id={id} disabled={members.length >= maxCount}>
-                {formatMessage({ id: 'InviteMembers' })}({members.length}/{maxCount})
-              </InviteMember>
+              {inviteMemberButton}
             </Flex>
           )}
         </Flex>
-      </SimpleBar>
+      </DetailScroller>
+      {isMobile && inviteMemberButton && <ButtonFooter>{inviteMemberButton}</ButtonFooter>}
     </Flex>
   );
 }));

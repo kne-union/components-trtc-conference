@@ -108,6 +108,10 @@ const locale = {
   // ConferenceInfo.js (list view)
   Ended: 'Ended',
   DateFormat: 'MM/DD',
+  FilterDatePlaceholder: 'Select date',
+  FilterDateLabel: 'Date',
+  FilterKeywordPlaceholder: 'Search meetings',
+  FilterKeywordLabel: 'Keyword',
 
   // AddConference.js
   AddMeetingTitle: 'Add Meeting',

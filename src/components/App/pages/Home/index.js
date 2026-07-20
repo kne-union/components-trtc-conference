@@ -7,6 +7,8 @@ import { useContext } from '../../context';
 import { App } from 'antd';
 import withLocale from '../../withLocale';
 import { useIntl } from '@kne/react-intl';
+import { useIsMobile } from '@kne/responsive-utils';
+import { useCallback, useMemo } from 'react';
 
 const Home = createWithRemoteLoader({
   modules: ['components-core:Global@usePreset']
@@ -15,26 +17,80 @@ const Home = createWithRemoteLoader({
   const { apis, ajax } = usePreset();
   const { baseUrl, userInfo, name } = useContext();
   const [searchParams, setSearchParams] = useSearchParams();
+  const isMobile = useIsMobile();
   const pageSize = 10;
   const { message } = App.useApp();
   const { formatMessage } = useIntl();
+  const keyword = searchParams.get('keyword') || '';
+  const date = searchParams.get('date') || '';
+  const currentPage = isMobile ? 1 : Number(searchParams.get('page') || 1) || 1;
+  const filterValue = useMemo(
+    () => ({
+      keyword,
+      date
+    }),
+    [keyword, date]
+  );
+
+  const buildListParams = useCallback(
+    (page = currentPage) => {
+      return Object.assign(
+        {
+          perPage: pageSize,
+          currentPage: page
+        },
+        keyword ? { keyword } : {},
+        date ? { date } : {}
+      );
+    },
+    [currentPage, date, keyword, pageSize]
+  );
+
+  const handleFilterChange = useCallback(
+    ({ keyword: nextKeyword = '', date: nextDate = '' }) => {
+      setSearchParams(prev => {
+        const next = new URLSearchParams(prev);
+        if (nextKeyword) {
+          next.set('keyword', nextKeyword);
+        } else {
+          next.delete('keyword');
+        }
+        if (nextDate) {
+          next.set('date', nextDate);
+        } else {
+          next.delete('date');
+        }
+        next.delete('page');
+        return next;
+      });
+    },
+    [setSearchParams]
+  );
+
   return (
     <div className={style['page']}>
       <div className={style['box']}>
         <Fetch
           {...Object.assign({}, apis[name].getConferenceList, {
-            params: {
-              perPage: pageSize,
-              currentPage: searchParams.get('page') || 1
-            }
+            params: buildListParams()
           })}
-          render={({ data, reload }) => {
+          render={({ data, reload, loadMore, isComplete, requestParams }) => {
+            const resetReload = () => {
+              return reload({
+                params: buildListParams(isMobile ? 1 : currentPage)
+              });
+            };
             return (
               <ConferenceInfo
                 user={userInfo}
-                current={searchParams.get('page') || 1}
-                reload={reload}
+                current={currentPage}
+                reload={resetReload}
                 pageSize={pageSize}
+                loadMore={isMobile ? loadMore : undefined}
+                isComplete={isComplete}
+                requestParams={requestParams}
+                filterValue={filterValue}
+                onFilterChange={handleFilterChange}
                 getDetailUrl={item => {
                   return `${baseUrl}/detail?code=${item.shorten}`;
                 }}
@@ -84,7 +140,7 @@ const Home = createWithRemoteLoader({
                       return;
                     }
                     message.success(formatMessage({ id: 'CancelMeetingSuccess' }));
-                    reload();
+                    resetReload();
                   },
                   remove: async ({ id }) => {
                     const { data: resData } = await ajax(
@@ -97,7 +153,7 @@ const Home = createWithRemoteLoader({
                       return;
                     }
                     message.success(formatMessage({ id: 'DeleteSuccess' }));
-                    reload();
+                    resetReload();
                   }
                 }}
               />

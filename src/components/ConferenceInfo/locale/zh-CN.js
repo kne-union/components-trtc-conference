@@ -108,6 +108,10 @@ const locale = {
   // ConferenceInfo.js (list view)
   Ended: '已结束',
   DateFormat: 'MM月DD日',
+  FilterDatePlaceholder: '选择日期',
+  FilterDateLabel: '日期',
+  FilterKeywordPlaceholder: '搜索会议',
+  FilterKeywordLabel: '关键词',
 
   // AddConference.js
   AddMeetingTitle: '添加会议',

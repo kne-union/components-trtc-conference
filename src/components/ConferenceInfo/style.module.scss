@@ -36,6 +36,139 @@
   padding: 0 20px;
 }
 
+.title-date {
+  flex: none;
+}
+
+.list-filter-outer {
+  width: 100%;
+  min-width: 0;
+}
+
+.list-header-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  &.has-value-display {
+    .list-value-display {
+      :global(.filter-title),
+      :global(.filter-value-display),
+      > :global(.ant-space) {
+        border-bottom: none !important;
+      }
+
+      :global(.filter-line) {
+        border-bottom: none !important;
+      }
+    }
+  }
+}
+
+.list-toolbar {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.list-toolbar-actions {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+  min-width: 0;
+}
+
+.list-filter {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+}
+
+.list-filter-inner {
+  width: 100%;
+
+  :global(.filter-title) {
+    width: 100%;
+    padding: 0 !important;
+    margin: 0 !important;
+    line-height: 24px !important;
+    border-bottom: none !important;
+  }
+
+  :global(.filter-title > .ant-space-item:first-child) {
+    display: none !important;
+  }
+
+  :global(.filter-label) {
+    display: none !important;
+  }
+
+  :global(.filter-list) {
+    width: 100%;
+  }
+
+  :global(.filter-line) {
+    min-height: 24px;
+    gap: 8px;
+  }
+
+  :global(.filter-item-wrap) {
+    height: 24px;
+  }
+
+  :global(.filter-item) {
+    height: 24px;
+    padding: 0 8px;
+
+    :global(.ant-space-item) {
+      line-height: 24px;
+    }
+  }
+
+  :global(.filter-item-label) {
+    line-height: 24px;
+  }
+}
+
+.list-filter-keyword {
+  width: 160px;
+  min-width: 120px;
+}
+
+.list-value-display {
+  :global(.filter-value-display),
+  :global(.filter-title) {
+    padding: 0 20px 6px !important;
+    margin-top: 0 !important;
+    line-height: 22px !important;
+    border-bottom: none !important;
+    gap: 8px !important;
+  }
+
+  :global(.filter-value-display .filter-label) {
+    line-height: 22px;
+  }
+
+  :global(.filter-value-display-root .filter-line) {
+    min-height: 22px;
+    gap: 6px;
+  }
+
+  :global(.filter-value-tag) {
+    margin-inline-end: 0;
+  }
+}
+
+.list-header {
+  display: flex;
+  flex-direction: column;
+}
+
 .title-info {
   flex: 1;
   min-width: 0;
@@ -80,9 +213,20 @@
   min-width: 0;
 }
 
+.list-content {
+  flex: 1;
+  min-height: 0;
+}
+
 .list-scroller-outer {
   flex: 1;
   min-height: 0;
+  overflow: hidden;
+}
+
+.list-scroller {
+  max-height: none;
+  height: 100%;
 }
 
 .list-item-header {
@@ -136,6 +280,10 @@
 .time {
   font-size: 12px;
   color: var(--font-color-grey);
+}
+
+.list-pagination-wrap {
+  flex-shrink: 0;
 }
 
 .list-pagination {
@@ -435,22 +583,24 @@
 @include resp.mobile-container {
   .info {
     width: 100%;
-    height: var(--box-height, var(--kne-viewport-height, 100vh));
-    min-height: var(--box-height, var(--kne-viewport-height, 100vh));
+    height: auto;
+    min-height: var(--kne-viewport-height, 100vh);
     border-radius: 0;
     box-shadow: none;
+    overflow: visible;
     flex-direction: column;
   }
 
   .right-panel-outer {
     width: 100%;
-    flex: 1;
+    flex: 1 0 auto;
     min-width: 0;
     min-height: 0;
+    height: auto;
   }
 
   .right-panel {
-    height: 100%;
+    height: auto;
     min-height: 0;
     padding: 12px 16px 16px;
     display: flex;
@@ -458,16 +608,50 @@
   }
 
   .right-panel > .scroller {
-    flex: 1;
+    flex: none;
     min-height: 0;
     max-height: none;
+    height: auto;
   }
 
   .title {
     padding: 0;
     font-size: 16px;
-    flex-wrap: wrap;
-    row-gap: 4px;
+    flex-wrap: nowrap;
+    row-gap: 0;
+  }
+
+  .list-header-section.has-mobile-search {
+    .list-search-row {
+      padding-bottom: 0;
+    }
+  }
+
+  .list-search-row {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+
+    :global(.ant-input-search),
+    :global(.ant-input-group-wrapper),
+    :global(.ant-input-group) {
+      width: 100% !important;
+      max-width: 100%;
+    }
+  }
+
+  .list-toolbar.is-mobile {
+    flex: 1;
+    min-width: 0;
+    gap: 8px;
+    justify-content: flex-end;
+  }
+
+  .list-value-display {
+    :global(.filter-value-display),
+    :global(.filter-title) {
+      padding-inline: 0 !important;
+    }
   }
 
   .title-info,
@@ -530,21 +714,32 @@
   }
 
   .list-content {
-    flex: 1;
+    flex: none;
     min-height: 0;
   }
 
   .list-scroller-outer {
-    overflow: hidden;
+    flex: none;
+    overflow: visible;
   }
 
   .scroller {
-    max-height: calc(var(--box-height, var(--kne-viewport-height, 100vh)) - 120px);
+    max-height: none;
+    height: auto;
   }
 
   .list-scroller {
-    height: 100%;
+    height: auto;
     max-height: none;
+  }
+
+  .mobile-load-more {
+    width: 100%;
+    height: auto;
+  }
+
+  .invite-footer-btn {
+    width: 100%;
   }
 
   .list-title-area {

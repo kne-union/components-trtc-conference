@@ -4,6 +4,7 @@ import Fetch from '@kne/react-fetch';
 import style from '../../style.module.scss';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useContext } from '../../context';
+import prepareMediaPermission from '../../prepareMediaPermission';
 
 const Invite = createWithRemoteLoader({
   modules: ['components-core:Global@usePreset']
@@ -28,7 +29,8 @@ const Invite = createWithRemoteLoader({
               <ConferenceDetail
                 {...data.conference}
                 inviter={data.inviter}
-                onEnter={() => {
+                onEnter={async () => {
+                  await prepareMediaPermission();
                   navigate(`${baseUrl}/conference`);
                 }}
                 onReload={data => {
