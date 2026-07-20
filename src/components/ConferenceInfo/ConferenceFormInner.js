@@ -5,9 +5,9 @@ import withLocale from './withLocale';
 import { useIntl } from '@kne/react-intl';
 
 const ConferenceFormInner = createWithRemoteLoader({
-  modules: ['components-core:FormInfo']
+  modules: ['components-core:FormInfo', 'components-thirdparty:CKEditor']
 })(withLocale(({ remoteModules, isEdit }) => {
-  const [FormInfo] = remoteModules;
+  const [FormInfo, CKEditor] = remoteModules;
   const { TableList, useFormContext } = FormInfo;
   const { Input, DatePicker, Select, Upload, Switch, InputNumber, Checkbox, RadioGroup } = FormInfo.fields;
   const { formData } = useFormContext();
@@ -151,6 +151,16 @@ const ConferenceFormInner = createWithRemoteLoader({
           ]}
         />
       )}
+      <FormInfo
+        column={1}
+        list={[
+          <CKEditor
+            name="options.attention"
+            label={formatMessage({ id: 'Attention' })}
+            defaultValue={formatMessage({ id: 'AttentionDefault' })}
+          />
+        ]}
+      />
     </>
   );
 }));

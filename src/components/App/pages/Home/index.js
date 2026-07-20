@@ -19,90 +19,92 @@ const Home = createWithRemoteLoader({
   const { message } = App.useApp();
   const { formatMessage } = useIntl();
   return (
-    <div className={style['box']}>
-      <Fetch
-        {...Object.assign({}, apis[name].getConferenceList, {
-          params: {
-            perPage: pageSize,
-            currentPage: searchParams.get('page') || 1
-          }
-        })}
-        render={({ data, reload }) => {
-          return (
-            <ConferenceInfo
-              user={userInfo}
-              current={searchParams.get('page') || 1}
-              reload={reload}
-              pageSize={pageSize}
-              getDetailUrl={item => {
-                return `${baseUrl}/detail?code=${item.shorten}`;
-              }}
-              onPageChange={({ currentPage }) => {
-                setSearchParams(searchParams => {
-                  const newSearchParams = new URLSearchParams(searchParams);
-                  newSearchParams.set('page', currentPage);
-                  return newSearchParams;
-                });
-              }}
-              data={data}
-              apis={{
-                create: apis[name].createConference,
-                save: apis[name].saveConference,
-                inviteMember: Object.assign(apis[name].inviteMemberFromUser),
-                getMemberShorten: apis[name].getMemberShorten,
-                getTrtcInstanceEvents: apis[name].getTrtcInstanceEvents,
-                getAiTranscriptionContent: async ({ id }) => {
-                  const { data: resData } = await ajax(
-                    Object.assign({}, apis[name].getAiTranscriptionContent, {
-                      params: { id }
-                    })
-                  );
-                  if (resData.code !== 0) {
-                    throw new Error(resData.msg);
+    <div className={style['page']}>
+      <div className={style['box']}>
+        <Fetch
+          {...Object.assign({}, apis[name].getConferenceList, {
+            params: {
+              perPage: pageSize,
+              currentPage: searchParams.get('page') || 1
+            }
+          })}
+          render={({ data, reload }) => {
+            return (
+              <ConferenceInfo
+                user={userInfo}
+                current={searchParams.get('page') || 1}
+                reload={reload}
+                pageSize={pageSize}
+                getDetailUrl={item => {
+                  return `${baseUrl}/detail?code=${item.shorten}`;
+                }}
+                onPageChange={({ currentPage }) => {
+                  setSearchParams(searchParams => {
+                    const newSearchParams = new URLSearchParams(searchParams);
+                    newSearchParams.set('page', currentPage);
+                    return newSearchParams;
+                  });
+                }}
+                data={data}
+                apis={{
+                  create: apis[name].createConference,
+                  save: apis[name].saveConference,
+                  inviteMember: Object.assign(apis[name].inviteMemberFromUser),
+                  getMemberShorten: apis[name].getMemberShorten,
+                  getTrtcInstanceEvents: apis[name].getTrtcInstanceEvents,
+                  getAiTranscriptionContent: async ({ id }) => {
+                    const { data: resData } = await ajax(
+                      Object.assign({}, apis[name].getAiTranscriptionContent, {
+                        params: { id }
+                      })
+                    );
+                    if (resData.code !== 0) {
+                      throw new Error(resData.msg);
+                    }
+                    return resData.data;
                   }
-                  return resData.data;
-                }
-              }}
-              actions={{
-                getMemberShorten: async ({ id }) => {
-                  const { data: resData } = await ajax(
-                    Object.assign({}, apis[name].getMemberShorten, {
-                      params: { id }
-                    })
-                  );
-                  if (resData.code !== 0) {
-                    throw new Error(resData.msg);
-                  }
-                  return resData.data;
-                },
-                cancel: async ({ id } = {}) => {
-                  const { data: resData } = await ajax(
-                    Object.assign({}, apis[name].cancelConference, id ? { data: { id } } : {})
-                  );
-                  if (resData.code !== 0) {
-                    return;
-                  }
-                  message.success(formatMessage({ id: 'CancelMeetingSuccess' }));
-                  reload();
-                },
-                remove: async ({ id }) => {
-                  const { data: resData } = await ajax(
-                    Object.assign({}, apis[name].deleteConference, {
-                      data: { id }
-                    })
-                  );
+                }}
+                actions={{
+                  getMemberShorten: async ({ id }) => {
+                    const { data: resData } = await ajax(
+                      Object.assign({}, apis[name].getMemberShorten, {
+                        params: { id }
+                      })
+                    );
+                    if (resData.code !== 0) {
+                      throw new Error(resData.msg);
+                    }
+                    return resData.data;
+                  },
+                  cancel: async ({ id } = {}) => {
+                    const { data: resData } = await ajax(
+                      Object.assign({}, apis[name].cancelConference, id ? { data: { id } } : {})
+                    );
+                    if (resData.code !== 0) {
+                      return;
+                    }
+                    message.success(formatMessage({ id: 'CancelMeetingSuccess' }));
+                    reload();
+                  },
+                  remove: async ({ id }) => {
+                    const { data: resData } = await ajax(
+                      Object.assign({}, apis[name].deleteConference, {
+                        data: { id }
+                      })
+                    );
 
-                  if (resData.code !== 0) {
-                    return;
+                    if (resData.code !== 0) {
+                      return;
+                    }
+                    message.success(formatMessage({ id: 'DeleteSuccess' }));
+                    reload();
                   }
-                  message.success(formatMessage({ id: 'DeleteSuccess' }));
-                  reload();
-                }
-              }}
-            />
-          );
-        }}
-      />
+                }}
+              />
+            );
+          }}
+        />
+      </div>
     </div>
   );
 }));

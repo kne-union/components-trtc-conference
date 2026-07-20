@@ -1,33 +1,74 @@
 import RemoteLoader, { createWithRemoteLoader } from '@kne/remote-loader';
 import iFrameResize from '@kne/iframe-resizer';
-import { Flex, Select } from 'antd';
+import FileType from '@kne/react-file-type';
+import { Select } from 'antd';
 import { useEffect, useRef, useState } from 'react';
 import style from './style.module.scss';
 
+const FILE_TYPE_ALIAS = {
+  jpeg: 'jpg'
+};
+
+const getFileType = filename => {
+  if (!filename || typeof filename !== 'string') {
+    return 'unknow';
+  }
+  const index = filename.lastIndexOf('.');
+  if (index < 0 || index === filename.length - 1) {
+    return 'unknow';
+  }
+  const ext = filename.slice(index + 1).toLowerCase();
+  return FILE_TYPE_ALIAS[ext] || ext;
+};
+
+const FileOptionLabel = ({ filename, size = 18 }) => (
+  <span className={style['files-option']}>
+    <FileType type={getFileType(filename)} size={size} />
+    <span className={style['files-option-name']}>{filename}</span>
+  </span>
+);
+
 const Files = createWithRemoteLoader({
   modules: ['components-core:FilePreview', 'components-core:Common@SimpleBar']
-})(({ remoteModules, files }) => {
+})(({ remoteModules, files = [] }) => {
   const [FilePreview, SimpleBar] = remoteModules;
   const [current, setCurrent] = useState(0);
+  const safeIndex = files.length ? Math.min(current, files.length - 1) : 0;
+  const currentFile = files[safeIndex];
+  const options = files.map((item, index) => ({
+    value: index,
+    filename: item.filename,
+    label: <FileOptionLabel filename={item.filename} />,
+    title: item.filename
+  }));
+
+  if (!files.length) {
+    return null;
+  }
+
   return (
-    <SimpleBar className={style['main-scroller']}>
-      <Flex vertical>
-        <Flex>
-          <Select
-            value={current}
-            options={files.map((item, index) => {
-              return { label: item.filename, value: index };
-            })}
-            onChange={index => {
-              setCurrent(index);
-            }}
-          />
-        </Flex>
-        <Flex flex={1}>
-          <FilePreview {...files[current]} className={style['main']} />
-        </Flex>
-      </Flex>
-    </SimpleBar>
+    <div className={style['files']}>
+      <div className={style['files-toolbar']}>
+        <Select
+          className={style['files-select']}
+          popupClassName={style['files-select-dropdown']}
+          variant="filled"
+          value={safeIndex}
+          options={options}
+          showSearch
+          listHeight={280}
+          popupMatchSelectWidth={false}
+          filterOption={(input, option) => {
+            const filename = option?.filename || '';
+            return filename.toLowerCase().includes(String(input).toLowerCase());
+          }}
+          onChange={index => setCurrent(index)}
+        />
+      </div>
+      <SimpleBar className={style['files-preview']}>
+        {currentFile ? <FilePreview {...currentFile} className={style['main']} /> : null}
+      </SimpleBar>
+    </div>
   );
 });
 

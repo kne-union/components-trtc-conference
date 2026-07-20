@@ -2,84 +2,43 @@
   "pageData": [
     {
       "id": "event-001",
-      "code": "1001",
-      "time": "2026-06-08T01:00:05.000Z",
-      "payload": {
-        "source": "DescribeUserEvent",
-        "roomId": "conf-001",
-        "userId": "user-001",
-        "peerId": "user-001",
-        "eventId": 1001,
-        "type": "room",
-        "paramOne": "enter",
-        "paramTwo": "",
-        "event": {
-          "EventId": 1001,
-          "Time": 1780870805000,
-          "Type": "room",
-          "ParamOne": "enter"
-        }
-      }
-    },
-    {
-      "id": "event-002",
-      "code": "2001",
-      "time": "2026-06-08T01:12:36.000Z",
-      "payload": {
-        "source": "DescribeUserEvent",
-        "roomId": "conf-001",
-        "userId": "user-002",
-        "peerId": "user-002",
-        "eventId": 2001,
-        "type": "audio",
-        "paramOne": "mute",
-        "paramTwo": "",
-        "event": {
-          "EventId": 2001,
-          "Time": 1780871556000,
-          "Type": "audio",
-          "ParamOne": "mute"
-        }
-      }
-    },
-    {
-      "id": "event-003",
-      "code": "1002",
-      "time": "2026-06-08T01:45:18.000Z",
-      "payload": {
-        "source": "webhook",
-        "roomId": "conf-001",
-        "userId": "user-001",
-        "peerId": "user-001",
-        "eventId": 1002,
-        "eventType": 103,
-        "event": {
-          "EventId": 1002,
-          "Time": 1780873518000,
-          "Type": "room",
-          "ParamOne": "exit"
-        }
-      }
-    },
-    {
-      "id": "event-004",
-      "code": "Client.device-info",
-      "time": "2026-06-08T01:01:00.000Z",
+      "code": "Client.enter",
+      "time": "2026-06-05T10:00:05.000Z",
       "payload": {
         "source": "ClientSDK",
         "roomId": "conf-001",
         "userId": "user-001",
+        "reporterId": "user-001",
+        "eventType": "enter",
+        "event": { "type": "enter", "userId": "user-001" }
+      }
+    },
+    {
+      "id": "event-002",
+      "code": "Client.device-info",
+      "time": "2026-06-05T10:00:08.000Z",
+      "payload": {
+        "source": "ClientSDK",
+        "roomId": "conf-001",
+        "userId": "user-001",
+        "reporterId": "user-001",
         "eventType": "device-info",
         "event": {
           "type": "device-info",
           "data": {
-            "userAgent": "Mozilla/5.0",
+            "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
             "platform": "MacIntel",
             "language": "zh-CN",
             "screenWidth": 1440,
             "screenHeight": 900,
-            "audioDevices": [{ "deviceId": "mic-1", "label": "MacBook Microphone" }],
-            "videoDevices": [{ "deviceId": "cam-1", "label": "FaceTime HD Camera" }],
+            "connection": { "effectiveType": "4g", "downlink": 10, "rtt": 40, "saveData": false },
+            "audioDevices": [
+              { "deviceId": "mic-1", "label": "MacBook Pro Microphone" },
+              { "deviceId": "mic-2", "label": "External USB Mic" }
+            ],
+            "videoDevices": [
+              { "deviceId": "cam-1", "label": "FaceTime HD Camera" }
+            ],
             "audioDeviceId": "mic-1",
             "videoDeviceId": "cam-1"
           }
@@ -87,73 +46,138 @@
       }
     },
     {
+      "id": "event-003",
+      "code": "Client.enter",
+      "time": "2026-06-05T10:00:20.000Z",
+      "payload": {
+        "source": "ClientSDK",
+        "roomId": "conf-001",
+        "userId": "user-002",
+        "reporterId": "user-002",
+        "eventType": "enter",
+        "event": { "type": "enter", "userId": "user-002" }
+      }
+    },
+    {
+      "id": "event-004",
+      "code": "Client.device-info",
+      "time": "2026-06-05T10:00:24.000Z",
+      "payload": {
+        "source": "ClientSDK",
+        "roomId": "conf-001",
+        "userId": "user-002",
+        "reporterId": "user-002",
+        "eventType": "device-info",
+        "event": {
+          "type": "device-info",
+          "data": {
+            "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
+            "platform": "Win32",
+            "language": "zh-CN",
+            "screenWidth": 1920,
+            "screenHeight": 1080,
+            "connection": { "effectiveType": "4g", "downlink": 8, "rtt": 55, "saveData": false },
+            "audioDevices": [{ "deviceId": "mic-a", "label": "Realtek Audio" }],
+            "videoDevices": [{ "deviceId": "cam-a", "label": "Logitech Webcam" }],
+            "audioDeviceId": "mic-a",
+            "videoDeviceId": "cam-a"
+          }
+        }
+      }
+    },
+    {
       "id": "event-005",
-      "code": "Client.camera-close",
-      "time": "2026-06-08T01:01:30.000Z",
+      "code": "Client.camera-open",
+      "time": "2026-06-05T10:00:30.000Z",
       "payload": {
         "source": "ClientSDK",
         "roomId": "conf-001",
         "userId": "user-001",
-        "eventType": "camera-close",
-        "event": { "type": "camera-close", "data": { "cameraId": "cam-1" } }
+        "reporterId": "user-001",
+        "eventType": "camera-open",
+        "event": { "type": "camera-open", "data": { "cameraId": "cam-1" } }
       }
     },
     {
       "id": "event-006",
-      "code": "Client.microphone-switch",
-      "time": "2026-06-08T01:01:45.000Z",
+      "code": "Client.microphone-open",
+      "time": "2026-06-05T10:00:32.000Z",
       "payload": {
         "source": "ClientSDK",
         "roomId": "conf-001",
         "userId": "user-001",
-        "eventType": "microphone-switch",
-        "event": { "type": "microphone-switch", "data": { "microphoneId": "mic-2" } }
+        "reporterId": "user-001",
+        "eventType": "microphone-open",
+        "event": { "type": "microphone-open", "data": { "microphoneId": "mic-1" } }
       }
     },
     {
       "id": "event-007",
-      "code": "Client.network-quality",
-      "time": "2026-06-08T01:02:00.000Z",
+      "code": "Client.camera-open",
+      "time": "2026-06-05T10:00:35.000Z",
       "payload": {
         "source": "ClientSDK",
         "roomId": "conf-001",
-        "userId": "user-001",
-        "eventType": "network-quality",
-        "event": {
-          "type": "network-quality",
-          "data": {
-            "uplinkNetworkQuality": 2,
-            "downlinkNetworkQuality": 1
-          }
-        }
+        "userId": "user-002",
+        "reporterId": "user-002",
+        "eventType": "camera-open",
+        "event": { "type": "camera-open", "data": { "cameraId": "cam-a" } }
       }
     },
     {
       "id": "event-008",
-      "code": "Client.network-quality",
-      "time": "2026-06-08T01:04:00.000Z",
+      "code": "Client.microphone-open",
+      "time": "2026-06-05T10:00:38.000Z",
       "payload": {
         "source": "ClientSDK",
         "roomId": "conf-001",
-        "userId": "user-001",
-        "eventType": "network-quality",
-        "event": {
-          "type": "network-quality",
-          "data": {
-            "uplinkNetworkQuality": 3,
-            "downlinkNetworkQuality": 2
-          }
-        }
+        "userId": "user-002",
+        "reporterId": "user-002",
+        "eventType": "microphone-open",
+        "event": { "type": "microphone-open", "data": { "microphoneId": "mic-a" } }
       }
     },
     {
       "id": "event-009",
-      "code": "Client.statistics",
-      "time": "2026-06-08T01:02:00.000Z",
+      "code": "Client.network-quality",
+      "time": "2026-06-05T10:02:00.000Z",
       "payload": {
         "source": "ClientSDK",
         "roomId": "conf-001",
         "userId": "user-001",
+        "reporterId": "user-001",
+        "eventType": "network-quality",
+        "event": {
+          "type": "network-quality",
+          "data": { "uplinkNetworkQuality": 2, "downlinkNetworkQuality": 1 }
+        }
+      }
+    },
+    {
+      "id": "event-010",
+      "code": "Client.network-quality",
+      "time": "2026-06-05T10:02:00.000Z",
+      "payload": {
+        "source": "ClientSDK",
+        "roomId": "conf-001",
+        "userId": "user-002",
+        "reporterId": "user-002",
+        "eventType": "network-quality",
+        "event": {
+          "type": "network-quality",
+          "data": { "uplinkNetworkQuality": 3, "downlinkNetworkQuality": 2 }
+        }
+      }
+    },
+    {
+      "id": "event-011",
+      "code": "Client.statistics",
+      "time": "2026-06-05T10:02:00.000Z",
+      "payload": {
+        "source": "ClientSDK",
+        "roomId": "conf-001",
+        "userId": "user-001",
+        "reporterId": "user-001",
         "eventType": "statistics",
         "event": {
           "type": "statistics",
@@ -172,54 +196,218 @@
       }
     },
     {
-      "id": "event-010",
+      "id": "event-012",
       "code": "Client.statistics",
-      "time": "2026-06-08T01:04:00.000Z",
+      "time": "2026-06-05T10:02:00.000Z",
       "payload": {
         "source": "ClientSDK",
         "roomId": "conf-001",
-        "userId": "user-001",
+        "userId": "user-002",
+        "reporterId": "user-002",
         "eventType": "statistics",
         "event": {
           "type": "statistics",
           "data": {
-            "rtt": 56,
+            "rtt": 72,
             "upLoss": 1,
             "downLoss": 0,
-            "bytesSent": 2097152,
-            "bytesReceived": 1048576,
+            "bytesSent": 920000,
+            "bytesReceived": 480000,
             "localStatistics": {
-              "audio": { "bitrate": 39, "audioLevel": 0.06 },
-              "video": [{ "bitrate": 760, "frameRate": 22, "width": 1280, "height": 720 }]
+              "audio": { "bitrate": 36, "audioLevel": 0.05 },
+              "video": [{ "bitrate": 700, "frameRate": 22, "width": 1280, "height": 720 }]
             }
           }
         }
       }
     },
     {
-      "id": "event-011",
+      "id": "event-013",
+      "code": "Client.microphone-switch",
+      "time": "2026-06-05T10:05:10.000Z",
+      "payload": {
+        "source": "ClientSDK",
+        "roomId": "conf-001",
+        "userId": "user-001",
+        "reporterId": "user-001",
+        "eventType": "microphone-switch",
+        "event": { "type": "microphone-switch", "data": { "microphoneId": "mic-2" } }
+      }
+    },
+    {
+      "id": "event-014",
+      "code": "Client.camera-close",
+      "time": "2026-06-05T10:08:00.000Z",
+      "payload": {
+        "source": "ClientSDK",
+        "roomId": "conf-001",
+        "userId": "user-002",
+        "reporterId": "user-002",
+        "eventType": "camera-close",
+        "event": { "type": "camera-close", "data": { "cameraId": "cam-a" } }
+      }
+    },
+    {
+      "id": "event-015",
+      "code": "Client.network-quality",
+      "time": "2026-06-05T10:10:00.000Z",
+      "payload": {
+        "source": "ClientSDK",
+        "roomId": "conf-001",
+        "userId": "user-001",
+        "reporterId": "user-001",
+        "eventType": "network-quality",
+        "event": {
+          "type": "network-quality",
+          "data": { "uplinkNetworkQuality": 1, "downlinkNetworkQuality": 1 }
+        }
+      }
+    },
+    {
+      "id": "event-016",
+      "code": "Client.network-quality",
+      "time": "2026-06-05T10:10:00.000Z",
+      "payload": {
+        "source": "ClientSDK",
+        "roomId": "conf-001",
+        "userId": "user-002",
+        "reporterId": "user-002",
+        "eventType": "network-quality",
+        "event": {
+          "type": "network-quality",
+          "data": { "uplinkNetworkQuality": 4, "downlinkNetworkQuality": 3 }
+        }
+      }
+    },
+    {
+      "id": "event-017",
+      "code": "Client.statistics",
+      "time": "2026-06-05T10:10:00.000Z",
+      "payload": {
+        "source": "ClientSDK",
+        "roomId": "conf-001",
+        "userId": "user-001",
+        "reporterId": "user-001",
+        "eventType": "statistics",
+        "event": {
+          "type": "statistics",
+          "data": {
+            "rtt": 42,
+            "upLoss": 0,
+            "downLoss": 0,
+            "bytesSent": 2097152,
+            "bytesReceived": 1048576,
+            "localStatistics": {
+              "audio": { "bitrate": 40, "audioLevel": 0.07 },
+              "video": [{ "bitrate": 800, "frameRate": 25, "width": 1280, "height": 720 }]
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "event-018",
+      "code": "Client.statistics",
+      "time": "2026-06-05T10:10:00.000Z",
+      "payload": {
+        "source": "ClientSDK",
+        "roomId": "conf-001",
+        "userId": "user-002",
+        "reporterId": "user-002",
+        "eventType": "statistics",
+        "event": {
+          "type": "statistics",
+          "data": {
+            "rtt": 180,
+            "upLoss": 6,
+            "downLoss": 4,
+            "bytesSent": 1500000,
+            "bytesReceived": 900000,
+            "localStatistics": {
+              "audio": { "bitrate": 28, "audioLevel": 0.02 },
+              "video": [{ "bitrate": 420, "frameRate": 12, "width": 640, "height": 360 }]
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "event-019",
       "code": "DescribeCallDetailInfo.Metric",
-      "time": "2026-06-08T01:00:00.000Z",
+      "time": "2026-06-05T10:00:00.000Z",
       "payload": {
         "source": "DescribeCallDetailInfo",
         "recordType": "metric",
         "roomId": "conf-001",
-        "commId": "1400000000_conf-001_1780870800",
+        "commId": "1400000000_conf-001_1749117600",
         "userId": "user-001",
         "dataType": "bigvCapFps",
-        "startTime": 1780870800,
-        "endTime": 1780871100,
+        "startTime": 1749117600,
+        "endTime": 1749118200,
         "data": {
           "UserId": "user-001",
           "DataType": "bigvCapFps",
           "Content": [
-            { "Time": 1780870800, "Value": 24 },
-            { "Time": 1780870920, "Value": 22 },
-            { "Time": 1780871040, "Value": 25 }
+            { "Time": 1749117600, "Value": 24 },
+            { "Time": 1749117720, "Value": 22 },
+            { "Time": 1749117840, "Value": 25 },
+            { "Time": 1749117960, "Value": 23 },
+            { "Time": 1749118080, "Value": 24 }
           ]
         }
       }
+    },
+    {
+      "id": "event-020",
+      "code": "Client.microphone-close",
+      "time": "2026-06-05T10:25:00.000Z",
+      "payload": {
+        "source": "ClientSDK",
+        "roomId": "conf-001",
+        "userId": "user-002",
+        "reporterId": "user-002",
+        "eventType": "microphone-close",
+        "event": { "type": "microphone-close", "data": { "microphoneId": "mic-a" } }
+      }
+    },
+    {
+      "id": "event-021",
+      "code": "Client.exit",
+      "time": "2026-06-05T10:45:00.000Z",
+      "payload": {
+        "source": "ClientSDK",
+        "roomId": "conf-001",
+        "userId": "user-002",
+        "reporterId": "user-002",
+        "eventType": "exit",
+        "event": { "type": "exit", "userId": "user-002" }
+      }
+    },
+    {
+      "id": "event-022",
+      "code": "Client.exit",
+      "time": "2026-06-05T10:50:00.000Z",
+      "payload": {
+        "source": "ClientSDK",
+        "roomId": "conf-001",
+        "userId": "user-001",
+        "reporterId": "user-001",
+        "eventType": "exit",
+        "event": { "type": "exit", "userId": "user-001" }
+      }
+    },
+    {
+      "id": "event-023",
+      "code": "103",
+      "time": "2026-06-05T10:50:05.000Z",
+      "payload": {
+        "source": "webhook",
+        "roomId": "conf-001",
+        "userId": "user-001",
+        "eventType": 103,
+        "event": { "EventId": 103, "Time": 1749120605000, "Type": "room" }
+      }
     }
   ],
-  "totalCount": 11
+  "totalCount": 23
 }

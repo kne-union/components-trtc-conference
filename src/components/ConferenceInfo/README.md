@@ -8,8 +8,10 @@
 - **ConferenceInfo**：会议信息主组件，展示会议列表和侧边栏操作菜单
 - **ConferenceFormInner**：会议表单内部组件，用于创建和编辑会议的表单字段
 - **MemberFormInner**：成员表单内部组件，用于编辑参会成员信息
-- **ConferenceDetail**：会议详情组件，展示会议详情、参会人员、会议文档和录制资源
+- **ConferenceDetail**：会议详情组件，展示会议详情、参会人员、会议文档和录制资源；房间情况通过独立组件 `RoomEvents` 展示
 - **InviteMember**：邀请成员组件，生成邀请链接和会议信息
+
+房间情况展示请使用独立组件 `RoomEvents`（`components-trtc-conference:RoomEvents`），可被 unfolds 等平台直接复用。
 
 
 ### 示例(全屏)
@@ -283,6 +285,7 @@ render(<BaseExample />);
 | options.allowExtend | boolean | 是否允许主持人延长会议（默认开启；开启后剩余不足15分钟时可延长15分钟） |
 | isInvitationAllowed | boolean | 是否允许邀请（默认允许） |
 | maxCount | number | 最大参会成员数（默认2） |
+| options.attention | string | 会议注意事项（富文本 HTML，使用 CKEditor 编辑） |
 | options.documentType | string | 文档类型：`'files'` 文件列表、`'iframe'` 内嵌页面 |
 | options.document | array | 会议文档文件列表（最多10个，type为 files 时使用） |
 | options.documentUrl | string | 内嵌页面地址（type为 iframe 时使用） |
@@ -306,7 +309,7 @@ render(<BaseExample />);
 
 ### ConferenceDetail
 
-会议详情组件，展示会议完整信息，包括当前用户状态、参会人员列表、会议文档和录制资源。
+会议详情组件，展示会议完整信息，包括当前用户状态、注意事项、参会人员列表、会议文档和录制资源。
 
 #### 属性说明
 
@@ -322,7 +325,7 @@ render(<BaseExample />);
 | status | number | 是 | - | 会议状态：0-进行中/待开始、1-已结束 |
 | isInvitationAllowed | boolean | 否 | - | 是否允许邀请成员 |
 | maxCount | number | 否 | - | 最大参会成员数 |
-| members | array | 否 | `[]` | 参会成员列表 |
+| members | array | 否 | `[]` | 参会成员列表，成员含 `attended`（是否参加过会议） |
 | options | object | 否 | - | 会议选项配置 |
 | apis | object | 否 | - | API接口配置 |
 | onReload | function | 否 | - | 数据刷新回调 |

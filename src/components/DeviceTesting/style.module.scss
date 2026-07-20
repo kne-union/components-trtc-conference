@@ -1,3 +1,5 @@
+@use '~@kne/responsive-utils/scss' as resp;
+
 .device-testing {
   width: min(720px, 100%);
   margin: 0 auto;
@@ -39,7 +41,7 @@
   font-size: 13px;
 }
 
-@media (max-width: 768px) {
+@include resp.mobile-container {
   .device-row {
     flex-direction: column;
   }

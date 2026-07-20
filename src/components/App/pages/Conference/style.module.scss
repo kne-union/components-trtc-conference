@@ -1,9 +1,3 @@
 .conference-room {
-  height: 100vh;
-}
-
-@media (max-width: 768px) {
-  .conference-room {
-    height: 100dvh;
-  }
+  height: var(--kne-viewport-height, 100vh);
 }

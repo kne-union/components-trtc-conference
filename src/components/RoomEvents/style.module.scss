@@ -1,0 +1,261 @@
+@use '~@kne/responsive-utils/scss' as resp;
+
+.room-events {
+  width: 100%;
+}
+
+.event-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.event-overview {
+  padding: 16px;
+  border: 1px solid #e6e8f0;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #f7faff 0%, #ffffff 100%);
+}
+
+.event-overview-title {
+  margin: 0;
+  color: var(--font-color);
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.event-overview-id {
+  margin-top: 4px;
+  color: var(--font-color-grey);
+  font-size: 12px;
+}
+
+.event-overview-descriptions {
+  margin-top: 14px;
+}
+
+.event-summary-grid {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+}
+
+.event-summary-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid #e6e8f0;
+  border-radius: 10px;
+  background: #ffffff;
+}
+
+.event-summary-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+  color: #667085;
+  background: #f2f4f7;
+  font-size: 16px;
+}
+
+.event-summary-content {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.event-summary-label {
+  overflow: hidden;
+  color: #667085;
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.event-summary-value {
+  color: #1d2939;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.is-success {
+  border-color: #b7ebc6;
+
+  .event-summary-icon {
+    color: #039855;
+    background: #ecfdf3;
+  }
+}
+
+.is-warning {
+  border-color: #fedf89;
+
+  .event-summary-icon {
+    color: #dc6803;
+    background: #fffaeb;
+  }
+}
+
+.is-error {
+  border-color: #fecdca;
+
+  .event-summary-icon {
+    color: #d92d20;
+    background: #fef3f2;
+  }
+}
+
+.event-chart-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.event-analysis-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.event-device-info {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.event-device-tabs {
+  :global {
+    .ant-tabs-nav {
+      margin-bottom: 8px;
+    }
+
+    .ant-tabs-content-holder {
+      min-height: 120px;
+    }
+  }
+}
+
+.event-device-card {
+  word-break: break-all;
+
+  :global {
+    .ant-descriptions-title {
+      font-size: 13px;
+    }
+
+    .ant-descriptions-item-label {
+      white-space: nowrap;
+    }
+
+    .ant-descriptions-item-label,
+    .ant-descriptions-item-content {
+      padding: 6px 8px !important;
+      font-size: 12px;
+    }
+  }
+}
+
+.event-chart-card {
+  padding: 12px;
+  border-radius: 10px;
+  background: var(--bg-color-grey);
+}
+
+.event-chart-title {
+  margin-bottom: 8px;
+  font-weight: bold;
+}
+
+.event-flow {
+  :global {
+    .ant-descriptions {
+      margin-top: 8px;
+    }
+
+    .ant-descriptions-item-label,
+    .ant-descriptions-item-content {
+      padding: 6px 8px !important;
+      font-size: 12px;
+    }
+  }
+}
+
+.event-item {
+  display: grid;
+  grid-template-columns: 160px minmax(0, 1fr);
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.event-time {
+  color: var(--font-color-grey);
+  font-size: 12px;
+  line-height: 32px;
+  text-align: right;
+}
+
+.event-card {
+  position: relative;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: var(--bg-color-grey);
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 16px;
+    left: -18px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--primary-color);
+  }
+}
+
+.event-code {
+  font-weight: bold;
+}
+
+.event-detail-collapse {
+  margin-top: 6px;
+
+  :global {
+    .ant-collapse-header {
+      padding: 4px 0 !important;
+      color: var(--primary-color) !important;
+      font-size: 12px;
+    }
+
+    .ant-collapse-content-box {
+      padding: 6px 0 0 !important;
+    }
+
+    .ant-descriptions-item-label,
+    .ant-descriptions-item-content {
+      padding: 6px 8px !important;
+      font-size: 12px;
+    }
+  }
+}
+
+@include resp.mobile-container {
+  .event-item {
+    grid-template-columns: 1fr;
+  }
+
+  .event-time {
+    text-align: left;
+    line-height: 1.5;
+  }
+
+  .event-card::before {
+    display: none;
+  }
+}

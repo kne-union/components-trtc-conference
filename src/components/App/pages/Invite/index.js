@@ -15,40 +15,42 @@ const Invite = createWithRemoteLoader({
   const { baseUrl, headerName, name } = useContext();
   const code = searchParams.get('code');
   return (
-    <div className={style['box']}>
-      <Fetch
-        {...Object.assign({}, apis[name].getConferenceDetail, {
-          params: {
-            code
-          }
-        })}
-        render={({ data, reload }) => {
-          return (
-            <ConferenceDetail
-              {...data.conference}
-              inviter={data.inviter}
-              onEnter={() => {
-                navigate(`${baseUrl}/conference`);
-              }}
-              onReload={data => {
-                if (data?.shorten) {
-                  window.location.href = `${window.location.origin}${baseUrl}/detail?code=${data.shorten}`;
-                  return;
-                }
-                reload();
-              }}
-              apis={{
-                saveMember: apis[name].saveMember,
-                inviteMember: apis[name].inviteMember,
-                removeMember: apis[name].removeMember,
-                joinConference: Object.assign({}, apis[name].joinConference, {
-                  headers: { [headerName]: code }
-                })
-              }}
-            />
-          );
-        }}
-      />
+    <div className={style['page']}>
+      <div className={style['box']}>
+        <Fetch
+          {...Object.assign({}, apis[name].getConferenceDetail, {
+            params: {
+              code
+            }
+          })}
+          render={({ data, reload }) => {
+            return (
+              <ConferenceDetail
+                {...data.conference}
+                inviter={data.inviter}
+                onEnter={() => {
+                  navigate(`${baseUrl}/conference`);
+                }}
+                onReload={data => {
+                  if (data?.shorten) {
+                    window.location.href = `${window.location.origin}${baseUrl}/detail?code=${data.shorten}`;
+                    return;
+                  }
+                  reload();
+                }}
+                apis={{
+                  saveMember: apis[name].saveMember,
+                  inviteMember: apis[name].inviteMember,
+                  removeMember: apis[name].removeMember,
+                  joinConference: Object.assign({}, apis[name].joinConference, {
+                    headers: { [headerName]: code }
+                  })
+                }}
+              />
+            );
+          }}
+        />
+      </div>
     </div>
   );
 });
