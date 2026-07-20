@@ -48,6 +48,125 @@ render(<BaseExample />);
 
 ```
 
+- 详情页返回首页
+- 登录用户进入 /detail 时，左侧显示返回按钮，点击回到系统首页（会议列表）
+- _App(@components/App),_mockPreset(@root/mockPreset),remoteLoader(@kne/remote-loader),reactRouterDom(react-router-dom)
+
+```jsx
+const { default: App } = _App;
+const { default: preset, mockUserInfo } = _mockPreset;
+const { createWithRemoteLoader } = remoteLoader;
+const { Route, Routes, Navigate } = reactRouterDom;
+
+const DetailExample = createWithRemoteLoader({
+  modules: ['components-core:Global@PureGlobal']
+})(({ remoteModules }) => {
+  const [PureGlobal] = remoteModules;
+  return (
+    <PureGlobal preset={preset}>
+      <Routes>
+        <Route
+          path="/conference/*"
+          element={<App baseUrl="/conference" userInfo={mockUserInfo} headerName="x-trtc-conference-code" name="conference" />}
+        />
+        <Route path="*" element={<Navigate to="/conference/detail" replace />} />
+      </Routes>
+    </PureGlobal>
+  );
+});
+
+render(<DetailExample />);
+
+```
+
+- 会议页返回首页
+- 进入会议后，会议名称左侧显示返回按钮，点击回到系统首页（会议列表）。示例用会议房间 UI 演示返回按钮，避免文档环境连真实 TRTC
+- _App(@components/App),_ConferenceRoom(@components/ConferenceRoom),_mockPreset(@root/mockPreset),remoteLoader(@kne/remote-loader),reactRouterDom(react-router-dom)
+
+```jsx
+const { default: App } = _App;
+const { default: ConferenceRoom } = _ConferenceRoom;
+const { default: preset, mockConferenceList, mockUserInfo } = _mockPreset;
+const { createWithRemoteLoader } = remoteLoader;
+const { Route, Routes, Navigate, useNavigate } = reactRouterDom;
+
+const conference = mockConferenceList.pageData[0];
+const now = new Date();
+
+const ConferenceBackRoom = () => {
+  const navigate = useNavigate();
+  return (
+    <ConferenceRoom
+      conference={{ ...conference, startTime: now.toISOString() }}
+      isMaster
+      isInvitationAllowed
+      signalLevel={3}
+      onBack={() => {
+        navigate('/conference');
+      }}
+      devices={{
+        cameras: [
+          { deviceId: 'cam-1', label: '内置摄像头' },
+          { deviceId: 'cam-2', label: '外接摄像头' }
+        ],
+        microphones: [
+          { deviceId: 'mic-1', label: '内置麦克风' },
+          { deviceId: 'mic-2', label: '外接麦克风' }
+        ]
+      }}
+      list={Array.from({ length: 4 }).map((_, index) => (
+        <div
+          key={index}
+          style={{
+            width: '100%',
+            height: '100%',
+            background: &#96;hsl(${index * 80}, 60%, 30%)&#96;,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: '#fff',
+            fontSize: 24
+          }}
+        >
+          参会者 {index + 1}
+        </div>
+      ))}
+      actions={{
+        shareScreen: () => {},
+        invite: () => {},
+        leave: () => {
+          navigate('/conference/detail');
+        },
+        end: () => {
+          navigate('/conference/detail');
+        }
+      }}
+    />
+  );
+};
+
+const ConferenceExample = createWithRemoteLoader({
+  modules: ['components-core:Global@PureGlobal']
+})(({ remoteModules }) => {
+  const [PureGlobal] = remoteModules;
+  return (
+    <PureGlobal preset={preset}>
+      <Routes>
+        <Route
+          path="/conference/*"
+          element={<App baseUrl="/conference" userInfo={mockUserInfo} headerName="x-trtc-conference-code" name="conference" />}
+        />
+        <Route path="/room" element={<ConferenceBackRoom />} />
+        <Route path="*" element={<Navigate to="/room" replace />} />
+      </Routes>
+    </PureGlobal>
+  );
+});
+
+render(<ConferenceExample />);
+
+```
+
 ### API
 
 ### App

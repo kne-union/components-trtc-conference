@@ -109,7 +109,7 @@ const apis = merge({}, baseApis, {
       loader: async props => {
         const data = await loadConferenceListData();
         const id = props?.params?.id || props?.data?.id;
-        const conference = (id && data.pageData.find(item => item.id === id)) || null;
+        const conference = (id && data.pageData.find(item => item.id === id)) || data.pageData[0];
         if (!conference) {
           return null;
         }
@@ -122,7 +122,18 @@ const apis = merge({}, baseApis, {
           id: 'conf-new-' + Date.now(),
           status: 0,
           shorten: 'new-' + Date.now(),
-          members: data.includingMe ? [{ id: 'user-001', nickname: '陈建国', email: 'chenjianguo@company.com', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=chen', isMaster: true }, ...(data.members || [])] : (data.members || [])
+          members: data.includingMe
+            ? [
+                {
+                  id: 'user-001',
+                  nickname: '陈建国',
+                  email: 'chenjianguo@company.com',
+                  avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=chen',
+                  isMaster: true
+                },
+                ...(data.members || [])
+              ]
+            : data.members || []
         });
       }
     },
@@ -156,7 +167,15 @@ const apis = merge({}, baseApis, {
       loader: () => null
     },
     enterConference: {
-      loader: () => ({ sign: { sdkAppId: 1400000000, userId: 'user-001', userSig: 'test_sig' } })
+      loader: async () => {
+        const data = await loadConferenceListData();
+        const conference = data.pageData[0];
+        return {
+          conference,
+          member: conference?.members?.[0],
+          sign: { sdkAppId: 1400000000, userId: 'user-001', userSig: 'test_sig' }
+        };
+      }
     },
     endConference: {
       loader: () => null

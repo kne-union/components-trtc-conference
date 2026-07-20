@@ -37,6 +37,13 @@ const Detail = createWithRemoteLoader({
               <ConferenceDetail
                 {...data.conference}
                 current={data.member}
+                onBack={
+                  data.member
+                    ? () => {
+                        navigate(baseUrl);
+                      }
+                    : undefined
+                }
                 onEnter={async () => {
                   // iOS PWA：必须在点击手势内先拿媒体权限，否则入会后 startLocal* 会被拦截
                   await prepareMediaPermission();

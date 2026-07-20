@@ -3,11 +3,7 @@ import Toolbar from './Toolbar';
 import { Provider } from './context';
 import Window from './Window';
 import useControlValue from '@kne/use-control-value';
-import {
-  ResponsiveProvider,
-  RESPONSIVE_CONTAINER_CLASS,
-  useIsMobile
-} from '@kne/responsive-utils';
+import { ResponsiveProvider, RESPONSIVE_CONTAINER_CLASS, useIsMobile } from '@kne/responsive-utils';
 import get from 'lodash/get';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 
@@ -38,6 +34,7 @@ const ConferenceRoomInner = ({
   isInvitationAllowed,
   devices,
   headerExtra,
+  onBack,
   defaultValue = {
     layoutType: 1,
     mainIndex: 0,
@@ -91,14 +88,9 @@ const ConferenceRoomInner = ({
         duration={conference.duration}
         isMobile={isMobile}
         headerExtra={headerExtra}
+        onBack={onBack}
       >
-        <Window
-          list={list}
-          document={document}
-          layoutType={setting.layoutType}
-          documentInside={setting.documentInside}
-          isMobile={isMobile}
-        />
+        <Window list={list} document={document} layoutType={setting.layoutType} documentInside={setting.documentInside} isMobile={isMobile} />
       </Layout>
     </Provider>
   );
@@ -134,15 +126,8 @@ const ConferenceRoom = props => {
   }, []);
 
   return (
-    <div
-      ref={rootRef}
-      className={RESPONSIVE_CONTAINER_CLASS}
-      style={{ width: '100%', height: '100%', minHeight: 0 }}
-    >
-      <ResponsiveProvider
-        mode={typeof containerWidth === 'number' ? 'container' : 'viewport'}
-        containerWidth={containerWidth}
-      >
+    <div ref={rootRef} className={RESPONSIVE_CONTAINER_CLASS} style={{ width: '100%', height: '100%', minHeight: 0 }}>
+      <ResponsiveProvider mode={typeof containerWidth === 'number' ? 'container' : 'viewport'} containerWidth={containerWidth}>
         <ConferenceRoomInner {...props} />
       </ResponsiveProvider>
     </div>
