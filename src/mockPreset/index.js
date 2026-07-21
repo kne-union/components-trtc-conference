@@ -98,7 +98,10 @@ const apis = merge({}, baseApis, {
           pageData = pageData.filter(item => dayjs(item.startTime).format('YYYY-MM-DD') === date);
         }
         if (record) {
-          pageData = pageData.filter(item => item.options?.setting?.record === record);
+          pageData = pageData.filter(item => {
+            const itemRecord = item.options?.setting?.record;
+            return record === 'false' ? !itemRecord : itemRecord === record;
+          });
         }
         if (speech) {
           pageData = pageData.filter(item => String(!!item.options?.setting?.speech) === speech);

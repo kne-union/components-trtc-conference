@@ -5,11 +5,10 @@ const locale = {
   message: 'Message',
   delete: 'Delete',
   cancel: 'Cancel',
-  StartMeeting: 'Start Meeting',
   InviteMembers: 'Invite Members',
   EnterMeeting: 'Enter Meeting',
   InviteYouToMeeting: 'invites you to the meeting',
-  AfterStartMeeting: 'to start meeting',
+  AfterStartMeeting: ' until the meeting starts',
   JoinMeeting: 'Join Meeting',
   CannotJoinMeeting: 'Cannot join meeting. The room is full or does not allow joining. Please contact the inviter.',
   MeetingEnded: 'Meeting has ended',
@@ -65,7 +64,8 @@ const locale = {
   InvitationTips: 'Hosts can invite others to join. Invitations cannot be sent when the maximum number of participants is reached or exceeded.',
   MaxMemberCount: 'Max Member Count',
   Attention: 'Notes',
-  AttentionDefault: '<ul><li>Please join the meeting on time</li><li>Unmute your microphone when speaking, and choose a quiet environment for the meeting</li><li>Prepare materials in advance if you need to share your screen</li><li>Please complete device testing in advance to ensure your camera and microphone work properly</li></ul>',
+  AttentionDefault:
+    '<ul><li>Please join the meeting on time</li><li>Unmute your microphone when speaking, and choose a quiet environment for the meeting</li><li>Prepare materials in advance if you need to share your screen</li><li>Please complete device testing in advance to ensure your camera and microphone work properly</li></ul>',
   Document: 'Document',
   DocumentType: 'Document Type',
   DocumentTypeFiles: 'Files',
@@ -115,6 +115,11 @@ const locale = {
   FilterRecordLabel: 'Meeting Recording',
   FilterSpeechLabel: 'Speech Recognition',
 
+  // PullToRefresh.js
+  PullToRefreshPull: 'Pull to refresh',
+  PullToRefreshRelease: 'Release to refresh',
+  PullToRefreshRefreshing: 'Refreshing...',
+
   // AddConference.js
   AddMeetingTitle: 'Add Meeting',
   AddSuccess: 'Added successfully',
@@ -133,16 +138,16 @@ const locale = {
 
   // ConferenceCountDown.js
   MeetingStarted: 'Meeting has started, click the enter button to join',
-  SecondsAfter: 's later',
-  MinutesAfter: 'min later',
-  HoursAfter: 'hr later',
-  DaysAfter: 'days later',
+  SecondsAfter: 's',
+  MinutesAfter: ' min',
+  HoursAfter: ' hr',
+  DaysAfter: ' days',
 
   // formatConferenceTime.js
   NoTimeLimit: 'No time limit',
   Start: 'Start',
   DeviceTesting: 'Device Testing',
-  DeviceTestingComplete: 'Device testing complete',
+  DeviceTestingComplete: 'Device testing complete'
 
   // MemberFormInner.js (labels are same as above: Avatar, Nickname, Email)
 };

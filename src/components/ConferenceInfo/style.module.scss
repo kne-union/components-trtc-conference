@@ -204,6 +204,13 @@
   &:hover .options-btn {
     opacity: 1;
   }
+
+  &.is-canceled {
+    .list-title-area,
+    .list-item-meta {
+      opacity: 0.5;
+    }
+  }
 }
 
 .list-content,
@@ -280,6 +287,29 @@
 .time {
   font-size: 12px;
   color: var(--font-color-grey);
+
+  :global(.iconfont) {
+    font-size: 12px;
+  }
+}
+
+.list-item-meta {
+  font-size: 12px;
+  color: var(--font-color-grey);
+}
+
+.attendance-progress {
+  flex: none;
+
+  :global(.ant-progress) {
+    width: 30px;
+    margin: 0;
+    line-height: 1;
+  }
+}
+
+.attendance-count {
+  font-variant-numeric: tabular-nums;
 }
 
 .list-pagination-wrap {
@@ -613,6 +643,35 @@
 
 .transcription-bubble-meta {
   margin-bottom: 4px;
+}
+
+// 仅移动端渲染（PullToRefresh 组件在桌面端直接返回 children）
+.pull-to-refresh {
+  width: 100%;
+  overflow: hidden;
+}
+
+.pull-to-refresh-inner {
+  position: relative;
+
+  &.is-resetting {
+    transition: transform 300ms;
+  }
+}
+
+.pull-to-refresh-indicator {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  transform: translateY(-100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 60px;
+  color: var(--font-color-grey);
+  font-size: 12px;
 }
 
 .transcription-bubble {

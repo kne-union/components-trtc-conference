@@ -369,7 +369,10 @@ const Conference = createWithRemoteLoader({
               message: message.message,
               time: new Date()
             };
-            collector(target);
+            // 转写消息会广播给房间内所有客户端，只由说话人自己的客户端上报，避免重复记录
+            if (String(message.sender) === String(sdkParams.userId)) {
+              collector(target);
+            }
             speechInputRef.current && speechInputRef.current(target, ...args);
           },
           onDisconnected: () => {

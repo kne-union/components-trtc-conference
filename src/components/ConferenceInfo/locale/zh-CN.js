@@ -5,7 +5,6 @@ const locale = {
   message: '消息',
   delete: '删除',
   cancel: '取消',
-  StartMeeting: '开始会议',
   InviteMembers: '邀请成员',
   EnterMeeting: '进入会议',
   InviteYouToMeeting: '邀请你参加会议',
@@ -65,7 +64,8 @@ const locale = {
   InvitationTips: '主持人可以邀请其他人进入会议，达到或超过最大参会成员数则不能继续邀请',
   MaxMemberCount: '最大参会成员数',
   Attention: '注意事项',
-  AttentionDefault: '<ul><li>请准时进入会议</li><li>发言时请开启麦克风，请选择安静的环境进行会议</li><li>如需共享屏幕，请提前准备好相关材料</li><li>请提前进行设备检测，确保摄像头和麦克风正常</li></ul>',
+  AttentionDefault:
+    '<ul><li>请准时进入会议</li><li>发言时请开启麦克风，请选择安静的环境进行会议</li><li>如需共享屏幕，请提前准备好相关材料</li><li>请提前进行设备检测，确保摄像头和麦克风正常</li></ul>',
   Document: '文档',
   DocumentType: '文档类型',
   DocumentTypeFiles: '文件',
@@ -115,6 +115,11 @@ const locale = {
   FilterRecordLabel: '录制会议',
   FilterSpeechLabel: '语言识别',
 
+  // PullToRefresh.js
+  PullToRefreshPull: '下拉刷新',
+  PullToRefreshRelease: '松开立即刷新',
+  PullToRefreshRefreshing: '刷新中...',
+
   // AddConference.js
   AddMeetingTitle: '添加会议',
   AddSuccess: '添加成功',
@@ -133,16 +138,16 @@ const locale = {
 
   // ConferenceCountDown.js
   MeetingStarted: '会议已开始，点击进入会议按钮直接进入',
-  SecondsAfter: 's后',
-  MinutesAfter: '分钟后',
-  HoursAfter: '小时后',
-  DaysAfter: '天后',
+  SecondsAfter: 's',
+  MinutesAfter: '分钟',
+  HoursAfter: '小时',
+  DaysAfter: '天',
 
   // formatConferenceTime.js
   NoTimeLimit: '无时间限制',
   Start: '开始',
   DeviceTesting: '设备检测',
-  DeviceTestingComplete: '设备检测完成',
+  DeviceTestingComplete: '设备检测完成'
 
   // MemberFormInner.js (labels are same as above: Avatar, Nickname, Email)
 };

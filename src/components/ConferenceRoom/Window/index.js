@@ -674,7 +674,14 @@ const WindowList = ({ layoutType, list, document, isMobile }) => {
 const Window = ({ layoutType, documentInside = true, document, list = [], isMobile: isMobileProp }) => {
   const contextIsMobile = useIsMobile();
   const isMobile = typeof isMobileProp === 'boolean' ? isMobileProp : contextIsMobile;
-  const [sizes, setSizes] = useState(localStorage.getItem(LEAPIN_VIDEO_CONFERENCE_WINDOW_SIZES) || ['50%', '50%']);
+  const [sizes, setSizes] = useState(() => {
+    const stored = localStorage.getItem(LEAPIN_VIDEO_CONFERENCE_WINDOW_SIZES);
+    // 面板被折叠过会把 0 持久化，导致之后每次进会文档面板都不可见，此时丢弃存储值
+    if (!Array.isArray(stored) || stored.length !== 2 || stored.some(size => !(parseFloat(size) > 0))) {
+      return ['20%', '80%'];
+    }
+    return stored;
+  });
 
   if (!document) {
     return (
