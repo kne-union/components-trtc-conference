@@ -21,6 +21,8 @@ class ConferenceSDK {
     this.trtc = TRTC.create();
     //0: 未加入房间 1: 已加入房间
     this.clientState = {};
+    // userId:streamType -> view 元素；REMOTE_VIDEO_AVAILABLE 可能早于/晚于 React 挂载 view，两边都从这里取
+    this.remoteViews = {};
     this.taskPromise = {};
     this.localQuality = -1;
 
@@ -40,6 +42,11 @@ class ConferenceSDK {
       this.recordClientEvent('exit', { userId, userType: 'remote' });
       this.events.onExitRoom?.({ userId, type: 'remote' });
       this.clientState[userId] = 0;
+      Object.keys(this.remoteViews).forEach(key => {
+        if (key.startsWith(`${userId}:`)) {
+          delete this.remoteViews[key];
+        }
+      });
     });
 
     this.trtc.on(TRTC.EVENT.REMOTE_VIDEO_AVAILABLE, ({ userId, streamType, ...props }) => {
@@ -47,7 +54,7 @@ class ConferenceSDK {
         return;
       }
       this.runTask(userId, async () => {
-        await this.trtc.startRemoteVideo({ userId, streamType });
+        await this.trtc.startRemoteVideo({ userId, streamType, view: this.remoteViews[`${userId}:${streamType}`] || null });
         if (streamType === this.STREAM_TYPE_MAIN) {
           this.recordClientEvent('camera-open', { userId, userType: 'remote', streamType });
         }
@@ -161,6 +168,9 @@ class ConferenceSDK {
     let audioStarted = false;
     await this.runTask(this.sdkParams.userId, async () => {
       await this.trtc.enterRoom(this.sdkParams);
+      // enterRoom 成功即视为已加入房间；若等本地设备启动完才置位，
+      // 后入会者绑定远端 view 的 updateRemote 会被 clientState 守卫跳过，导致对端画面黑屏
+      this.clientState[this.sdkParams.userId] = 1;
       // iOS PWA 上 getUserMedia 可能失败；不阻塞入会，由后续设备开关再试
       try {
         await this.trtc.startLocalVideo();
@@ -175,7 +185,6 @@ class ConferenceSDK {
         console.warn('[trtc] startLocalAudio failed', e);
       }
     });
-    this.clientState[this.sdkParams.userId] = 1;
     this.events.onLocalStateChange?.(this.clientState[this.sdkParams.userId]);
     this.recordClientEvent('enter', { userId: this.sdkParams.userId, userType: 'local' });
     this.events.onEnterRoom?.({
@@ -255,6 +264,7 @@ class ConferenceSDK {
   }
 
   async updateRemote({ userId, streamType, el }) {
+    this.remoteViews[`${userId}:${streamType}`] = el;
     await this.runTask(userId, async () => {
       this.clientState[this.sdkParams.userId] === 1 &&
         this.clientState[userId] === 1 &&
