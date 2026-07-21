@@ -103,6 +103,7 @@ const apis = merge({}, baseApis, {
         if (speech) {
           pageData = pageData.filter(item => String(!!item.options?.setting?.speech) === speech);
         }
+        pageData.sort((a, b) => dayjs(b.startTime).valueOf() - dayjs(a.startTime).valueOf());
         const currentPage = Math.max(1, Number(props?.params?.currentPage) || 1);
         const perPage = Math.max(1, Number(props?.params?.perPage) || 10);
         const start = (currentPage - 1) * perPage;
