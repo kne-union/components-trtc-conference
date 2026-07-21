@@ -1,5 +1,6 @@
 import { createWithRemoteLoader } from '@kne/remote-loader';
 import { Flex, Button, Card } from 'antd';
+import classnames from 'classnames';
 import style from './style.module.scss';
 import AddConference from './AddConference';
 import { removeToken } from '@kne/token-storage';
@@ -27,16 +28,40 @@ const MenuBar = createWithRemoteLoader({
         className={style['menu-item']}
         type="primary"
         shape={'circle'}
-        icon={<Image.Avatar size={40} {...resolveAvatarProps(user.value.avatar)} />}
+        icon={
+          <span className={style['avatar-edit']}>
+            <Image.Avatar size={40} {...resolveAvatarProps(user.value.avatar)} />
+            <span className={classnames(style['avatar-edit-icon'], style['avatar-edit-icon-small'])}>
+              <Icon type="icon-bianji" size={10} />
+            </span>
+          </span>
+        }
         onClick={() => {
           const modalApi = modal({
             title: formatMessage({ id: 'UserInfo' }),
             size: 'small',
             footer: null,
             children: (
-              <Card className={style['current-user']}>
+              <Card className={classnames(style['current-user'], style['user-info-card'])}>
                 <Flex vertical gap={12} align="center">
-                  <Image.Avatar size={100} {...resolveAvatarProps(user.value.avatar)} />
+                  <SaveUserInfo>
+                    {({ onClick }) => {
+                      return (
+                        <div
+                          className={style['avatar-edit']}
+                          onClick={() => {
+                            modalApi.close();
+                            onClick();
+                          }}
+                        >
+                          <Image.Avatar size={100} {...resolveAvatarProps(user.value.avatar)} />
+                          <span className={style['avatar-edit-icon']}>
+                            <Icon type="icon-bianji" size={10} />
+                          </span>
+                        </div>
+                      );
+                    }}
+                  </SaveUserInfo>
                   <div>{user.value.email}</div>
                   <div>{user.value.nickname}</div>
                   <Button
@@ -49,22 +74,6 @@ const MenuBar = createWithRemoteLoader({
                     {formatMessage({ id: 'Logout' })}
                   </Button>
                 </Flex>
-                <SaveUserInfo>
-                  {({ onClick }) => {
-                    return (
-                      <Button
-                        onClick={() => {
-                          modalApi.close();
-                          onClick();
-                        }}
-                        className={style['current-user-edit']}
-                        size="small"
-                        type="text"
-                        icon={<Icon type="icon-bianji" />}
-                      />
-                    );
-                  }}
-                </SaveUserInfo>
               </Card>
             )
           });
@@ -92,7 +101,7 @@ const MenuBar = createWithRemoteLoader({
                 duration: 60 * 60,
                 isInvitationAllowed: true,
                 includingMe: true,
-                options: { allowExtend: true }
+                options: { allowExtend: true, attention: formatMessage({ id: 'AttentionDefault' }) }
               }
             })
           );

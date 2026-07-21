@@ -23,13 +23,17 @@ const Home = createWithRemoteLoader({
   const { formatMessage } = useIntl();
   const keyword = searchParams.get('keyword') || '';
   const date = searchParams.get('date') || '';
+  const record = searchParams.get('record') || '';
+  const speech = searchParams.get('speech') || '';
   const currentPage = isMobile ? 1 : Number(searchParams.get('page') || 1) || 1;
   const filterValue = useMemo(
     () => ({
       keyword,
-      date
+      date,
+      record,
+      speech
     }),
-    [keyword, date]
+    [keyword, date, record, speech]
   );
 
   const buildListParams = useCallback(
@@ -40,14 +44,16 @@ const Home = createWithRemoteLoader({
           currentPage: page
         },
         keyword ? { keyword } : {},
-        date ? { date } : {}
+        date ? { date } : {},
+        record ? { record } : {},
+        speech ? { speech } : {}
       );
     },
-    [currentPage, date, keyword, pageSize]
+    [currentPage, date, keyword, pageSize, record, speech]
   );
 
   const handleFilterChange = useCallback(
-    ({ keyword: nextKeyword = '', date: nextDate = '' }) => {
+    ({ keyword: nextKeyword = '', date: nextDate = '', record: nextRecord = '', speech: nextSpeech = '' }) => {
       setSearchParams(prev => {
         const next = new URLSearchParams(prev);
         if (nextKeyword) {
@@ -59,6 +65,16 @@ const Home = createWithRemoteLoader({
           next.set('date', nextDate);
         } else {
           next.delete('date');
+        }
+        if (nextRecord) {
+          next.set('record', nextRecord);
+        } else {
+          next.delete('record');
+        }
+        if (nextSpeech) {
+          next.set('speech', nextSpeech);
+        } else {
+          next.delete('speech');
         }
         next.delete('page');
         return next;

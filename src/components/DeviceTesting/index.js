@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Alert, Button, Flex, Progress, Select, Spin } from 'antd';
 import { AudioOutlined, CameraOutlined, ReloadOutlined } from '@ant-design/icons';
+import { useIsMobile } from '@kne/responsive-utils';
+import classnames from 'classnames';
 import withLocale from './withLocale';
 import { useIntl } from '@kne/react-intl';
 import style from './style.module.scss';
@@ -26,6 +28,7 @@ const getDeviceErrorMessage = ({ error, formatMessage }) => {
 };
 
 const DeviceTesting = withLocale(({ defaultAudioDeviceId, defaultVideoDeviceId, onComplete }) => {
+  const isMobile = useIsMobile();
   const videoRef = useRef(null);
   const streamRef = useRef(null);
   const audioContextRef = useRef(null);
@@ -177,42 +180,68 @@ const DeviceTesting = withLocale(({ defaultAudioDeviceId, defaultVideoDeviceId, 
     });
   };
 
+  const mobileButtonProps = isMobile ? { size: 'large', shape: 'round' } : {};
+  const actionButtons = (
+    <>
+      <Button {...mobileButtonProps} icon={<ReloadOutlined />} onClick={startTest} loading={loading}>
+        {formatMessage({ id: 'Retest' })}
+      </Button>
+      <Button {...mobileButtonProps} type="primary" onClick={handleComplete} disabled={!stream}>
+        {formatMessage({ id: 'TestComplete' })}
+      </Button>
+    </>
+  );
+
   return (
-    <div className={style['device-testing']}>
-      <Flex gap={16} vertical>
+    <div className={classnames(style['device-testing'], { [style['is-mobile']]: isMobile, [style['has-footer']]: isMobile })}>
+      <Flex gap={16} vertical className={style['content']}>
         <div className={style['preview']}>
           {stream ? <video ref={videoRef} autoPlay playsInline muted /> : <div className={style['preview-placeholder']}>{loading ? <Spin /> : formatMessage({ id: 'WaitingCameraPreview' })}</div>}
         </div>
         {error && <Alert type="error" showIcon message={error} />}
-        <Flex gap={12} className={style['device-row']}>
-          <Flex vertical gap={6} flex={1}>
+        <Flex gap={12} vertical={isMobile} className={style['device-row']}>
+          <Flex vertical gap={6} flex={1} className={style['device-field']}>
             <div className={style['device-label']}>
               <AudioOutlined />
               {formatMessage({ id: 'Microphone' })}
             </div>
-            <Select value={audioDeviceId} options={audioOptions} onChange={setAudioDeviceId} placeholder={formatMessage({ id: 'SelectMicrophone' })} />
+            <Select
+              value={audioDeviceId}
+              options={audioOptions}
+              onChange={setAudioDeviceId}
+              placeholder={formatMessage({ id: 'SelectMicrophone' })}
+              style={{ width: '100%' }}
+            />
           </Flex>
-          <Flex vertical gap={6} flex={1}>
+          <Flex vertical gap={6} flex={1} className={style['device-field']}>
             <div className={style['device-label']}>
               <CameraOutlined />
               {formatMessage({ id: 'Camera' })}
             </div>
-            <Select value={videoDeviceId} options={videoOptions} onChange={setVideoDeviceId} placeholder={formatMessage({ id: 'SelectCamera' })} />
+            <Select
+              value={videoDeviceId}
+              options={videoOptions}
+              onChange={setVideoDeviceId}
+              placeholder={formatMessage({ id: 'SelectCamera' })}
+              style={{ width: '100%' }}
+            />
           </Flex>
         </Flex>
-        <div>
+        <div className={style['volume-row']}>
           <div className={style['device-label']}>{formatMessage({ id: 'MicrophoneVolume' })}</div>
           <Progress percent={volume} showInfo={false} />
         </div>
-        <Flex justify="flex-end" gap={12}>
-          <Button icon={<ReloadOutlined />} onClick={startTest} loading={loading}>
-            {formatMessage({ id: 'Retest' })}
-          </Button>
-          <Button type="primary" onClick={handleComplete} disabled={!stream}>
-            {formatMessage({ id: 'TestComplete' })}
-          </Button>
-        </Flex>
+        {!isMobile && (
+          <Flex justify="flex-end" gap={12}>
+            {actionButtons}
+          </Flex>
+        )}
       </Flex>
+      {isMobile && (
+        <div className={style['footer-actions']}>
+          <Flex gap={12}>{actionButtons}</Flex>
+        </div>
+      )}
     </div>
   );
 });

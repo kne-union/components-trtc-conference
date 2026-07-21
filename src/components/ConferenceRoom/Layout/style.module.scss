@@ -158,6 +158,11 @@
     flex: 1;
     min-width: 0;
     order: 2;
+
+    // 移动端返回按钮显示在 mobile-title-row 里，这行的隐藏，避免出现两个
+    > .back-button {
+      display: none;
+    }
   }
 
   .header-actions {

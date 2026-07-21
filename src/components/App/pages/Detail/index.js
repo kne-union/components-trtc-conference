@@ -15,7 +15,7 @@ const Detail = createWithRemoteLoader({
   const { apis } = usePreset();
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
-  const { baseUrl, headerName, name } = useContext();
+  const { baseUrl, headerName, name, userInfo } = useContext();
   useEffect(() => {
     const code = searchParams.get('code');
     if (code) {
@@ -38,9 +38,10 @@ const Detail = createWithRemoteLoader({
                 {...data.conference}
                 current={data.member}
                 onBack={
-                  data.member
+                  userInfo
                     ? () => {
-                        navigate(baseUrl);
+                        // PWA 部署时 baseUrl 可能为空字符串，navigate('') 是相对导航不会跳转，需回退到根路径
+                        navigate(baseUrl || '/');
                       }
                     : undefined
                 }

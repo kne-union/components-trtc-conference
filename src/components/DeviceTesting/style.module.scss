@@ -3,6 +3,14 @@
 .device-testing {
   width: min(720px, 100%);
   margin: 0 auto;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.content {
+  width: 100%;
+  min-width: 0;
 }
 
 .preview {
@@ -30,6 +38,17 @@
 }
 
 .device-row {
+  width: 100%;
+  min-width: 0;
+}
+
+.device-field {
+  width: 100%;
+  min-width: 0;
+}
+
+.volume-row {
+  width: 100%;
   min-width: 0;
 }
 
@@ -41,8 +60,45 @@
   font-size: 13px;
 }
 
+.footer-actions {
+  width: 100%;
+  padding: 12px 0 4px;
+  box-sizing: border-box;
+  background: #ffffff;
+
+  :global(.ant-btn) {
+    flex: 1;
+    min-width: 0;
+  }
+}
+
+// 设备检测在 Modal 内渲染，弹框 Portal 到 body 后容器查询失效，用 JS 打标兜底
+.device-testing.is-mobile {
+  width: 100%;
+
+  .preview {
+    aspect-ratio: 4 / 3;
+  }
+
+  &.has-footer {
+    .content {
+      padding-bottom: 8px;
+    }
+
+    .footer-actions {
+      position: sticky;
+      bottom: 0;
+      padding: 12px 0;
+    }
+  }
+}
+
 @include resp.mobile-container {
-  .device-row {
-    flex-direction: column;
+  .device-testing {
+    width: 100%;
+  }
+
+  .preview {
+    aspect-ratio: 4 / 3;
   }
 }

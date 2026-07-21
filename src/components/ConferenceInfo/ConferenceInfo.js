@@ -78,6 +78,27 @@ const buildFilterItems = (filterValue, formatMessage) => {
       }
     });
   }
+  if (filterValue.record) {
+    items.push({
+      name: 'record',
+      label: formatMessage({ id: 'FilterRecordLabel' }),
+      value: {
+        label: formatMessage({ id: filterValue.record === 'video' ? 'RecordVideo' : 'RecordAudio' }),
+        value: filterValue.record
+      }
+    });
+  }
+  if (filterValue.speech !== undefined && filterValue.speech !== null && filterValue.speech !== '') {
+    const speech = String(filterValue.speech);
+    items.push({
+      name: 'speech',
+      label: formatMessage({ id: 'FilterSpeechLabel' }),
+      value: {
+        label: formatMessage({ id: speech === 'true' ? 'Open' : 'Close' }),
+        value: speech
+      }
+    });
+  }
   return items;
 };
 
@@ -115,7 +136,7 @@ const ConferenceInfo = createWithRemoteLoader({
   const [conference, setConference] = useState(null);
   const [aiTranscriptionContent, setAiTranscriptionContent] = useState(null);
   const [ButtonGroup, Icon, StateTag, SimpleBar, Filter, FilterOuter, FilterLines, FilterValueDisplay, SearchInput, Language] = remoteModules;
-  const { DatePickerFilterItem } = Filter.fields;
+  const { DatePickerFilterItem, SuperSelectFilterItem } = Filter.fields;
   const { message } = App.useApp();
   const { formatMessage } = useIntl();
   const isMobile = useIsMobile();
@@ -131,16 +152,42 @@ const ConferenceInfo = createWithRemoteLoader({
           label: formatMessage({ id: 'FilterDateLabel' }),
           format: 'YYYY-MM-DD'
         }
+      },
+      {
+        type: SuperSelectFilterItem,
+        props: {
+          name: 'record',
+          label: formatMessage({ id: 'FilterRecordLabel' }),
+          single: true,
+          options: [
+            { value: 'audio', label: formatMessage({ id: 'RecordAudio' }) },
+            { value: 'video', label: formatMessage({ id: 'RecordVideo' }) }
+          ]
+        }
+      },
+      {
+        type: SuperSelectFilterItem,
+        props: {
+          name: 'speech',
+          label: formatMessage({ id: 'FilterSpeechLabel' }),
+          single: true,
+          options: [
+            { value: 'true', label: formatMessage({ id: 'Open' }) },
+            { value: 'false', label: formatMessage({ id: 'Close' }) }
+          ]
+        }
       }
     ],
-    [DatePickerFilterItem, formatMessage]
+    [DatePickerFilterItem, SuperSelectFilterItem, formatMessage]
   );
   const handleFilterItemsChange = useCallback(
     items => {
       const params = Filter.getFilterValue(items);
       onFilterChange?.({
         keyword: params.keyword || '',
-        date: params.date ? dayjs(params.date).format('YYYY-MM-DD') : ''
+        date: params.date ? dayjs(params.date).format('YYYY-MM-DD') : '',
+        record: params.record || '',
+        speech: params.speech ?? ''
       });
     },
     [Filter, onFilterChange]
@@ -282,6 +329,16 @@ const ConferenceInfo = createWithRemoteLoader({
                     }
                   });
                 }
+                const optionsNode = (
+                  <div className={style['options-btn']}>
+                    <ButtonGroup
+                      list={isMobile ? options.map(option => Object.assign({}, option, { type: 'link', shape: undefined })) : options}
+                      showLength={isMobile ? 2 : undefined}
+                      split={isMobile ? <Divider type="vertical" /> : undefined}
+                      more={<Button icon={<Icon type="icon-gengduo2" />} className="btn-no-padding" type="link" />}
+                    />
+                  </div>
+                );
                 return (
                   <List.Item className={style['list-item']} key={item.id}>
                     <Flex vertical flex={1} className={style['list-item-content']}>
@@ -295,16 +352,12 @@ const ConferenceInfo = createWithRemoteLoader({
                             {item.status === 2 && <StateTag type="danger" text={formatMessage({ id: 'Canceled' })} />}
                           </div>
                         </Flex>
-                        <div className={style['options-btn']}>
-                          <ButtonGroup
-                            list={options}
-                            more={<Button icon={<Icon type="icon-gengduo2" />} className="btn-no-padding" type="link" />}
-                          />
-                        </div>
+                        {!isMobile && optionsNode}
                       </Flex>
                       <div className={style['time']}>
                         {dayjs(item.startTime).format('HH:mm')} - {dayjs(item.startTime).add(item.duration, 'second').format('HH:mm')}
                       </div>
+                      {isMobile && optionsNode}
                     </Flex>
                   </List.Item>
                 );
@@ -384,13 +437,16 @@ const ConferenceInfo = createWithRemoteLoader({
                   >
                     {isMobile ? (
                       <div className={style['list-search-row']}>
-                        <SearchInput
-                          name="keyword"
-                          label={formatMessage({ id: 'FilterKeywordLabel' })}
-                          placeholder={formatMessage({ id: 'FilterKeywordPlaceholder' })}
-                          allowClear
-                          style={{ width: '100%', maxWidth: '100%' }}
-                        />
+                        <div className={style['list-search-input']}>
+                          <SearchInput
+                            name="keyword"
+                            label={formatMessage({ id: 'FilterKeywordLabel' })}
+                            placeholder={formatMessage({ id: 'FilterKeywordPlaceholder' })}
+                            allowClear
+                            style={{ width: '100%', maxWidth: '100%' }}
+                          />
+                        </div>
+                        <Language colorful={false} />
                       </div>
                     ) : null}
                     <Flex className={style['title']} justify="space-between" align="center" gap={8}>
@@ -401,11 +457,7 @@ const ConferenceInfo = createWithRemoteLoader({
                             <FilterLines list={filterList} label="" displayLine={1} />
                           </div>
                         </div>
-                        {isMobile ? (
-                          <div className={style['list-toolbar-actions']}>
-                            <Language colorful={false} />
-                          </div>
-                        ) : (
+                        {isMobile ? null : (
                           <div className={style['list-toolbar-actions']}>
                               <SearchInput
                                 name="keyword"

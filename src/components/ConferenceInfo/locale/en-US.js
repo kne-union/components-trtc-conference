@@ -112,6 +112,8 @@ const locale = {
   FilterDateLabel: 'Date',
   FilterKeywordPlaceholder: 'Search meetings',
   FilterKeywordLabel: 'Keyword',
+  FilterRecordLabel: 'Meeting Recording',
+  FilterSpeechLabel: 'Speech Recognition',
 
   // AddConference.js
   AddMeetingTitle: 'Add Meeting',

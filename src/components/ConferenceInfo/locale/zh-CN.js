@@ -36,7 +36,7 @@ const locale = {
   MeetingAudio: '录音',
   Meeting: '会议',
   TrtcRoomEvents: '房间事件',
-  ViewTrtcRoomEvents: '查看房间事件',
+  ViewTrtcRoomEvents: '查看',
   Refresh: '刷新',
   NoRecordedResources: '用户没有产生录制资源',
   SyncingRecordedResources: '正在同步录制资源，最长需要10分钟，请稍后查看',
@@ -112,6 +112,8 @@ const locale = {
   FilterDateLabel: '日期',
   FilterKeywordPlaceholder: '搜索会议',
   FilterKeywordLabel: '关键词',
+  FilterRecordLabel: '录制会议',
+  FilterSpeechLabel: '语言识别',
 
   // AddConference.js
   AddMeetingTitle: '添加会议',
