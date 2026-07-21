@@ -106,6 +106,8 @@ const locale = {
   Settings: 'Settings',
 
   // ConferenceInfo.js (list view)
+  NotStarted: 'Not started',
+  InProgress: 'In progress',
   Ended: 'Ended',
   DateFormat: 'MM/DD',
   FilterDatePlaceholder: 'Select date',

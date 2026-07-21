@@ -355,38 +355,65 @@ const ConferenceInfo = createWithRemoteLoader({
                         />
                       </div>
                     );
+                    const isStarted = dayjs().isAfter(dayjs(item.startTime));
+                    const statusTag =
+                      item.status === 2
+                        ? { type: 'danger', text: formatMessage({ id: 'Canceled' }) }
+                        : item.status === 1
+                          ? { text: formatMessage({ id: 'Ended' }) }
+                          : isStarted
+                            ? { type: 'success', text: formatMessage({ id: 'InProgress' }) }
+                            : { text: formatMessage({ id: 'NotStarted' }) };
+                    const titleNode = (
+                      <Flex gap={8} align="center" className={style['list-title-area']}>
+                        <div className={style['conference-title']}>{item.name}</div>
+                        <StateTag {...statusTag} />
+                      </Flex>
+                    );
+                    const timeNode = (
+                      <Flex gap={6} align="center" className={style['time']}>
+                        <Icon type="icon-shijian" />
+                        <span>
+                          {dayjs(item.startTime).format('HH:mm')} - {dayjs(item.startTime).add(item.duration, 'second').format('HH:mm')}
+                        </span>
+                      </Flex>
+                    );
+                    const progressNode = (
+                      <Flex gap={8} align="center" className={style['attendance-progress']}>
+                        <Progress
+                          percent={members.length > 0 ? (attendedCount / members.length) * 100 : 0}
+                          showInfo={false}
+                          size="small"
+                          strokeColor="var(--primary-color)"
+                        />
+                        <span className={style['attendance-count']}>
+                          {attendedCount}/{members.length}
+                        </span>
+                      </Flex>
+                    );
                     return (
                       <List.Item className={classnames(style['list-item'], { [style['is-canceled']]: item.status === 2 })} key={item.id}>
-                        <Flex vertical flex={1} gap={6} className={style['list-item-content']}>
-                          <Flex justify="space-between" align="center" gap={8} className={style['list-item-header']}>
-                            <Flex gap={8} align="center" className={style['list-title-area']}>
-                              <div className={style['conference-title']}>{item.name}</div>
-                              {item.status === 1 && <StateTag text={formatMessage({ id: 'Ended' })} />}
-                              {item.status === 2 && <StateTag type="danger" text={formatMessage({ id: 'Canceled' })} />}
+                        {isMobile ? (
+                          <Flex vertical flex={1} gap={6} className={style['list-item-content']}>
+                            <Flex justify="space-between" align="center" gap={8} className={style['list-item-header']}>
+                              {titleNode}
                             </Flex>
-                            {!isMobile && optionsNode}
+                            <Flex justify="space-between" align="center" gap={12} wrap className={style['list-item-meta']}>
+                              {timeNode}
+                              {progressNode}
+                            </Flex>
+                            {optionsNode}
                           </Flex>
-                          <Flex justify="space-between" align="center" gap={12} wrap className={style['list-item-meta']}>
-                            <Flex gap={6} align="center" className={style['time']}>
-                              <Icon type="icon-shijian" />
-                              <span>
-                                {dayjs(item.startTime).format('HH:mm')} - {dayjs(item.startTime).add(item.duration, 'second').format('HH:mm')}
-                              </span>
+                        ) : (
+                          <Flex align="center" flex={1} gap={16} className={style['list-item-content']}>
+                            <Flex vertical flex={1} gap={4} align="flex-start" className={style['list-item-main']}>
+                              {titleNode}
+                              {timeNode}
                             </Flex>
-                            <Flex gap={8} align="center" className={style['attendance-progress']}>
-                              <Progress
-                                percent={members.length > 0 ? (attendedCount / members.length) * 100 : 0}
-                                showInfo={false}
-                                size="small"
-                                strokeColor="var(--primary-color)"
-                              />
-                              <span className={style['attendance-count']}>
-                                {attendedCount}/{members.length}
-                              </span>
-                            </Flex>
+                            {progressNode}
+                            {optionsNode}
                           </Flex>
-                          {isMobile && optionsNode}
-                        </Flex>
+                        )}
                       </List.Item>
                     );
                   }}

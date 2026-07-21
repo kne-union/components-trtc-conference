@@ -3,29 +3,25 @@ import { Flex, App } from 'antd';
 import formatConferenceTime from './formatConferenceTime';
 import withLocale from './withLocale';
 import { useIntl } from '@kne/react-intl';
+import style from './style.module.scss';
 
 const renderModal = ({ inviter, conference, shorten, message, formatMessage }) => {
   const link = `${window.location.origin}/invite?code=${shorten}`;
-  const text = `
-            ${inviter.nickname || inviter.email || formatMessage({ id: 'DefaultUser' })} ${formatMessage({ id: 'InviteToVideoConference' })}
-            ${formatMessage({ id: 'MeetingNameLabel' })}：${conference.name}
-            ${formatMessage({ id: 'MeetingTime' })}：${formatConferenceTime({ startTime: conference.startTime, duration: conference.duration, formatMessage })}
-
-            ${formatMessage({ id: 'ClickLinkToJoin' })}：
-            ${link}`;
+  const text = [
+    `${inviter.nickname || inviter.email || formatMessage({ id: 'DefaultUser' })} ${formatMessage({ id: 'InviteToVideoConference' })}`,
+    `${formatMessage({ id: 'MeetingNameLabel' })}：${conference.name}`,
+    `${formatMessage({ id: 'MeetingTime' })}：${formatConferenceTime({ startTime: conference.startTime, duration: conference.duration, formatMessage })}`,
+    '',
+    `${formatMessage({ id: 'ClickLinkToJoin' })}：`,
+    link
+  ].join('\n');
   return {
     title: formatMessage({ id: 'InviteParticipants' }),
     size: 'small',
     footer: null,
     children: (
       <Flex vertical gap={60}>
-        <div
-          style={{
-            whiteSpace: 'pre-wrap'
-          }}
-        >
-          {text}
-        </div>
+        <div className={style['invite-text']}>{text}</div>
         <Flex justify="center" gap={12}>
           <RemoteLoader
             module="components-core:LoadingButton"
