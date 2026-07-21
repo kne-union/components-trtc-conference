@@ -106,6 +106,8 @@ const locale = {
   Settings: '设置',
 
   // ConferenceInfo.js (list view)
+  NotStarted: '未开始',
+  InProgress: '进行中',
   Ended: '已结束',
   DateFormat: 'MM月DD日',
   FilterDatePlaceholder: '选择日期',

@@ -1,5 +1,25 @@
 @use '~@kne/responsive-utils/scss' as resp;
 
+:global(html):has(.page) {
+  overflow-y: overlay;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.15) transparent;
+}
+
+:global(html):has(.page)::-webkit-scrollbar {
+  width: 3px;
+  height: 3px;
+}
+
+:global(html):has(.page)::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 999px;
+}
+
+:global(html):has(.page)::-webkit-scrollbar-track {
+  background: transparent;
+}
+
 .page {
   @include resp.responsive-container;
   width: var(--kne-viewport-width, 100vw);
