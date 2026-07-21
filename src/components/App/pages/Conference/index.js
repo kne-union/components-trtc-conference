@@ -10,7 +10,7 @@ const Conference = createWithRemoteLoader({
 })(({ remoteModules }) => {
   const [usePreset] = remoteModules;
   const { apis } = usePreset();
-  const { baseUrl, name } = useContext();
+  const { baseUrl, name, userInfo } = useContext();
   const navigate = useNavigate();
   return (
     <Fetch
@@ -21,9 +21,13 @@ const Conference = createWithRemoteLoader({
             className={style['conference-room']}
             conference={data.conference}
             current={data.member}
-            onBack={() => {
-              navigate(baseUrl);
-            }}
+            onBack={
+              userInfo
+                ? () => {
+                    navigate(baseUrl || '/');
+                  }
+                : undefined
+            }
             sdkParams={data.sign}
             baseUrl={baseUrl}
             apis={{

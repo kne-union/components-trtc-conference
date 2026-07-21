@@ -175,7 +175,7 @@
 }
 
 .title-actions {
-  flex: 1;
+  flex: none;
   justify-content: flex-end;
 }
 
@@ -331,6 +331,58 @@
   right: 4px;
   opacity: 0;
   transition: opacity 500ms;
+}
+
+// ButtonFooter 在小屏会把内容 Portal 到 body，容器查询不生效，样式需放在顶层
+.footer-actions {
+  width: 100%;
+  padding: 10px 16px;
+  box-sizing: border-box;
+
+  > :global(.ant-btn) {
+    width: 100%;
+  }
+}
+
+.footer-actions-row {
+  width: 100%;
+
+  > :global(.ant-btn) {
+    flex: 1;
+    min-width: 0;
+  }
+}
+
+.invite-footer-btn {
+  width: 100%;
+}
+
+.avatar-edit {
+  position: relative;
+  display: inline-flex;
+  cursor: pointer;
+}
+
+.avatar-edit-icon {
+  position: absolute;
+  right: 6px;
+  bottom: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  background: var(--primary-color);
+  color: #fff;
+  border-radius: 6px;
+  padding: 2px;
+  box-sizing: content-box;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+  line-height: 1;
+}
+
+.avatar-edit-icon-small {
+  right: -2px;
+  bottom: -2px;
 }
 
 .current-actions {
@@ -612,6 +664,14 @@
     min-height: 0;
     max-height: none;
     height: auto;
+
+    &.has-footer {
+      padding-bottom: 88px;
+    }
+
+    &.has-footer-tall {
+      padding-bottom: 150px;
+    }
   }
 
   .title {
@@ -628,9 +688,16 @@
   }
 
   .list-search-row {
-    display: block;
+    display: flex;
+    align-items: center;
+    gap: 8px;
     width: 100%;
     box-sizing: border-box;
+
+    .list-search-input {
+      flex: 1;
+      min-width: 0;
+    }
 
     :global(.ant-input-search),
     :global(.ant-input-group-wrapper),
@@ -639,10 +706,12 @@
       max-width: 100%;
     }
 
-    // iOS Safari zooms the page when focused input font-size < 16px
+    // iOS Safari zooms the page when focused input font-size < 16px;
+    // keep the default 22px content height so the input stays aligned with the search button
     :global(.ant-input),
     :global(.ant-input-affix-wrapper input) {
       font-size: 16px !important;
+      line-height: 22px !important;
     }
   }
 
@@ -651,6 +720,23 @@
     min-width: 0;
     gap: 8px;
     justify-content: flex-end;
+
+    .list-filter {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      justify-content: flex-start;
+    }
+
+    .list-filter-inner {
+      width: max-content;
+      min-width: 0;
+
+      :global(.filter-line) {
+        flex-wrap: nowrap;
+        white-space: nowrap;
+        justify-content: flex-start;
+      }
+    }
   }
 
   .list-value-display {
@@ -660,15 +746,17 @@
     }
   }
 
-  .title-info,
-  .title-actions {
-    flex: 1 1 auto;
+  .title-info {
+    flex: none;
     min-width: 0;
   }
 
   .title-actions {
-    flex-wrap: wrap;
+    flex: none;
+    min-width: 0;
+    flex-wrap: nowrap;
     justify-content: flex-end;
+    align-items: center;
   }
 
   .detail-summary {
@@ -689,15 +777,25 @@
   }
 
   .menu-bar {
+    position: sticky;
+    top: 0;
+    z-index: 100;
     width: 100%;
     padding: 8px;
     overflow-x: auto;
     flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    align-items: center;
   }
 
   .menu-item {
     flex: none;
     min-width: 56px;
+    white-space: nowrap;
+
+    :global(.ant-flex) {
+      flex-wrap: nowrap;
+    }
   }
 
   .options-btn,
@@ -710,13 +808,20 @@
 
     :global {
       .ant-list-item {
-        padding: 10px 8px;
+        padding: 16px;
+        background: #ffffff;
+        border-radius: 10px;
+      }
+
+      .ant-list-item + .ant-list-item {
+        margin-top: 8px;
       }
     }
   }
 
   .conference-title {
     max-width: 100%;
+    font-size: 16px;
   }
 
   .list-content {
@@ -754,13 +859,56 @@
   }
 
   .options-btn {
-    flex: none;
+    align-self: stretch;
+    width: auto;
+    margin: 12px -16px -8px;
+    padding: 8px 8px 0;
+    border-top: 1px solid var(--border-color, rgba(5, 5, 5, 0.06));
+
+    :global(.ant-space) {
+      width: 100%;
+      display: flex;
+      flex-wrap: nowrap;
+    }
+
+    :global(.ant-space-item) {
+      flex: 1 1 0;
+      min-width: 0;
+    }
+
+    :global(.ant-space-item-split) {
+      flex: none;
+    }
+
+    :global(.ant-space-item:has(.btn-no-padding)) {
+      flex: none;
+    }
+
+    :global(.ant-btn) {
+      width: 100%;
+      min-width: 0;
+    }
+
+    :global(.btn-no-padding) {
+      width: auto;
+    }
   }
 
   .current-user {
     gap: 16px !important;
     padding: 8px 0;
     width: 100%;
+  }
+
+  .user-info-card {
+    :global(.ant-card-body) {
+      padding: 16px 8px;
+    }
+
+    :global(.ant-btn) {
+      width: 100%;
+      margin-top: 4px;
+    }
   }
 
   .current-actions {
@@ -786,23 +934,40 @@
   }
 
   .member-item {
-    align-items: flex-start;
+    align-items: stretch;
     flex-direction: column;
+    gap: 10px;
+    padding: 12px;
   }
 
-  .member-info,
-  .member-actions {
+  .member-info {
     width: 100%;
   }
 
   .member-actions {
     display: flex;
-    justify-content: flex-end;
+    align-self: stretch;
+    width: auto;
+    margin: 0 -12px -8px;
+    padding: 4px 8px 0;
+    border-top: 1px solid var(--border-color, rgba(5, 5, 5, 0.06));
+
+    :global(.ant-btn) {
+      flex: 1;
+      min-width: 0;
+      min-height: 40px;
+    }
   }
 
   .member-actions-inner {
     width: 100%;
-    justify-content: flex-end;
+    flex-wrap: nowrap !important;
+    gap: 0 !important;
+
+    > :global(.ant-btn) + :global(.ant-btn) {
+      border-left: 1px solid var(--border-color, rgba(5, 5, 5, 0.06));
+      border-radius: 0;
+    }
   }
 
   .meeting-settings {

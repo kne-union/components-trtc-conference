@@ -30,6 +30,7 @@ export const ConferenceDetailInner = createWithRemoteLoader({
     'components-core:FilePreview',
     'components-core:Common@SimpleBar',
     'components-core:Modal@useModal',
+    'components-core:ButtonGroup',
     'components-core:ButtonGroup@ButtonFooter',
     'components-thirdparty:CKEditor',
     'components-admin:Account@Language'
@@ -58,7 +59,7 @@ export const ConferenceDetailInner = createWithRemoteLoader({
   isAdmin,
   aiTranscriptionContent
 }) => {
-  const [Icon, Image, InfoPage, StateTag, ConfirmButton, usePreset, LoadingButton, FilePreview, SimpleBar, useModal, ButtonFooter, CKEditor, Language] = remoteModules;
+  const [Icon, Image, InfoPage, StateTag, ConfirmButton, usePreset, LoadingButton, FilePreview, SimpleBar, useModal, ButtonGroup, ButtonFooter, CKEditor, Language] = remoteModules;
   const { ajax } = usePreset();
   const { message } = App.useApp();
   const modal = useModal();
@@ -214,6 +215,7 @@ export const ConferenceDetailInner = createWithRemoteLoader({
           danger
           size="small"
           type="text"
+          isModal={isMobile}
           icon={<Icon type="icon-shanchu" />}
           onClick={async () => {
             const { data: resData } = await ajax(
@@ -294,10 +296,92 @@ export const ConferenceDetailInner = createWithRemoteLoader({
     </InviteMember>
   ) : null;
 
+  const currentActionsNode =
+    status === 0 && current ? (
+      <>
+        <Button
+          size="large"
+          shape="round"
+          icon={<Icon type="icon-setting" fontClassName="iconfont-ai" />}
+          onClick={() => {
+            const modalApi = modal({
+              title: formatMessage({ id: 'DeviceTesting' }),
+              footer: null,
+              width: isMobile ? '100%' : undefined,
+              children: (
+                <DeviceTesting
+                  onComplete={() => {
+                    message.success(formatMessage({ id: 'DeviceTestingComplete' }));
+                    modalApi.close();
+                  }}
+                />
+              )
+            });
+          }}
+        >
+          {formatMessage({ id: 'DeviceTesting' })}
+        </Button>
+        <LoadingButton
+          disabled={startTime && dayjs(startTime).isAfter(dayjs())}
+          size="large"
+          type="primary"
+          shape="round"
+          icon={<Icon type="icon-fasongduihua" />}
+          onClick={async () => {
+            await onEnter?.();
+          }}
+        >
+          {formatMessage({ id: 'EnterMeeting' })}
+        </LoadingButton>
+      </>
+    ) : null;
+
+  const joinConferenceNode =
+    status === 0 && inviter && isInvitationAllowed && members.length < maxCount ? (
+      <JoinConference
+        apis={apis}
+        onSuccess={data => {
+          onReload && onReload(data);
+        }}
+      >
+        {({ onClick }) => {
+          return (
+            <Button size="large" type="primary" shape="round" onClick={onClick}>
+              {formatMessage({ id: 'JoinMeeting' })}
+            </Button>
+          );
+        }}
+      </JoinConference>
+    ) : null;
+
+  const footerRowCount = [inviteMemberButton, currentActionsNode, joinConferenceNode].filter(Boolean).length;
+  const hasMobileFooter = isMobile && footerRowCount > 0;
+
+  const titleActions = [];
+  if (onCancel && isBeforeStart) {
+    titleActions.push({
+      type: 'link',
+      danger: true,
+      children: formatMessage({ id: 'CancelMeeting' }),
+      confirm: true,
+      isModal: true,
+      message: formatMessage({ id: 'CancelMeetingConfirm' }),
+      okText: formatMessage({ id: 'CancelMeeting' }),
+      onClick: onCancel
+    });
+  }
+  if (onEdit && status === 0) {
+    titleActions.push({
+      type: 'link',
+      children: formatMessage({ id: 'Edit' }),
+      onClick: onEdit
+    });
+  }
+
   return (
     <Flex vertical flex={isMobile ? undefined : 1} className={style['right-panel']}>
-      <Flex className={style['title']} gap={8} justify="space-between">
-        <Flex gap={8} className={style['title-info']}>
+      <Flex className={style['title']} gap={8} justify="space-between" align="center">
+        <Flex gap={8} align="center" className={style['title-info']}>
           {onBack && (
             <Button
               type="link"
@@ -314,15 +398,12 @@ export const ConferenceDetailInner = createWithRemoteLoader({
         </Flex>
         <Flex gap={8} align="center" className={style['title-actions']}>
           <Language colorful={false} />
-          {onCancel && isBeforeStart && (
-            <ConfirmButton type="link" danger message={formatMessage({ id: 'CancelMeetingConfirm' })} okText={formatMessage({ id: 'CancelMeeting' })} onClick={onCancel}>
-              {formatMessage({ id: 'CancelMeeting' })}
-            </ConfirmButton>
-          )}
-          {onEdit && status === 0 && (
-            <Button type="link" onClick={onEdit}>
-              {formatMessage({ id: 'Edit' })}
-            </Button>
+          {titleActions.length > 0 && (
+            <ButtonGroup
+              list={titleActions}
+              showLength={isMobile ? 2 : undefined}
+              more={<Button icon={<Icon type="icon-gengduo2" />} className="btn-no-padding" type="link" />}
+            />
           )}
         </Flex>
       </Flex>
@@ -331,7 +412,12 @@ export const ConferenceDetailInner = createWithRemoteLoader({
         <div className={style['detail-name']}>{name}</div>
         <div className={style['detail-time']}>({formatConferenceTime({ startTime, duration, formatMessage })})</div>
       </div>
-      <DetailScroller className={style['scroller']}>
+      <DetailScroller
+        className={classnames(style['scroller'], {
+          [style['has-footer']]: hasMobileFooter,
+          [style['has-footer-tall']]: footerRowCount > 1
+        })}
+      >
         <Flex vertical align="center" className={style['current-user']} gap={30}>
           {status === 0 && current && (
             <>
@@ -395,68 +481,20 @@ export const ConferenceDetailInner = createWithRemoteLoader({
           {status === 2 && <div className={style['tips']}>{formatMessage({ id: 'MeetingCanceled' })}</div>}
           {[0, 1, 2].indexOf(status) === -1 && <div className={style['tips']}>{formatMessage({ id: 'MeetingError' })}</div>}
 
+          {!isMobile && currentActionsNode && (
+            <Flex gap={12} className={style['current-actions']}>
+              {canInviteAsMaster && inviteMemberButton}
+              {currentActionsNode}
+            </Flex>
+          )}
+
+          {!isMobile && joinConferenceNode}
+
           {options?.attention && (
             <Flex vertical className={style['member-area']}>
               <div className={style['member-title']}>{formatMessage({ id: 'Attention' })}</div>
               <CKEditor.Content className={style['attention-content']}>{options.attention}</CKEditor.Content>
             </Flex>
-          )}
-
-          {status === 0 && current && (
-            <Flex gap={12} className={style['current-actions']}>
-              {!isMobile && canInviteAsMaster && inviteMemberButton}
-              <Button
-                size="large"
-                shape="round"
-                icon={<Icon type="icon-setting" fontClassName="iconfont-ai" />}
-                onClick={() => {
-                  const modalApi = modal({
-                    title: formatMessage({ id: 'DeviceTesting' }),
-                    footer: null,
-                    width: isMobile ? '100%' : undefined,
-                    children: (
-                      <DeviceTesting
-                        onComplete={() => {
-                          message.success(formatMessage({ id: 'DeviceTestingComplete' }));
-                          modalApi.close();
-                        }}
-                      />
-                    )
-                  });
-                }}
-              >
-                {formatMessage({ id: 'DeviceTesting' })}
-              </Button>
-              <LoadingButton
-                disabled={startTime && dayjs(startTime).isAfter(dayjs())}
-                size="large"
-                type="primary"
-                shape="round"
-                icon={<Icon type="icon-fasongduihua" />}
-                onClick={async () => {
-                  await onEnter?.();
-                }}
-              >
-                {formatMessage({ id: 'EnterMeeting' })}
-              </LoadingButton>
-            </Flex>
-          )}
-
-          {status === 0 && inviter && isInvitationAllowed && members.length < maxCount && (
-            <JoinConference
-              apis={apis}
-              onSuccess={data => {
-                onReload && onReload(data);
-              }}
-            >
-              {({ onClick }) => {
-                return (
-                  <Button size="large" type="primary" shape="round" onClick={onClick}>
-                    {formatMessage({ id: 'JoinMeeting' })}
-                  </Button>
-                );
-              }}
-            </JoinConference>
           )}
 
           {options?.documentType && (isAdmin || options?.documentVisibleAll || current?.isMaster) && (
@@ -490,32 +528,41 @@ export const ConferenceDetailInner = createWithRemoteLoader({
             </Flex>
           )}
 
+          {!isMobile && canInviteAsAdmin && (
+            <Flex justify="center">
+              {inviteMemberButton}
+            </Flex>
+          )}
+
           <Flex vertical className={style['member-area']}>
             <div className={style['member-title']}>
               {formatMessage({ id: 'Participants' })}({members.length}/{maxCount})
             </div>
             <div className={style['member-list']}>
               {members.length > 0 ? (
-                members.map(member => (
-                  <div className={style['member-item']} key={member.id || member.email || member.nickname}>
-                    <Flex align="center" gap={10} className={style['member-info']}>
-                      <Image.Avatar size={36} {...resolveAvatarProps(member.avatar)} />
-                      <div className={style['member-profile']}>
-                        <div className={style['member-name']}>{member.nickname || member.email || '-'}</div>
-                        <Flex gap={4} wrap className={style['member-tags']}>
-                          <StateTag type={member.isMaster ? 'success' : undefined} text={member.isMaster ? formatMessage({ id: 'Host' }) : formatMessage({ id: 'Attendee' })} />
-                          {!isBeforeStart && (
-                            <StateTag
-                              type={hasMemberAttended(member) ? 'success' : undefined}
-                              text={hasMemberAttended(member) ? formatMessage({ id: 'Attended' }) : formatMessage({ id: 'NotAttended' })}
-                            />
-                          )}
-                        </Flex>
-                      </div>
-                    </Flex>
-                    <div className={style['member-actions']}>{renderMemberActions(member)}</div>
-                  </div>
-                ))
+                members.map(member => {
+                  const memberActions = renderMemberActions(member);
+                  return (
+                    <div className={style['member-item']} key={member.id || member.email || member.nickname}>
+                      <Flex align="center" gap={10} className={style['member-info']}>
+                        <Image.Avatar size={36} {...resolveAvatarProps(member.avatar)} />
+                        <div className={style['member-profile']}>
+                          <div className={style['member-name']}>{member.nickname || member.email || '-'}</div>
+                          <Flex gap={4} wrap className={style['member-tags']}>
+                            <StateTag type={member.isMaster ? 'success' : undefined} text={member.isMaster ? formatMessage({ id: 'Host' }) : formatMessage({ id: 'Attendee' })} />
+                            {!isBeforeStart && (
+                              <StateTag
+                                type={hasMemberAttended(member) ? 'success' : undefined}
+                                text={hasMemberAttended(member) ? formatMessage({ id: 'Attended' }) : formatMessage({ id: 'NotAttended' })}
+                              />
+                            )}
+                          </Flex>
+                        </div>
+                      </Flex>
+                      {memberActions ? <div className={style['member-actions']}>{memberActions}</div> : null}
+                    </div>
+                  );
+                })
               ) : (
                 <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} />
               )}
@@ -663,14 +710,21 @@ export const ConferenceDetailInner = createWithRemoteLoader({
             </Flex>
           )}
 
-          {!isMobile && canInviteAsAdmin && (
-            <Flex justify="center">
-              {inviteMemberButton}
-            </Flex>
-          )}
         </Flex>
       </DetailScroller>
-      {isMobile && inviteMemberButton && <ButtonFooter>{inviteMemberButton}</ButtonFooter>}
+      {hasMobileFooter && (
+        <ButtonFooter>
+          <Flex vertical gap={10} className={style['footer-actions']}>
+            {inviteMemberButton}
+            {currentActionsNode && (
+              <Flex gap={10} className={style['footer-actions-row']}>
+                {currentActionsNode}
+              </Flex>
+            )}
+            {joinConferenceNode}
+          </Flex>
+        </ButtonFooter>
+      )}
     </Flex>
   );
 }));

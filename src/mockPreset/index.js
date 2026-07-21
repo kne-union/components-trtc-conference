@@ -88,12 +88,20 @@ const apis = merge({}, baseApis, {
         const data = await loadConferenceListData();
         const keyword = (props?.params?.keyword || '').trim();
         const date = props?.params?.date || '';
+        const record = props?.params?.record || '';
+        const speech = props?.params?.speech || '';
         let pageData = data.pageData.slice();
         if (keyword) {
           pageData = pageData.filter(item => String(item.name || '').includes(keyword));
         }
         if (date) {
           pageData = pageData.filter(item => dayjs(item.startTime).format('YYYY-MM-DD') === date);
+        }
+        if (record) {
+          pageData = pageData.filter(item => item.options?.setting?.record === record);
+        }
+        if (speech) {
+          pageData = pageData.filter(item => String(!!item.options?.setting?.speech) === speech);
         }
         const currentPage = Math.max(1, Number(props?.params?.currentPage) || 1);
         const perPage = Math.max(1, Number(props?.params?.perPage) || 10);
