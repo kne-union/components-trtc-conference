@@ -259,15 +259,27 @@ export const ConferenceDetailInner = createWithRemoteLoader({
     return member?.nickname || member?.email || formatMessage({ id: 'DefaultUser' });
   };
   const showTrtcRoomEvents = async () => {
-    const { data: resData } = await ajax(
-      Object.assign({}, apis?.getTrtcInstanceEvents, {
-        params: { id, perPage: 200, currentPage: 1 }
-      })
-    );
-    if (resData.code !== 0) {
-      return;
+    const perPage = 200;
+    const events = [];
+    let currentPage = 1;
+    // 按 totalCount 翻页拉全事件，只取第一页会截断会议后半段数据
+    while (true) {
+      const { data: resData } = await ajax(
+        Object.assign({}, apis?.getTrtcInstanceEvents, {
+          params: { id, perPage, currentPage }
+        })
+      );
+      if (resData.code !== 0) {
+        return;
+      }
+      const pageData = resData.data?.pageData || [];
+      events.push(...pageData);
+      const totalCount = resData.data?.totalCount ?? 0;
+      if (pageData.length === 0 || events.length >= totalCount) {
+        break;
+      }
+      currentPage += 1;
     }
-    const events = resData.data?.pageData || [];
     modal({
       title: formatMessage({ id: 'TrtcRoomEvents' }),
       footer: null,
@@ -358,7 +370,7 @@ export const ConferenceDetailInner = createWithRemoteLoader({
   const hasMobileFooter = isMobile && footerRowCount > 0;
 
   const titleActions = [];
-  if (onCancel && isBeforeStart) {
+  if (onCancel && status === 0) {
     titleActions.push({
       type: 'link',
       danger: true,
@@ -450,7 +462,7 @@ export const ConferenceDetailInner = createWithRemoteLoader({
                       onReload && onReload();
                     }}
                   />
-                  {formatMessage({ id: 'StartMeeting' })}
+                  {formatMessage({ id: 'AfterStartMeeting' })}
                 </Flex>
               )}
             </>
