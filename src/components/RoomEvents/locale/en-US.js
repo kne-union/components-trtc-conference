@@ -26,6 +26,7 @@ const locale = {
   AudioLevelLowAnalysis: 'Audio level is low and may be hard to hear',
   AudioLevelHighAnalysis: 'Audio level is high and may include noise or clipping',
   PacketLoss: 'Packet Loss',
+  RttMetric: 'RTT',
   AudioLevel: 'Audio Level',
   EventUser: 'User',
   EventCode: 'Event',

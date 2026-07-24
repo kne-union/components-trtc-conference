@@ -66,6 +66,10 @@ const getApis = options => {
       url: `${prefix}/getTrtcInstanceEvents`,
       method: 'GET'
     },
+    getTrtcRoomEventsSummary: {
+      url: `${prefix}/getTrtcRoomEventsSummary`,
+      method: 'GET'
+    },
     createConference: {
       url: `${prefix}/create`,
       method: 'POST'

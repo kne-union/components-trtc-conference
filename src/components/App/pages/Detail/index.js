@@ -59,7 +59,8 @@ const Detail = createWithRemoteLoader({
                   inviteMember: apis[name].inviteMember,
                   removeMember: apis[name].removeMember,
                   joinConference: apis[name].joinConference,
-                  getTrtcInstanceEvents: apis[name].getTrtcInstanceEvents
+                  getTrtcInstanceEvents: apis[name].getTrtcInstanceEvents,
+                  getTrtcRoomEventsSummary: apis[name].getTrtcRoomEventsSummary
                 }}
               />
             );

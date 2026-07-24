@@ -259,33 +259,23 @@ export const ConferenceDetailInner = createWithRemoteLoader({
     return member?.nickname || member?.email || formatMessage({ id: 'DefaultUser' });
   };
   const showTrtcRoomEvents = async () => {
-    const perPage = 200;
-    const events = [];
-    let currentPage = 1;
-    // 按 totalCount 翻页拉全事件，只取第一页会截断会议后半段数据
-    while (true) {
-      const { data: resData } = await ajax(
-        Object.assign({}, apis?.getTrtcInstanceEvents, {
-          params: { id, perPage, currentPage }
-        })
-      );
-      if (resData.code !== 0) {
-        return;
-      }
-      const pageData = resData.data?.pageData || [];
-      events.push(...pageData);
-      const totalCount = resData.data?.totalCount ?? 0;
-      if (pageData.length === 0 || events.length >= totalCount) {
-        break;
-      }
-      currentPage += 1;
+    if (!apis?.getTrtcRoomEventsSummary) {
+      return;
+    }
+    const { data: resData } = await ajax(
+      Object.assign({}, apis.getTrtcRoomEventsSummary, {
+        params: { id }
+      })
+    );
+    if (resData.code !== 0) {
+      return;
     }
     modal({
       title: formatMessage({ id: 'TrtcRoomEvents' }),
       footer: null,
       width: isMobile ? '100%' : 860,
       children: (
-        <RoomEvents id={id} name={name} status={status} members={members} events={events} />
+        <RoomEvents id={id} name={name} status={status} members={members} data={resData.data} />
       )
     });
   };
@@ -657,7 +647,7 @@ export const ConferenceDetailInner = createWithRemoteLoader({
             </div>
           )}
 
-          {(status === 1 || (status === 0 && !isBeforeStart)) && apis?.getTrtcInstanceEvents && canViewTrtcRoomEvents && (
+          {(status === 1 || (status === 0 && !isBeforeStart)) && apis?.getTrtcRoomEventsSummary && canViewTrtcRoomEvents && (
             <Flex vertical className={style['member-area']}>
               <Flex align="center" justify="space-between">
                 <div className={style['member-title']}>{formatMessage({ id: 'TrtcRoomEvents' })}</div>

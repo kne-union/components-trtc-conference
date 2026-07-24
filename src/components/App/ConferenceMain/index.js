@@ -304,7 +304,9 @@ const Conference = createWithRemoteLoader({
     const collector = createCollector(data => {
       return ajax(
         Object.assign({}, apis.recordAITranscription, {
-          data: { records: data }
+          data: { records: data },
+          // 会议结束后退房时仍会 flush 上报，服务端会返回"会议已结束"错误，静默处理不打扰用户
+          showError: false
         })
       );
     });
@@ -315,7 +317,8 @@ const Conference = createWithRemoteLoader({
         }
         return ajax(
           Object.assign({}, apis.recordClientEvents, {
-            data: { events: data }
+            data: { events: data },
+            showError: false
           })
         );
       },

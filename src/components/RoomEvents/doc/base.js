@@ -1,5 +1,5 @@
 const { default: RoomEvents } = _RoomEvents;
-const { default: preset, mockConferenceList, mockTrtcInstanceEvents } = _mockPreset;
+const { default: preset, mockConferenceList, mockTrtcRoomEventsSummary } = _mockPreset;
 const { createWithRemoteLoader } = remoteLoader;
 
 const conference = mockConferenceList.pageData[0];
@@ -16,7 +16,7 @@ const BaseExample = createWithRemoteLoader({
           name={conference.name}
           status={conference.status}
           members={conference.members}
-          events={mockTrtcInstanceEvents.pageData}
+          data={mockTrtcRoomEventsSummary}
         />
       </div>
     </PureGlobal>

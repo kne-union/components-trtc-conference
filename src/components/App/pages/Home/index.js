@@ -124,6 +124,7 @@ const Home = createWithRemoteLoader({
                   inviteMember: Object.assign(apis[name].inviteMemberFromUser),
                   getMemberShorten: apis[name].getMemberShorten,
                   getTrtcInstanceEvents: apis[name].getTrtcInstanceEvents,
+                  getTrtcRoomEventsSummary: apis[name].getTrtcRoomEventsSummary,
                   getAiTranscriptionContent: async ({ id }) => {
                     const { data: resData } = await ajax(
                       Object.assign({}, apis[name].getAiTranscriptionContent, {
