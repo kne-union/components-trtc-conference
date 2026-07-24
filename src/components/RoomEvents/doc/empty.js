@@ -11,7 +11,7 @@ const BaseExample = createWithRemoteLoader({
   return (
     <PureGlobal preset={preset}>
       <div style={{ width: 860, maxWidth: '100%', margin: '0 auto', padding: 16 }}>
-        <RoomEvents id={conference.id} name={conference.name} status={1} members={conference.members} events={[]} />
+        <RoomEvents id={conference.id} name={conference.name} status={1} members={conference.members} data={null} />
       </div>
     </PureGlobal>
   );

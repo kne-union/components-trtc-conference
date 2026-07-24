@@ -26,6 +26,7 @@ const locale = {
   AudioLevelLowAnalysis: '音量偏低，可能听不清',
   AudioLevelHighAnalysis: '音量偏高，可能存在噪音或爆音',
   PacketLoss: '丢包率',
+  RttMetric: 'RTT',
   AudioLevel: '音量大小',
   EventUser: '用户',
   EventCode: '事件',

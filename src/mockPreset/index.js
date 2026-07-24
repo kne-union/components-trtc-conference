@@ -219,6 +219,11 @@ const apis = merge({}, baseApis, {
       loader: () => {
         return import('./trtc-instance-events.json').then(({ default: data }) => data);
       }
+    },
+    getTrtcRoomEventsSummary: {
+      loader: () => {
+        return import('./trtc-room-events-summary.json').then(({ default: data }) => data);
+      }
     }
   },
   file: {
@@ -258,4 +263,5 @@ export { default as mockUserInfo } from './user-info.json';
 export { default as mockInviteData } from './invite-data.json';
 export { default as mockAiTranscriptionContent } from './ai-transcription-content.json';
 export { default as mockTrtcInstanceEvents } from './trtc-instance-events.json';
+export { default as mockTrtcRoomEventsSummary } from './trtc-room-events-summary.json';
 export default preset;

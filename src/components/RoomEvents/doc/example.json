@@ -3,7 +3,7 @@
   "list": [
     {
       "title": "基础用法",
-      "description": "传入 mock 房间事件与成员数据，展示房间概览、摘要与成员详情",
+      "description": "传入 mock 房间事件摘要与成员数据，展示房间概览、摘要与成员详情",
       "code": "./base.js",
       "scope": [
         {
@@ -22,7 +22,7 @@
     },
     {
       "title": "空数据",
-      "description": "未传入事件时展示空状态",
+      "description": "未传入摘要时展示空状态",
       "code": "./empty.js",
       "scope": [
         {

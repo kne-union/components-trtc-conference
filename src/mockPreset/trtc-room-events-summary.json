@@ -1,0 +1,90 @@
+{
+  "overview": {
+    "actualStart": "2024-01-15T10:00:00.000Z",
+    "actualEnd": "2024-01-15T10:30:00.000Z",
+    "actualDurationSeconds": 1800,
+    "useLiveEnd": false
+  },
+  "summary": {
+    "memberCount": 2,
+    "onlineCount": 0,
+    "networkIssueCount": 0,
+    "deviceIssueCount": 0
+  },
+  "members": [
+    {
+      "userId": "member-1",
+      "deviceInfo": {
+        "time": "2024-01-15T10:00:05.000Z",
+        "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        "platform": "MacIntel",
+        "language": "zh-CN",
+        "screenWidth": 1440,
+        "screenHeight": 900,
+        "devicePixelRatio": 2,
+        "connection": { "effectiveType": "4g", "downlink": 10, "rtt": 50 },
+        "selectedAudioLabel": "Built-in Microphone",
+        "selectedVideoLabel": "FaceTime HD Camera",
+        "audioDeviceLabels": ["Built-in Microphone"],
+        "videoDeviceLabels": ["FaceTime HD Camera"]
+      },
+      "analysis": {
+        "type": "success",
+        "issueCodes": ["QualityNormalAnalysis"],
+        "metrics": [
+          { "key": "rtt", "value": "45ms" },
+          { "key": "packetLoss", "value": "0%" },
+          { "key": "frameRate", "value": "24fps" },
+          { "key": "audioLevel", "value": "8.50%" }
+        ]
+      },
+      "charts": {
+        "networkQuality": {
+          "labels": ["10:00:10", "10:10:00", "10:20:00", "10:29:50"],
+          "series": [
+            { "key": "uplinkNetworkQuality", "data": [1, 1, 2, 1] },
+            { "key": "downlinkNetworkQuality", "data": [1, 2, 1, 1] }
+          ]
+        },
+        "statisticsNetwork": {
+          "labels": ["10:00:10", "10:10:00", "10:20:00", "10:29:50"],
+          "series": [
+            { "key": "rtt", "data": [40, 48, 55, 42] },
+            { "key": "upLoss", "data": [0, 0, 1, 0] },
+            { "key": "downLoss", "data": [0, 1, 0, 0] }
+          ]
+        },
+        "statisticsMedia": {
+          "labels": ["10:00:10", "10:10:00", "10:20:00", "10:29:50"],
+          "series": [
+            { "key": "audioBitrate", "data": [32, 34, 33, 32] },
+            { "key": "audioLevel", "data": [8.2, 9.1, 7.5, 8.0] },
+            { "key": "videoBitrate", "data": [800, 820, 780, 810] },
+            { "key": "frameRate", "data": [24, 25, 23, 24] }
+          ]
+        },
+        "callMetric": null
+      },
+      "timeline": [
+        { "time": "2024-01-15T10:00:00.000Z", "code": "Client.enter", "actorUserId": "member-1" },
+        { "time": "2024-01-15T10:00:08.000Z", "code": "Client.camera-open", "actorUserId": "member-1" },
+        { "time": "2024-01-15T10:30:00.000Z", "code": "Client.exit", "actorUserId": "member-1" }
+      ]
+    },
+    {
+      "userId": "member-2",
+      "deviceInfo": null,
+      "analysis": null,
+      "charts": {
+        "networkQuality": null,
+        "statisticsNetwork": null,
+        "statisticsMedia": null,
+        "callMetric": null
+      },
+      "timeline": [
+        { "time": "2024-01-15T10:01:00.000Z", "code": "Client.enter", "actorUserId": "member-2" },
+        { "time": "2024-01-15T10:28:00.000Z", "code": "Client.exit", "actorUserId": "member-2" }
+      ]
+    }
+  ]
+}
