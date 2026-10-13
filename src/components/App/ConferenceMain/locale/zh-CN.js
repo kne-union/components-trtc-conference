@@ -27,7 +27,8 @@ const locale = {
   InterviewExtendReminder: '距离面试结束不足 15 分钟，是否延长 15 分钟？',
   InterviewExtendAction: '延长 15 分钟',
   InterviewExtendSuccess: '已延长 15 分钟',
-  InterviewExtendFailed: '延长失败，请稍后重试'
+  InterviewExtendFailed: '延长失败，请稍后重试',
+  ForceExitByTimeout: '会议已超过允许时间，已退出房间'
 };
 
 export default locale;

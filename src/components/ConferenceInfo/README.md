@@ -283,6 +283,8 @@ render(<BaseExample />);
 | startTime | Date | 开始时间（必填，创建后不可修改） |
 | duration | number | 会议时长，可选15/30/45/60/90/120/180分钟 |
 | options.allowExtend | boolean | 是否允许主持人延长会议（默认开启；开启后剩余不足15分钟时可延长15分钟） |
+| options.allowEarlyEnter | boolean | 是否允许提前进入房间（默认关闭；开启后开始时间之前即可进入） |
+| options.forceExitGrace | number | 计划结束时间之后再等待的分钟数，到时强制退出房间。`0` 表示到点立即退出，留空则不强制退出 |
 | isInvitationAllowed | boolean | 是否允许邀请（默认允许） |
 | maxCount | number | 最大参会成员数（默认2） |
 | options.attention | string | 会议注意事项（富文本 HTML，使用 CKEditor 编辑） |

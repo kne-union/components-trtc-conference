@@ -67,6 +67,19 @@ const ConferenceFormInner = createWithRemoteLoader({
             tips={formatMessage({ id: 'AllowExtendTips' })}
           />,
           <Switch
+            name="options.allowEarlyEnter"
+            label={formatMessage({ id: 'AllowEarlyEnter' })}
+            defaultValue={false}
+            tips={formatMessage({ id: 'AllowEarlyEnterTips' })}
+          />,
+          <InputNumber
+            name="options.forceExitGrace"
+            label={formatMessage({ id: 'ForceExitGrace' })}
+            min={0}
+            precision={0}
+            tips={formatMessage({ id: 'ForceExitGraceTips' })}
+          />,
+          <Switch
             name="isInvitationAllowed"
             label={formatMessage({ id: 'IsInvitationAllowed' })}
             defaultValue={true}

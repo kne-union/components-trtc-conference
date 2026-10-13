@@ -27,7 +27,8 @@ const locale = {
   InterviewExtendReminder: 'Less than 15 minutes remaining. Extend the interview by 15 minutes?',
   InterviewExtendAction: 'Extend 15 min',
   InterviewExtendSuccess: 'Extended by 15 minutes',
-  InterviewExtendFailed: 'Failed to extend, please try again later'
+  InterviewExtendFailed: 'Failed to extend, please try again later',
+  ForceExitByTimeout: 'The meeting has exceeded the allowed time. You have left the room'
 };
 
 export default locale;
