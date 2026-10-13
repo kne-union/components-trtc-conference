@@ -1,1 +1,3 @@
+npm run build:docs
+git add src/components/*/README.md README.md
 npm run lint-staged

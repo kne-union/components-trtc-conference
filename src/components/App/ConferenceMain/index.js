@@ -175,6 +175,29 @@ const Conference = createWithRemoteLoader({
     }
     return dayjs(conferenceState.startTime).add(conferenceState.duration, 'second').diff(now, 'second');
   }, [conferenceState, now]);
+  useEffect(() => {
+    const grace = conferenceState?.options?.forceExitGrace;
+    if (grace === undefined || grace === null || grace === '' || !conferenceState?.startTime || !conferenceState?.duration) {
+      return;
+    }
+    const graceMinutes = Number(grace);
+    if (!Number.isFinite(graceMinutes) || graceMinutes < 0) {
+      return;
+    }
+    const deadline = dayjs(conferenceState.startTime).add(conferenceState.duration, 'second').add(graceMinutes, 'minute');
+    let left = false;
+    const tick = () => {
+      if (left || !dayjs().isAfter(deadline)) {
+        return;
+      }
+      left = true;
+      message.warning(formatMessage({ id: 'ForceExitByTimeout' }));
+      navigate(`${baseUrl}/detail`);
+    };
+    tick();
+    const timer = window.setInterval(tick, 1000);
+    return () => window.clearInterval(timer);
+  }, [baseUrl, conferenceState?.duration, conferenceState?.options?.forceExitGrace, conferenceState?.startTime, formatMessage, message, navigate]);
   const showExtendAction =
     current.isMaster &&
     conferenceState?.options?.allowExtend &&

@@ -71,6 +71,9 @@ export const ConferenceDetailInner = createWithRemoteLoader({
   const recordType = get(options, 'setting.record');
   const speechEnabled = !!get(options, 'setting.speech');
   const allowExtend = get(options, 'allowExtend') !== false;
+  const allowEarlyEnter = get(options, 'allowEarlyEnter') === true;
+  const forceExitGrace = get(options, 'forceExitGrace');
+  const hasForceExitGrace = forceExitGrace !== undefined && forceExitGrace !== null && forceExitGrace !== '';
   const getRecordSettingLabel = () => {
     if (recordType === 'video') {
       return formatMessage({ id: 'RecordVideo' });
@@ -324,7 +327,7 @@ export const ConferenceDetailInner = createWithRemoteLoader({
           {formatMessage({ id: 'DeviceTesting' })}
         </Button>
         <LoadingButton
-          disabled={startTime && dayjs(startTime).isAfter(dayjs())}
+          disabled={startTime && dayjs(startTime).isAfter(dayjs()) && !allowEarlyEnter}
           size="large"
           type="primary"
           shape="round"
@@ -602,6 +605,18 @@ export const ConferenceDetailInner = createWithRemoteLoader({
                               key: 'allowExtend',
                               label: formatMessage({ id: 'AllowExtend' }),
                               children: <StateTag type={allowExtend ? 'success' : undefined} text={getEnabledLabel(allowExtend)} />
+                            },
+                            {
+                              key: 'allowEarlyEnter',
+                              label: formatMessage({ id: 'AllowEarlyEnter' }),
+                              children: <StateTag type={allowEarlyEnter ? 'success' : undefined} text={getEnabledLabel(allowEarlyEnter)} />
+                            },
+                            {
+                              key: 'forceExitGrace',
+                              label: formatMessage({ id: 'ForceExitGrace' }),
+                              children: hasForceExitGrace
+                                ? `${forceExitGrace}${formatMessage({ id: 'MinuteUnit' })}`
+                                : formatMessage({ id: 'ForceExitGraceNotSet' })
                             },
                             {
                               key: 'invitation',
