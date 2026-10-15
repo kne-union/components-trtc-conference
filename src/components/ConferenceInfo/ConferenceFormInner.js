@@ -69,7 +69,7 @@ const ConferenceFormInner = createWithRemoteLoader({
           <Switch
             name="options.allowEarlyEnter"
             label={formatMessage({ id: 'AllowEarlyEnter' })}
-            defaultValue={false}
+            defaultValue={true}
             tips={formatMessage({ id: 'AllowEarlyEnterTips' })}
           />,
           <InputNumber
