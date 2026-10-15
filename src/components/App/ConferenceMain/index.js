@@ -16,6 +16,7 @@ import createCollector from './createCollector';
 import withLocale from './withLocale';
 import { useIntl } from '@kne/react-intl';
 import resolveAvatarProps from '@components/ConferenceInfo/resolveAvatarProps';
+import useAbsoluteUrl from '@components/ConferenceInfo/useAbsoluteUrl';
 
 const ViewBar = createWithRemoteLoader({
   modules: ['components-core:Image', 'components-core:Icon']
@@ -160,6 +161,7 @@ const Conference = createWithRemoteLoader({
   const [list, setList] = useState([]);
   const [devices, setDevices] = useState({ cameras: [], microphones: [] });
   const { formatMessage } = useIntl();
+  const toAbsoluteUrl = useAbsoluteUrl();
   useEffect(() => {
     setConferenceState(conference);
   }, [conference]);
@@ -659,7 +661,7 @@ const Conference = createWithRemoteLoader({
             if (resData.code !== 0) {
               return;
             }
-            modal(InviteMember.renderModal(Object.assign({}, resData.data, { message, formatMessage })));
+            modal(InviteMember.renderModal(Object.assign({}, resData.data, { message, formatMessage, toAbsoluteUrl })));
           },
           leave: () => {
             navigate(baseUrl + '/detail');

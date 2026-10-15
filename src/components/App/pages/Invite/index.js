@@ -5,6 +5,7 @@ import style from '../../style.module.scss';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useContext } from '../../context';
 import prepareMediaPermission from '../../prepareMediaPermission';
+import useAbsoluteUrl from '@components/ConferenceInfo/useAbsoluteUrl';
 
 const Invite = createWithRemoteLoader({
   modules: ['components-core:Global@usePreset']
@@ -14,6 +15,7 @@ const Invite = createWithRemoteLoader({
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { baseUrl, headerName, name } = useContext();
+  const toAbsoluteUrl = useAbsoluteUrl();
   const code = searchParams.get('code');
   return (
     <div className={style['page']}>
@@ -35,7 +37,7 @@ const Invite = createWithRemoteLoader({
                 }}
                 onReload={data => {
                   if (data?.shorten) {
-                    window.location.href = `${window.location.origin}${baseUrl}/detail?code=${data.shorten}`;
+                    window.location.href = toAbsoluteUrl(`${baseUrl}/detail?code=${data.shorten}`);
                     return;
                   }
                   reload();

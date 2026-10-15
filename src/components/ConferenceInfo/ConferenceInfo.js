@@ -15,6 +15,7 @@ import PullToRefresh from './PullToRefresh';
 import { ConferenceDetailInner } from './ConferenceDetail';
 import EditConference, { EditConferenceButton } from './EditConference';
 import withLocale from './withLocale';
+import useAbsoluteUrl from './useAbsoluteUrl';
 import { useIntl } from '@kne/react-intl';
 
 const isStandalonePwa = () => {
@@ -24,16 +25,8 @@ const isStandalonePwa = () => {
   return window.navigator.standalone === true || (typeof window.matchMedia === 'function' && window.matchMedia('(display-mode: standalone)').matches);
 };
 
-const toAbsoluteUrl = url => {
-  if (/^https?:\/\//i.test(url)) {
-    return url;
-  }
-  const path = url.startsWith('/') ? url : `/${url}`;
-  return `${window.location.origin}${path}`;
-};
-
 /** iOS Safari/PWA 会拦截 async 后的 window.open；PWA standalone 下新窗口也不可用，改为当前页跳转 */
-const openDetailUrl = async getUrl => {
+const openDetailUrl = async (getUrl, toAbsoluteUrl) => {
   const isPwa = isStandalonePwa();
   const popup = isPwa ? null : window.open('about:blank', '_blank');
   try {
@@ -153,6 +146,7 @@ const ConferenceInfo = createWithRemoteLoader({
       const { DatePickerFilterItem, SuperSelectFilterItem } = Filter.fields;
       const { message } = App.useApp();
       const { formatMessage } = useIntl();
+      const toAbsoluteUrl = useAbsoluteUrl();
       const isMobile = useIsMobile();
       const useLoadMoreMode = isMobile && typeof loadMore === 'function';
       const filterItems = useMemo(() => buildFilterItems(filterValue, formatMessage), [filterValue, formatMessage]);
@@ -434,7 +428,7 @@ const ConferenceInfo = createWithRemoteLoader({
               reload && reload();
               data && openConference(data);
             }}
-            onDetailEnter={item => openDetailUrl(getDetailUrl(item))}
+            onDetailEnter={item => openDetailUrl(getDetailUrl(item), toAbsoluteUrl)}
           />
           <div className={style['right-panel-outer']}>
             {conference ? (
@@ -458,7 +452,7 @@ const ConferenceInfo = createWithRemoteLoader({
                         await openDetailUrl(async () => {
                           const { shorten } = await actions.getMemberShorten(item);
                           return getDetailUrl({ shorten });
-                        });
+                        }, toAbsoluteUrl);
                       }}
                       onEdit={conference.status === 0 ? onEdit : undefined}
                       onCancel={async () => {
@@ -468,7 +462,7 @@ const ConferenceInfo = createWithRemoteLoader({
                       }}
                       onDetailLinkCopy={async item => {
                         const { shorten } = await actions.getMemberShorten(item);
-                        navigator.clipboard.writeText(window.location.origin + getDetailUrl({ shorten })).then(() => {
+                        navigator.clipboard.writeText(toAbsoluteUrl(getDetailUrl({ shorten }))).then(() => {
                           message.success(formatMessage({ id: 'LinkCopied' }));
                         });
                       }}
