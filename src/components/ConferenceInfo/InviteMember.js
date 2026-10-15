@@ -2,11 +2,12 @@ import RemoteLoader, { createWithRemoteLoader } from '@kne/remote-loader';
 import { Flex, App } from 'antd';
 import formatConferenceTime from './formatConferenceTime';
 import withLocale from './withLocale';
+import useAbsoluteUrl from './useAbsoluteUrl';
 import { useIntl } from '@kne/react-intl';
 import style from './style.module.scss';
 
-const renderModal = ({ inviter, conference, shorten, message, formatMessage }) => {
-  const link = `${window.location.origin}/invite?code=${shorten}`;
+const renderModal = ({ inviter, conference, shorten, message, formatMessage, toAbsoluteUrl = url => `${window.location.origin}${url}` }) => {
+  const link = toAbsoluteUrl(`/invite?code=${shorten}`);
   const text = [
     `${inviter.nickname || inviter.email || formatMessage({ id: 'DefaultUser' })} ${formatMessage({ id: 'InviteToVideoConference' })}`,
     `${formatMessage({ id: 'MeetingNameLabel' })}：${conference.name}`,
@@ -56,6 +57,7 @@ const InviteMember = createWithRemoteLoader({
   const { ajax } = usePreset();
   const { message } = App.useApp();
   const { formatMessage } = useIntl();
+  const toAbsoluteUrl = useAbsoluteUrl();
   return (
     <LoadingButton
       {...props}
@@ -68,7 +70,7 @@ const InviteMember = createWithRemoteLoader({
         if (resData.code !== 0) {
           return;
         }
-        modal(renderModal(Object.assign({}, resData.data, { message, formatMessage })));
+        modal(renderModal(Object.assign({}, resData.data, { message, formatMessage, toAbsoluteUrl })));
       }}
     />
   );
