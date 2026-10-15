@@ -37,7 +37,7 @@ const locale = {
   TrtcRoomEvents: 'Room Events',
   ViewTrtcRoomEvents: 'View Room Events',
   Refresh: 'Refresh',
-  NoRecordedResources: 'No recorded resources from this user',
+  NoRecordedResources: 'No recordings',
   SyncingRecordedResources: 'Syncing recorded resources, it may take up to 10 minutes. Please check later.',
   AiTranscriptionContent: 'AI Transcription',
   NoAiTranscriptionContent: 'No AI transcription content',

@@ -52,13 +52,13 @@
 
   &.has-value-display {
     .list-value-display {
-      :global(.filter-title),
-      :global(.filter-value-display),
+      :global(.title),
+      :global(.value-display),
       > :global(.ant-space) {
         border-bottom: none !important;
       }
 
-      :global(.filter-line) {
+      :global(.line) {
         border-bottom: none !important;
       }
     }
@@ -92,7 +92,7 @@
 .list-filter-inner {
   width: 100%;
 
-  :global(.filter-title) {
+  :global(.title) {
     width: 100%;
     padding: 0 !important;
     margin: 0 !important;
@@ -100,28 +100,28 @@
     border-bottom: none !important;
   }
 
-  :global(.filter-title > .ant-space-item:first-child) {
+  :global(.title > .ant-space-item:first-child) {
     display: none !important;
   }
 
-  :global(.filter-label) {
+  :global(.label) {
     display: none !important;
   }
 
-  :global(.filter-list) {
+  :global(.list) {
     width: 100%;
   }
 
-  :global(.filter-line) {
+  :global(.line) {
     min-height: 24px;
     gap: 8px;
   }
 
-  :global(.filter-item-wrap) {
+  :global(.item-wrap) {
     height: 24px;
   }
 
-  :global(.filter-item) {
+  :global(.item) {
     height: 24px;
     padding: 0 8px;
 
@@ -130,7 +130,7 @@
     }
   }
 
-  :global(.filter-item-label) {
+  :global(.item-label) {
     line-height: 24px;
   }
 }
@@ -141,8 +141,8 @@
 }
 
 .list-value-display {
-  :global(.filter-value-display),
-  :global(.filter-title) {
+  :global(.value-display),
+  :global(.title) {
     padding: 0 20px 6px !important;
     margin-top: 0 !important;
     line-height: 22px !important;
@@ -150,16 +150,16 @@
     gap: 8px !important;
   }
 
-  :global(.filter-value-display .filter-label) {
+  :global(.value-display .label) {
     line-height: 22px;
   }
 
-  :global(.filter-value-display-root .filter-line) {
+  :global(.value-display .line) {
     min-height: 22px;
     gap: 6px;
   }
 
-  :global(.filter-value-tag) {
+  :global(.value-tag) {
     margin-inline-end: 0;
   }
 }
@@ -614,23 +614,70 @@
   width: 400px !important;
 }
 
-.preview-audio {
-  width: min(400px, 100%);
+.record-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 10px;
 }
 
-.preview-video {
-  width: min(400px, 100%);
-  max-height: 260px;
-  border-radius: 8px;
-  background: #000000;
+.record-card {
+  padding: 12px;
+  border-radius: 10px;
+  background: #ffffff;
 }
 
-.preview-list {
+.record-card-header {
+  min-width: 0;
+}
+
+.record-member-name {
+  min-width: 0;
+  font-weight: bold;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.record-empty {
+  flex: none;
+  margin-left: auto;
+  color: var(--font-color-grey);
+  font-size: 12px;
+}
+
+.record-syncing {
+  min-width: 0;
+  color: var(--font-color-grey);
+}
+
+.record-files {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 8px;
   margin-top: 10px;
 
-  :global(.ant-card) {
-    background: transparent !important;
+  &.is-audio {
+    grid-template-columns: 1fr;
   }
+}
+
+.record-file {
+  min-width: 0;
+}
+
+.record-video {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 8px;
+  background: #000000;
+  object-fit: contain;
+}
+
+.record-audio {
+  display: block;
+  width: 100%;
 }
 
 .transcription-member {
@@ -823,7 +870,7 @@
       width: max-content;
       min-width: 0;
 
-      :global(.filter-line) {
+      :global(.line) {
         flex-wrap: nowrap;
         white-space: nowrap;
         justify-content: flex-start;
@@ -832,8 +879,8 @@
   }
 
   .list-value-display {
-    :global(.filter-value-display),
-    :global(.filter-title) {
+    :global(.value-display),
+    :global(.title) {
       padding-inline: 0 !important;
     }
   }
@@ -1094,8 +1141,8 @@
     width: 100% !important;
   }
 
-  .preview-video {
-    width: 100%;
+  .record-files {
+    grid-template-columns: 1fr;
   }
 
   .list-pagination {

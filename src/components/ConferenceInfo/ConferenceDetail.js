@@ -22,7 +22,6 @@ export const ConferenceDetailInner = createWithRemoteLoader({
   modules: [
     'components-core:Icon',
     'components-core:Image',
-    'components-core:InfoPage',
     'components-core:StateTag',
     'components-core:ConfirmButton',
     'components-core:Global@usePreset',
@@ -59,7 +58,7 @@ export const ConferenceDetailInner = createWithRemoteLoader({
   isAdmin,
   aiTranscriptionContent
 }) => {
-  const [Icon, Image, InfoPage, StateTag, ConfirmButton, usePreset, LoadingButton, FilePreview, SimpleBar, useModal, ButtonGroup, ButtonFooter, CKEditor, Language] = remoteModules;
+  const [Icon, Image, StateTag, ConfirmButton, usePreset, LoadingButton, FilePreview, SimpleBar, useModal, ButtonGroup, ButtonFooter, CKEditor, Language] = remoteModules;
   const { ajax } = usePreset();
   const { message } = App.useApp();
   const modal = useModal();
@@ -243,18 +242,10 @@ export const ConferenceDetailInner = createWithRemoteLoader({
   };
   const renderRecordFile = ({ fileId }) => {
     if (recordType === 'audio') {
-      return (
-        <FilePreview id={fileId}>
-          {({ url }) => <audio controls src={url} className={style['preview-audio']} />}
-        </FilePreview>
-      );
+      return <FilePreview id={fileId} render={({ url }) => <audio controls preload="metadata" src={url} className={style['record-audio']} />} />;
     }
     if (recordType === 'video') {
-      return (
-        <FilePreview id={fileId}>
-          {({ url }) => <video controls src={url} className={style['preview-video']} />}
-        </FilePreview>
-      );
+      return <FilePreview id={fileId} render={({ url }) => <video controls preload="metadata" src={url} className={style['record-video']} />} />;
     }
     return <FilePreview id={fileId} className={style['preview-file']} />;
   };
@@ -679,38 +670,44 @@ export const ConferenceDetailInner = createWithRemoteLoader({
                 {formatMessage({ id: 'Meeting' })}
                 {get(options, 'setting.record') === 'video' ? formatMessage({ id: 'MeetingRecording' }) : formatMessage({ id: 'MeetingAudio' })}
               </div>
-              <InfoPage className={style['preview-list']}>
-                <InfoPage.Part>
-                  {get(options, 'recordFilesAchieved') ? (
-                    (members || [])
-                      .sort((a, b) => {
-                        return a.isMaster === b.isMaster ? 0 : a.isMaster ? -1 : 1;
-                      })
-                      .map(item => {
-                        const list = getMemberRecordFiles(item.id);
-                        return (
-                          <InfoPage.Part key={item.id} title={`${getMemberName(item)}(${item.isMaster ? formatMessage({ id: 'Host' }) : formatMessage({ id: 'Attendee' })})`}>
-                            <Flex gap={8} justify="center">
-                              {list.length > 0 ? (
-                                list.map(({ fileId }) => {
-                                  return <div key={fileId}>{renderRecordFile({ fileId })}</div>;
-                                })
-                              ) : (
-                                <Empty description={formatMessage({ id: 'NoRecordedResources' })} />
-                              )}
-                            </Flex>
-                          </InfoPage.Part>
-                        );
-                      })
-                  ) : (
-                    <Empty description={formatMessage({ id: 'SyncingRecordedResources' })}>
-                      <Button size="small" type="primary" onClick={onReload}>
-                        {formatMessage({ id: 'Refresh' })}
-                      </Button>
-                    </Empty>
-                  )}
-                </InfoPage.Part>
-              </InfoPage>
+              <div className={style['record-list']}>
+                {get(options, 'recordFilesAchieved') ? (
+                  (members || [])
+                    .slice()
+                    .sort((a, b) => {
+                      return a.isMaster === b.isMaster ? 0 : a.isMaster ? -1 : 1;
+                    })
+                    .map(item => {
+                      const list = getMemberRecordFiles(item.id);
+                      return (
+                        <div key={item.id} className={style['record-card']}>
+                          <Flex align="center" gap={8} className={style['record-card-header']}>
+                            <Image.Avatar size={28} {...resolveAvatarProps(item.avatar)} />
+                            <span className={style['record-member-name']}>{getMemberName(item)}</span>
+                            <StateTag type={item.isMaster ? 'success' : undefined} text={item.isMaster ? formatMessage({ id: 'Host' }) : formatMessage({ id: 'Attendee' })} />
+                            {list.length === 0 && <span className={style['record-empty']}>{formatMessage({ id: 'NoRecordedResources' })}</span>}
+                          </Flex>
+                          {list.length > 0 && (
+                            <div className={classnames(style['record-files'], { [style['is-audio']]: recordType === 'audio' })}>
+                              {list.map(({ fileId }) => (
+                                <div key={fileId} className={style['record-file']}>
+                                  {renderRecordFile({ fileId })}
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })
+                ) : (
+                  <Flex align="center" justify="space-between" gap={8} className={style['record-card']}>
+                    <span className={style['record-syncing']}>{formatMessage({ id: 'SyncingRecordedResources' })}</span>
+                    <Button size="small" type="link" className="btn-no-padding" onClick={onReload}>
+                      {formatMessage({ id: 'Refresh' })}
+                    </Button>
+                  </Flex>
+                )}
+              </div>
             </Flex>
           )}
 
