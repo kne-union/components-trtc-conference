@@ -37,7 +37,7 @@ const locale = {
   TrtcRoomEvents: '房间事件',
   ViewTrtcRoomEvents: '查看',
   Refresh: '刷新',
-  NoRecordedResources: '用户没有产生录制资源',
+  NoRecordedResources: '暂无录制资源',
   SyncingRecordedResources: '正在同步录制资源，最长需要10分钟，请稍后查看',
   AiTranscriptionContent: 'AI转写内容',
   NoAiTranscriptionContent: '暂无AI转写内容',
