@@ -360,7 +360,9 @@ const ConferenceInfo = createWithRemoteLoader({
                             : { text: formatMessage({ id: 'NotStarted' }) };
                     const titleNode = (
                       <Flex gap={8} align="center" className={style['list-title-area']}>
-                        <div className={style['conference-title']}>{item.name}</div>
+                        <div className={style['conference-title']} onClick={() => openConference(item)}>
+                          {item.name}
+                        </div>
                         <StateTag {...statusTag} />
                       </Flex>
                     );
