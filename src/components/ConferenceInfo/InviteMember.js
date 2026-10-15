@@ -49,19 +49,26 @@ const renderModal = ({ inviter, conference, shorten, message, formatMessage }) =
 };
 
 const InviteMember = createWithRemoteLoader({
-  modules: ['components-core:Modal@ModalButton']
+  modules: ['components-core:LoadingButton', 'components-core:Modal@useModal', 'components-core:Global@usePreset']
 })(withLocale(({ remoteModules, apis, id, ...props }) => {
-  const [ModalButton] = remoteModules;
+  const [LoadingButton, useModal, usePreset] = remoteModules;
+  const modal = useModal();
+  const { ajax } = usePreset();
   const { message } = App.useApp();
   const { formatMessage } = useIntl();
   return (
-    <ModalButton
+    <LoadingButton
       {...props}
-      api={Object.assign({}, apis.inviteMember, {
-        data: { id }
-      })}
-      modalProps={({ data }) => {
-        return renderModal(Object.assign({}, data, { message, formatMessage }));
+      onClick={async () => {
+        const { data: resData } = await ajax(
+          Object.assign({}, apis.inviteMember, {
+            data: { id }
+          })
+        );
+        if (resData.code !== 0) {
+          return;
+        }
+        modal(renderModal(Object.assign({}, resData.data, { message, formatMessage })));
       }}
     />
   );
