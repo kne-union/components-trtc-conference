@@ -2,6 +2,9 @@ import Im, { ImConnection, useIm } from '@components/Im';
 
 const conferenceImOptions = {
   sessionUrl: '/api/v1/conference/im/session',
+  callUrl: '/api/v1/im/call',
+  showVoiceCall: true,
+  showVideoCall: true,
   devApiHost: process.env.NODE_ENV === 'development' ? 'localhost:8042' : undefined
 };
 
