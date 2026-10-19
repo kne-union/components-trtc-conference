@@ -7,6 +7,7 @@ const locale = {
   cancel: 'Cancel',
   InviteMembers: 'Invite Members',
   EnterMeeting: 'Enter Meeting',
+  Chat: 'Chat',
   InviteYouToMeeting: 'invites you to the meeting',
   AfterStartMeeting: ' until the meeting starts',
   JoinMeeting: 'Join Meeting',

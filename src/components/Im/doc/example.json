@@ -1,0 +1,107 @@
+{
+  "isFull": false,
+  "list": [
+    {
+      "title": "会议群聊",
+      "description": "使用会议群聊的 mock 数据渲染完整面板，包含文字、文件、举手、撤回和未读",
+      "code": "./base.js",
+      "scope": [
+        {
+          "name": "_Im",
+          "packageName": "@components/Im"
+        },
+        {
+          "name": "_mockPreset",
+          "packageName": "@root/mockPreset"
+        },
+        {
+          "name": "remoteLoader",
+          "packageName": "@kne/remote-loader"
+        }
+      ]
+    },
+    {
+      "title": "会话和联系人",
+      "description": "左侧列表可选。不传 conversations 和 contacts 时只有聊天；同时传入时可在聊天和通讯录之间切换。通讯录里点发消息会打开或新建与该联系人的会话",
+      "code": "./directory.js",
+      "scope": [
+        {
+          "name": "_Im",
+          "packageName": "@components/Im"
+        },
+        {
+          "name": "_mockPreset",
+          "packageName": "@root/mockPreset"
+        },
+        {
+          "name": "remoteLoader",
+          "packageName": "@kne/remote-loader"
+        }
+      ]
+    },
+    {
+      "title": "只发文字和表情",
+      "description": "关闭举手、图片和文件，并换成业务自己的常用语",
+      "code": "./text.js",
+      "scope": [
+        {
+          "name": "_Im",
+          "packageName": "@components/Im"
+        },
+        {
+          "name": "_mockPreset",
+          "packageName": "@root/mockPreset"
+        },
+        {
+          "name": "remoteLoader",
+          "packageName": "@kne/remote-loader"
+        }
+      ]
+    },
+    {
+      "title": "语音和视频通话",
+      "description": "默认关闭。通过 features 打开后，可发起通话；示例不进 TRTC 房间，挂断后在列表留下记录",
+      "code": "./call.js",
+      "scope": [
+        {
+          "name": "_Im",
+          "packageName": "@components/Im"
+        },
+        {
+          "name": "_mockPreset",
+          "packageName": "@root/mockPreset"
+        },
+        {
+          "name": "remoteLoader",
+          "packageName": "@kne/remote-loader"
+        }
+      ]
+    },
+    {
+      "title": "未读按钮",
+      "description": "按钮上展示未读徽标，count 可传入静态数字",
+      "code": "./unread.js",
+      "scope": [
+        {
+          "name": "_Im",
+          "packageName": "@components/Im"
+        }
+      ]
+    },
+    {
+      "title": "右侧通知",
+      "description": "收到消息后在页面右侧展示通知，也可改为外部系统处理",
+      "code": "./notice.js",
+      "scope": [
+        {
+          "name": "_Im",
+          "packageName": "@components/Im"
+        },
+        {
+          "name": "antd",
+          "packageName": "antd"
+        }
+      ]
+    }
+  ]
+}

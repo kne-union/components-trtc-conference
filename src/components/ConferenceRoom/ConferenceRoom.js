@@ -1,3 +1,4 @@
+import { ConferenceImConnection } from '@components/ConferenceChat';
 import Layout from './Layout';
 import Toolbar from './Toolbar';
 import { Provider } from './context';
@@ -79,6 +80,7 @@ const ConferenceRoomInner = ({
         isMobile
       }}
     >
+      <ConferenceImConnection />
       <Layout
         toolbar={<Toolbar />}
         signalLevel={signalLevel}
