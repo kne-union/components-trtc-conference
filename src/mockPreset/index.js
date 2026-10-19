@@ -258,6 +258,106 @@ const preset = {
   }
 };
 
+const at = minutes => dayjs().subtract(minutes, 'minute').toISOString();
+
+export const mockIm = {
+  memberId: 'im-member-self',
+  memberName: '陈建国',
+  peerReadSeq: 4,
+  messages: [
+    {
+      id: 'im-msg-1',
+      seq: 1,
+      senderId: 'im-member-li',
+      sender: { nickname: '李明辉' },
+      type: 'text',
+      content: { type: 'text', value: '大家到齐了吗？我这边屏幕已经共享好了。' },
+      status: 0,
+      createdAt: at(26)
+    },
+    {
+      id: 'im-msg-2',
+      seq: 2,
+      senderId: 'im-member-wang',
+      sender: { nickname: '王芳' },
+      type: 'text',
+      content: { type: 'text', value: '我到了，声音正常。' },
+      status: 0,
+      createdAt: at(25)
+    },
+    {
+      id: 'im-msg-3',
+      seq: 3,
+      senderId: 'im-member-self',
+      sender: { nickname: '陈建国' },
+      type: 'text',
+      content: { type: 'text', value: '收到，我先看一下方案。' },
+      status: 0,
+      createdAt: at(24)
+    },
+    {
+      id: 'im-msg-4',
+      seq: 4,
+      senderId: 'im-member-self',
+      sender: { nickname: '陈建国' },
+      type: 'text',
+      content: { type: 'text', value: '议程我发在会上了。' },
+      status: 0,
+      createdAt: at(23)
+    },
+    {
+      id: 'im-msg-5',
+      seq: 5,
+      senderId: 'im-member-li',
+      sender: { nickname: '李明辉' },
+      type: 'custom',
+      content: { type: 'custom', value: { kind: 'raiseHand', raised: true } },
+      status: 0,
+      createdAt: at(8)
+    },
+    {
+      id: 'im-msg-6',
+      seq: 6,
+      senderId: 'im-member-wang',
+      sender: { nickname: '王芳' },
+      type: 'text',
+      content: { type: 'text', value: '这条发错了。' },
+      status: 1,
+      createdAt: at(7)
+    },
+    {
+      id: 'im-msg-7',
+      seq: 7,
+      senderId: 'im-member-self',
+      sender: { nickname: '陈建国' },
+      type: 'text',
+      content: { type: 'text', value: '我这边网络有点卡，稍等一下。' },
+      status: 0,
+      createdAt: at(6)
+    },
+    {
+      id: 'im-msg-8',
+      seq: 8,
+      senderId: 'im-member-li',
+      sender: { nickname: '李明辉' },
+      type: 'file',
+      content: { type: 'file', value: { id: 'mock-file-brief', name: '产品需求评审.pdf', mime: 'application/pdf' } },
+      status: 0,
+      createdAt: at(5)
+    },
+    {
+      id: 'im-msg-9',
+      seq: 9,
+      senderId: 'im-member-li',
+      sender: { nickname: '李明辉' },
+      type: 'custom',
+      content: { type: 'custom', value: { kind: 'call', media: 'voice', status: 'duration', duration: 72 } },
+      status: 0,
+      createdAt: at(4)
+    }
+  ]
+};
+
 export { default as mockConferenceList } from './conference-list.json';
 export { default as mockUserInfo } from './user-info.json';
 export { default as mockInviteData } from './invite-data.json';

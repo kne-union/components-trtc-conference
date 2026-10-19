@@ -163,7 +163,7 @@ class ConferenceSDK {
     });
   }
 
-  async enterRoom() {
+  async enterRoom({ video = true, audio = true } = {}) {
     let videoStarted = false;
     let audioStarted = false;
     await this.runTask(this.sdkParams.userId, async () => {
@@ -172,17 +172,21 @@ class ConferenceSDK {
       // 后入会者绑定远端 view 的 updateRemote 会被 clientState 守卫跳过，导致对端画面黑屏
       this.clientState[this.sdkParams.userId] = 1;
       // iOS PWA 上 getUserMedia 可能失败；不阻塞入会，由后续设备开关再试
-      try {
-        await this.trtc.startLocalVideo();
-        videoStarted = true;
-      } catch (e) {
-        console.warn('[trtc] startLocalVideo failed', e);
+      if (video) {
+        try {
+          await this.trtc.startLocalVideo();
+          videoStarted = true;
+        } catch (e) {
+          console.warn('[trtc] startLocalVideo failed', e);
+        }
       }
-      try {
-        await this.trtc.startLocalAudio();
-        audioStarted = true;
-      } catch (e) {
-        console.warn('[trtc] startLocalAudio failed', e);
+      if (audio) {
+        try {
+          await this.trtc.startLocalAudio();
+          audioStarted = true;
+        } catch (e) {
+          console.warn('[trtc] startLocalAudio failed', e);
+        }
       }
     });
     this.events.onLocalStateChange?.(this.clientState[this.sdkParams.userId]);
@@ -198,8 +202,16 @@ class ConferenceSDK {
   async exitRoom() {
     this.isEnd = true;
     await this.runTask(this.sdkParams.userId, async () => {
-      await this.trtc.stopLocalVideo();
-      await this.trtc.stopLocalAudio();
+      try {
+        await this.trtc.stopLocalVideo();
+      } catch (e) {
+        console.warn('[trtc] stopLocalVideo failed', e);
+      }
+      try {
+        await this.trtc.stopLocalAudio();
+      } catch (e) {
+        console.warn('[trtc] stopLocalAudio failed', e);
+      }
       await this.trtc.exitRoom();
     });
     this.clientState[this.sdkParams.userId] = 0;
@@ -261,6 +273,32 @@ class ConferenceSDK {
     }
     await this.trtc.updateLocalAudio({ option: { microphoneId } });
     this.recordClientEvent('microphone-switch', { microphoneId });
+  }
+
+  async setRemoteAudioMuted(muted) {
+    if (this.clientState[this.sdkParams.userId] !== 1) {
+      return;
+    }
+    const userIds = Object.keys(this.clientState).filter(id => id !== this.sdkParams.userId && this.clientState[id] === 1);
+    await Promise.all(userIds.map(userId => this.trtc.muteRemoteAudio(userId, muted)));
+  }
+
+  async flipCamera() {
+    if (this.clientState[this.sdkParams.userId] !== 1) {
+      return;
+    }
+    try {
+      const cameras = await TRTC.getCameraList();
+      if (!cameras || cameras.length < 2) {
+        return;
+      }
+      const found = cameras.findIndex(item => item.deviceId === this.cameraId);
+      const next = cameras[(Math.max(found, 0) + 1) % cameras.length];
+      this.cameraId = next.deviceId;
+      await this.switchLocalVideoDevice({ cameraId: next.deviceId });
+    } catch (e) {
+      console.warn('[trtc] flipCamera failed', e);
+    }
   }
 
   async updateRemote({ userId, streamType, el }) {

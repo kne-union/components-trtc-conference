@@ -7,6 +7,7 @@ const locale = {
   cancel: '取消',
   InviteMembers: '邀请成员',
   EnterMeeting: '进入会议',
+  Chat: '聊天',
   InviteYouToMeeting: '邀请你参加会议',
   AfterStartMeeting: '后开始会议',
   JoinMeeting: '加入会议',

@@ -3,6 +3,7 @@ import dayjs from 'dayjs';
 import range from 'lodash/range';
 import withLocale from './withLocale';
 import { useIntl } from '@kne/react-intl';
+import ConferenceTimeField from './ConferenceTimeField';
 
 const ConferenceFormInner = createWithRemoteLoader({
   modules: ['components-core:FormInfo', 'components-thirdparty:CKEditor']
@@ -18,48 +19,56 @@ const ConferenceFormInner = createWithRemoteLoader({
         column={1}
         list={[
           <Input name="name" label={formatMessage({ id: 'MeetingName' })} rule="REQ LEN-0-100" />,
-          <DatePicker
-            disabled={isEdit}
-            name="startTime"
-            label={formatMessage({ id: 'StartTime' })}
-            rule="REQ"
-            inputReadOnly
-            showTime
-            minuteStep={15}
-            format="YYYY-MM-DD HH:mm"
-            disabledDate={date => {
-              return date && date.isBefore(dayjs().startOf('day'));
-            }}
-            disabledTime={current => {
-              const now = dayjs();
-              const output = {};
-              if (current && current.isSame(now, 'day')) {
-                output.disabledHours = () => range(0, now.hour());
-              }
-              return output;
-            }}
-          />,
-          <Select
-            name="duration"
-            label={formatMessage({ id: 'Duration' })}
-            defaultValue={60 * 60}
-            rule="REQ"
-            options={[
-              { label: formatMessage({ id: 'FifteenMinutes' }), value: 15 * 60 },
-              { label: formatMessage({ id: 'ThirtyMinutes' }), value: 30 * 60 },
-              {
-                label: formatMessage({ id: 'FortyFiveMinutes' }),
-                value: 45 * 60
-              },
-              { label: formatMessage({ id: 'OneHour' }), value: 60 * 60 },
-              { label: formatMessage({ id: 'OneAndHalfHour' }), value: 90 * 60 },
-              {
-                label: formatMessage({ id: 'TwoHours' }),
-                value: 120 * 60
-              },
-              { label: formatMessage({ id: 'ThreeHours' }), value: 180 * 60 }
-            ]}
-          />,
+          isEdit ? (
+            <DatePicker
+              disabled
+              name="startTime"
+              label={formatMessage({ id: 'StartTime' })}
+              rule="REQ"
+              inputReadOnly
+              showTime
+              minuteStep={15}
+              format="YYYY-MM-DD HH:mm"
+              disabledDate={date => {
+                return date && date.isBefore(dayjs().startOf('day'));
+              }}
+              disabledTime={current => {
+                const now = dayjs();
+                const output = {};
+                if (current && current.isSame(now, 'day')) {
+                  output.disabledHours = () => range(0, now.hour());
+                }
+                return output;
+              }}
+            />
+          ) : (
+            <ConferenceTimeField hooks={FormInfo.hooks} />
+          ),
+          ...(isEdit
+            ? [
+                <Select
+                  name="duration"
+                  label={formatMessage({ id: 'Duration' })}
+                  defaultValue={60 * 60}
+                  rule="REQ"
+                  options={[
+                    { label: formatMessage({ id: 'FifteenMinutes' }), value: 15 * 60 },
+                    { label: formatMessage({ id: 'ThirtyMinutes' }), value: 30 * 60 },
+                    {
+                      label: formatMessage({ id: 'FortyFiveMinutes' }),
+                      value: 45 * 60
+                    },
+                    { label: formatMessage({ id: 'OneHour' }), value: 60 * 60 },
+                    { label: formatMessage({ id: 'OneAndHalfHour' }), value: 90 * 60 },
+                    {
+                      label: formatMessage({ id: 'TwoHours' }),
+                      value: 120 * 60
+                    },
+                    { label: formatMessage({ id: 'ThreeHours' }), value: 180 * 60 }
+                  ]}
+                />
+              ]
+            : []),
           <Switch
             name="options.allowExtend"
             label={formatMessage({ id: 'AllowExtend' })}

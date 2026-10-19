@@ -1,20 +1,41 @@
 import { createWithRemoteLoader } from '@kne/remote-loader';
-import { Flex, Button, App, Dropdown } from 'antd';
+import { Flex, Button, Dropdown } from 'antd';
 import { CaretDownFilled } from '@ant-design/icons';
+import { useEffect } from 'react';
 import { useIsMobile } from '@kne/responsive-utils';
+import ConferenceChat from '@components/ConferenceChat';
+import { ImUnreadButton, isImChatOpen, registerOpenChat } from '@components/Im';
 import { useContext as useRoomContext } from '../context';
 import style from './style.module.scss';
 import withLocale from '../withLocale';
 import { useIntl } from '@kne/react-intl';
 
 const Toolbar = createWithRemoteLoader({
-  modules: ['components-core:Icon', 'components-core:LoadingButton']
+  modules: ['components-core:Icon', 'components-core:LoadingButton', 'components-core:Modal@useModal']
 })(withLocale(({ remoteModules }) => {
-  const [Icon, LoadingButton] = remoteModules;
+  const [Icon, LoadingButton, useModal] = remoteModules;
+  const modal = useModal();
   const { isInvitationAllowed, actions, setting, setSetting, devices } = useRoomContext();
-  const { message } = App.useApp();
   const { formatMessage } = useIntl();
   const isMobile = useIsMobile();
+
+  useEffect(
+    () =>
+      registerOpenChat(() => {
+        if (isImChatOpen()) {
+          return;
+        }
+        modal({
+          title: formatMessage({ id: 'Chat' }),
+          footer: null,
+          noPadding: true,
+          bodyScroll: false,
+          width: isMobile ? '100%' : 480,
+          children: <ConferenceChat />
+        });
+      }),
+    [modal, formatMessage, isMobile]
+  );
 
   const cameraList = devices?.cameras || [];
   const microphoneList = devices?.microphones || [];
@@ -157,18 +178,25 @@ const Toolbar = createWithRemoteLoader({
           <div className={style['item-text']}>{formatMessage({ id: 'Reconnect' })}</div>
         </Flex>
       </Button>
-      <Button
+      <ImUnreadButton
         className={style['toolbar-item']}
         type="text"
         onClick={() => {
-          message.warning(formatMessage({ id: 'FeatureInDevelopment' }));
+          modal({
+            title: formatMessage({ id: 'Chat' }),
+            footer: null,
+            noPadding: true,
+            bodyScroll: false,
+            width: isMobile ? '100%' : 480,
+            children: <ConferenceChat />
+          });
         }}
       >
         <Flex vertical align="center" justify="center">
           <Icon type="icon-liaotian" fontClassName="iconfont-ai" size={28} />
           <div className={style['item-text']}>{formatMessage({ id: 'Chat' })}</div>
         </Flex>
-      </Button>
+      </ImUnreadButton>
     </>
   );
 }));

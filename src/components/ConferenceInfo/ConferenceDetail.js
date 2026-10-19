@@ -1,5 +1,5 @@
 import { createWithRemoteLoader } from '@kne/remote-loader';
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { Flex, Card, Divider, Button, Alert, App, Empty, Descriptions, Collapse } from 'antd';
 import dayjs from 'dayjs';
 import classnames from 'classnames';
@@ -12,6 +12,8 @@ import ConferenceCountDown from './ConferenceCountDown';
 import get from 'lodash/get';
 import ConferenceDocument from '@components/ConferenceDocument';
 import DeviceTesting from '@components/DeviceTesting';
+import ConferenceChat, { ConferenceImConnection } from '@components/ConferenceChat';
+import { ImUnreadButton, isImChatOpen, registerOpenChat } from '@components/Im';
 import RoomEvents from '@components/RoomEvents';
 import withLocale from './withLocale';
 import { useIntl } from '@kne/react-intl';
@@ -64,6 +66,24 @@ export const ConferenceDetailInner = createWithRemoteLoader({
   const modal = useModal();
   const { formatMessage } = useIntl();
   const isMobile = useIsMobile();
+
+  useEffect(
+    () =>
+      registerOpenChat(() => {
+        if (isImChatOpen()) {
+          return;
+        }
+        modal({
+          title: formatMessage({ id: 'Chat' }),
+          footer: null,
+          noPadding: true,
+          bodyScroll: false,
+          width: isMobile ? '100%' : 480,
+          children: <ConferenceChat />
+        });
+      }),
+    [modal, formatMessage, isMobile]
+  );
   const DetailScroller = isMobile ? 'div' : SimpleBar;
   const isBeforeStart = status === 0 && startTime && dayjs().isBefore(dayjs(startTime));
   const canViewTrtcRoomEvents = isAdmin || current?.isMaster;
@@ -283,6 +303,7 @@ export const ConferenceDetailInner = createWithRemoteLoader({
       type={canInviteAsAdmin || isMobile ? 'primary' : undefined}
       size="large"
       shape="round"
+      icon={<Icon type="icon-yonghu" />}
       apis={apis}
       id={id}
       disabled={members.length >= maxCount}
@@ -298,7 +319,7 @@ export const ConferenceDetailInner = createWithRemoteLoader({
         <Button
           size="large"
           shape="round"
-          icon={<Icon type="icon-setting" fontClassName="iconfont-ai" />}
+          icon={<Icon type="icon-shipin" />}
           onClick={() => {
             const modalApi = modal({
               title: formatMessage({ id: 'DeviceTesting' }),
@@ -317,6 +338,23 @@ export const ConferenceDetailInner = createWithRemoteLoader({
         >
           {formatMessage({ id: 'DeviceTesting' })}
         </Button>
+        <ImUnreadButton
+          size="large"
+          shape="round"
+          icon={<Icon type="icon-xiaoxizhongxin" />}
+          onClick={() => {
+            modal({
+              title: formatMessage({ id: 'Chat' }),
+              footer: null,
+              noPadding: true,
+              bodyScroll: false,
+              width: isMobile ? '100%' : 480,
+              children: <ConferenceChat />
+            });
+          }}
+        >
+          {formatMessage({ id: 'Chat' })}
+        </ImUnreadButton>
         <LoadingButton
           disabled={startTime && dayjs(startTime).isAfter(dayjs()) && !allowEarlyEnter}
           size="large"
@@ -376,6 +414,7 @@ export const ConferenceDetailInner = createWithRemoteLoader({
 
   return (
     <Flex vertical flex={isMobile ? undefined : 1} className={style['right-panel']}>
+      {status === 0 && current ? <ConferenceImConnection /> : null}
       <Flex className={style['title']} gap={8} justify="space-between" align="center">
         <Flex gap={8} align="center" className={style['title-info']}>
           {onBack && (
