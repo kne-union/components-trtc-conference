@@ -242,6 +242,7 @@ render(<BaseExample />);
 | 属性名 | 类型 | 必填 | 默认值 | 说明 |
 |--------|------|------|--------|------|
 | className | string | 否 | - | 根节点类名 |
+| avatarShape | `'circle' \| 'rounded'` | 否 | `circle` | 头像形状。`circle` 为圆形，`rounded` 为圆角矩形。作用于会话列表、联系人、消息和通话头像 |
 | sessionUrl | string | 否 | - | 创建或加入会话的 POST 地址，成功时 `data` 含 `wsToken`、`conversationId`、`memberId`。传入 `data` 时不需要 |
 | data | object | 否 | - | 静态消息。传入后不建立连接，直接渲染。字段：`memberId`、`memberName`、`peerReadSeq`、`messages` |
 | devApiHost | string | 否 | - | 本地开发时的 WebSocket 主机，例如 `localhost:8042`。不传则使用当前页面主机 |

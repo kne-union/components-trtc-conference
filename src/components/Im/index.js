@@ -1,13 +1,13 @@
 import { createWithRemoteLoader } from '@kne/remote-loader';
 import { MessageInput } from '@kne/react-bot';
 import '@kne/react-bot/dist/index.css';
-import Icon, { PaperClipOutlined, PictureOutlined, CommentOutlined, SmileOutlined, PhoneOutlined, VideoCameraOutlined, SearchOutlined } from '@ant-design/icons';
+import Icon, { LeftOutlined, PaperClipOutlined, PictureOutlined, CommentOutlined, SmileOutlined, PhoneOutlined, VideoCameraOutlined, SearchOutlined } from '@ant-design/icons';
 import { StackCard } from '@kne/react-box';
 import '@kne/react-box/dist/index.css';
 import { App, Badge, Button, Dropdown, Image, Input, Popover, Tooltip } from 'antd';
 import classnames from 'classnames';
 import dayjs from 'dayjs';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useIntl } from '@kne/react-intl';
 import { useIsMobile } from '@kne/responsive-utils';
 import withLocale from './withLocale';
@@ -25,6 +25,8 @@ const PHRASE_IDS = ['PhraseArrived', 'PhraseWait', 'PhraseHearMe', 'PhraseCantHe
 const EMOJIS = ['😀', '😄', '😂', '😉', '😍', '🤔', '😅', '😭', '👍', '👏', '🙏', '👌', '👋', '🎉', '❤️', '🔥', '✅', '❌', '👀', '💪'];
 
 const TIME_GAP_MS = 5 * 60 * 1000;
+const DIRECTORY_WIDTH = 248;
+const CHAT_MIN_WIDTH = 280;
 
 const messageStamp = item => Date.parse(item?.createdAt || '') || Number(item?.sentAt) || 0;
 
@@ -280,6 +282,7 @@ const Im = createWithRemoteLoader({
 })(withLocale(({
   remoteModules,
   className,
+  avatarShape = 'circle',
   sessionUrl,
   devApiHost,
   wsPath,
@@ -306,6 +309,8 @@ const Im = createWithRemoteLoader({
   const { message } = App.useApp();
   const modal = useModal();
   const isMobile = useIsMobile();
+  const rootRef = useRef(null);
+  const [rootWidth, setRootWidth] = useState(0);
   const listRef = useRef(null);
   const fileRef = useRef(null);
   const imageRef = useRef(null);
@@ -337,6 +342,17 @@ const Im = createWithRemoteLoader({
   const [pickedContactId, setPickedContactId] = useState(null);
   const [contactKeyword, setContactKeyword] = useState('');
   const [mobileChat, setMobileChat] = useState(false);
+  useLayoutEffect(() => {
+    const node = rootRef.current;
+    if (!node || typeof ResizeObserver === 'undefined') {
+      return undefined;
+    }
+    const update = () => setRootWidth(node.clientWidth);
+    update();
+    const observer = new ResizeObserver(update);
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, []);
   const activeId = activeConversationId != null && activeConversationId !== '' ? activeConversationId : pickedId;
   const messages = preview ? previewMessages : live.messages;
   const memberId = preview ? data.memberId : live.memberId;
@@ -367,6 +383,20 @@ const Im = createWithRemoteLoader({
       const id = String(user?.userId || '');
       return id && !selfIds.has(id);
     });
+  const onlineIdSet = new Set((live.onlineUsers || []).map(user => String(user?.userId || '')).filter(id => id && !selfIds.has(id)));
+  const personOnline = (item, conversation) => {
+    if (!item) {
+      return false;
+    }
+    if (typeof item.online === 'boolean') {
+      return item.online;
+    }
+    if (conversation && String(item.id) === String(activeId) && peerOnline) {
+      return true;
+    }
+    const ids = conversation ? [item.userId, item.contactId, item.memberId] : [item.userId, item.contactId, item.memberId, item.id];
+    return ids.some(id => id != null && id !== '' && onlineIdSet.has(String(id)));
+  };
   const callTitle = kind => formatMessage({ id: ready && !peerOnline ? 'CallPeerOffline' : kind });
 
   useEffect(() => {
@@ -757,13 +787,19 @@ const Im = createWithRemoteLoader({
     });
   }, [contactItems, contactKeywordText]);
   const directoryRows = directoryTabOn === 'contacts' ? visibleContacts : conversationItems || [];
-  const hideDirectory = showDirectory && isMobile && mobileChat;
-  const hideChat = showDirectory && isMobile && !mobileChat;
+  const activeConversation = (conversationItems || []).find(item => String(item.id) === String(activeId));
+  const stacked = showDirectory && (isMobile || (rootWidth > 0 && rootWidth < DIRECTORY_WIDTH + CHAT_MIN_WIDTH));
+  const hideDirectory = stacked && mobileChat;
+  const hideChat = stacked && !mobileChat;
 
   return (
-    <div className={classnames(style['root'], className)}>
+    <div
+      ref={rootRef}
+      className={classnames(style['root'], avatarShape === 'rounded' && style['is-avatar-rounded'], className)}
+      style={{ '--im-directory-width': `${DIRECTORY_WIDTH}px`, '--im-chat-min': `${CHAT_MIN_WIDTH}px` }}
+    >
       {showDirectory ? (
-        <aside className={classnames(style['directory'], hideDirectory && style['is-hidden'])}>
+        <aside className={classnames(style['directory'], stacked && style['is-fill'], hideDirectory && style['is-hidden'])}>
           {conversationItems && contactItems ? (
             <div className={style['directory-tabs']}>
               <button type="button" className={classnames(directoryTabOn === 'conversations' && style['is-active'])} onClick={() => setDirectoryTab('conversations')}>
@@ -802,6 +838,10 @@ const Im = createWithRemoteLoader({
                   <span className={style['directory-body']}>
                     <span className={style['directory-line']}>
                       <span className={style['directory-name']}>{item.name}</span>
+                      <span className={classnames(style['presence'], personOnline(item, directoryTabOn === 'conversations') ? style['is-online'] : style['is-offline'])}>
+                        <i className={style['presence-dot']} aria-hidden />
+                        {formatMessage({ id: personOnline(item, directoryTabOn === 'conversations') ? 'Online' : 'Offline' })}
+                      </span>
                       {directoryTabOn === 'conversations' && item.time ? <span className={style['directory-time']}>{item.time}</span> : null}
                     </span>
                     {directoryTabOn === 'conversations' ? (
@@ -819,11 +859,26 @@ const Im = createWithRemoteLoader({
           </div>
         </aside>
       ) : null}
-      <div className={classnames(style['chat'], hideChat && style['is-hidden'])}>
-      {showDirectory && isMobile ? (
-        <button type="button" className={style['chat-back']} onClick={() => setMobileChat(false)}>
-          {formatMessage({ id: 'Back' })}
-        </button>
+      <div className={classnames(style['chat'], !stacked && showDirectory && style['is-split'], stacked && style['is-fill'], hideChat && style['is-hidden'])}>
+      {stacked ? (
+        <div className={style['chat-back-bar']}>
+          <button type="button" className={style['chat-back']} aria-label={formatMessage({ id: 'Back' })} onClick={() => setMobileChat(false)}>
+            <LeftOutlined className={style['chat-back-icon']} />
+            <span>{formatMessage({ id: 'Back' })}</span>
+          </button>
+          {showContactPane && selectedContact ? (
+            <span className={classnames(style['presence'], personOnline(selectedContact) ? style['is-online'] : style['is-offline'])}>
+              <i className={style['presence-dot']} aria-hidden />
+              {formatMessage({ id: personOnline(selectedContact) ? 'Online' : 'Offline' })}
+            </span>
+          ) : null}
+          {!showContactPane && activeConversation ? (
+            <span className={classnames(style['presence'], personOnline(activeConversation, true) ? style['is-online'] : style['is-offline'])}>
+              <i className={style['presence-dot']} aria-hidden />
+              {formatMessage({ id: personOnline(activeConversation, true) ? 'Online' : 'Offline' })}
+            </span>
+          ) : null}
+        </div>
       ) : null}
       <CallOverlay placement="panel" />
       {showContactPane ? (
@@ -832,6 +887,10 @@ const Im = createWithRemoteLoader({
             <>
               <div className={style['contact-avatar']}>{selectedContact.avatar ? <img src={selectedContact.avatar} alt="" /> : (selectedContact.name || '?').slice(0, 1)}</div>
               <div className={style['contact-name']}>{selectedContact.name}</div>
+              <span className={classnames(style['presence'], personOnline(selectedContact) ? style['is-online'] : style['is-offline'])}>
+                <i className={style['presence-dot']} aria-hidden />
+                {formatMessage({ id: personOnline(selectedContact) ? 'Online' : 'Offline' })}
+              </span>
               {selectedContact.remark ? <div className={style['contact-remark']}>{selectedContact.remark}</div> : null}
               <Button type="primary" className={style['contact-message']} onClick={() => messageContact(selectedContact)}>
                 {formatMessage({ id: 'SendMessage' })}
