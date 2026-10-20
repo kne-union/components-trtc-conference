@@ -57,6 +57,8 @@ const locale = {
   Conversations: '聊天',
   Contacts: '通讯录',
   Back: '返回',
+  Online: '在线',
+  Offline: '离线',
   NoConversations: '暂无会话',
   NoContacts: '暂无联系人',
   SearchContacts: '搜索',

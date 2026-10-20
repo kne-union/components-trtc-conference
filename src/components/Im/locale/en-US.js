@@ -57,6 +57,8 @@ const locale = {
   Conversations: 'Chats',
   Contacts: 'Contacts',
   Back: 'Back',
+  Online: 'Online',
+  Offline: 'Offline',
   NoConversations: 'No chats',
   NoContacts: 'No contacts',
   SearchContacts: 'Search',
