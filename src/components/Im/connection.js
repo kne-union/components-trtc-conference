@@ -18,7 +18,8 @@ const emptyState = {
 const defaultOptions = {
   sessionUrl: '',
   wsPath: '/api/v1/im/ws',
-  devApiHost: ''
+  devApiHost: '',
+  apiBase: ''
 };
 
 let state = emptyState;
@@ -101,14 +102,26 @@ const scheduleAutoLower = (messages, memberId) => {
   }, delay);
 };
 
+const toWsOrigin = value => String(value || '').replace(/\/+$/, '').replace(/^http/i, 'ws');
+
 const wsBase = () => {
+  const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+  if (process.env.NODE_ENV === 'development' && options.devApiHost) {
+    return `${protocol}//${options.devApiHost}`;
+  }
+  const apiBase = String(options.apiBase || '').replace(/\/+$/, '');
+  if (apiBase) {
+    if (/^https?:\/\//i.test(apiBase)) {
+      return toWsOrigin(apiBase);
+    }
+    const prefix = apiBase.startsWith('/') ? apiBase : `/${apiBase}`;
+    return `${protocol}//${window.location.host}${prefix}`;
+  }
   const apiRoot = (window.runtimeApiUrl || '').replace(/\/+$/, '');
   if (apiRoot && /^https?:\/\//i.test(apiRoot)) {
-    return apiRoot.replace(/^http/i, 'ws');
+    return toWsOrigin(apiRoot);
   }
-  const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-  const host = process.env.NODE_ENV === 'development' && options.devApiHost ? options.devApiHost : window.location.host;
-  return `${protocol}//${host}`;
+  return `${protocol}//${window.location.host}`;
 };
 
 const createClientMsgId = () => `web-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;

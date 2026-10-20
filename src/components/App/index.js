@@ -30,9 +30,9 @@ const LocaleFromUrl = createWithRemoteLoader({
   return null;
 });
 
-const App = ({ baseUrl, userInfo, headerName = 'x-trtc-conference-code', name = 'conference' }) => {
+const App = ({ baseUrl, userInfo, headerName = 'x-trtc-conference-code', name = 'conference', apiBase }) => {
   return (
-    <Provider value={{ baseUrl, headerName, name, userInfo }}>
+    <Provider value={{ baseUrl, headerName, name, userInfo, apiBase }}>
       <LocaleFromUrl />
       <AppChildrenRouter
         baseUrl={baseUrl}
