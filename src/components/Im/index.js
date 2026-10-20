@@ -232,11 +232,11 @@ export const ImUnreadButton = ({ count, className, icon, children, ...buttonProp
 
 export const ImConnection = createWithRemoteLoader({
   modules: ['components-core:Global@usePreset']
-})(withLocale(({ remoteModules, sessionUrl, devApiHost, wsPath, onNotify, showNotice = true, callUrl }) => {
+})(withLocale(({ remoteModules, sessionUrl, devApiHost, wsPath, apiBase, onNotify, showNotice = true, callUrl }) => {
   const [usePreset] = remoteModules;
   const { ajax } = usePreset();
 
-  useEffect(() => retainIm(ajax, { sessionUrl, devApiHost, wsPath }), [ajax, sessionUrl, devApiHost, wsPath]);
+  useEffect(() => retainIm(ajax, { sessionUrl, devApiHost, wsPath, apiBase }), [ajax, sessionUrl, devApiHost, wsPath, apiBase]);
   useEffect(() => {
     configureCall({ ajax, callUrl, send: sendImContent });
   }, [ajax, callUrl]);
@@ -286,6 +286,7 @@ const Im = createWithRemoteLoader({
   sessionUrl,
   devApiHost,
   wsPath,
+  apiBase,
   uploadUrl = '/api/v1/static/upload',
   showPhrases = true,
   showEmoji = true,
@@ -409,8 +410,8 @@ const Im = createWithRemoteLoader({
     if (preview) {
       return undefined;
     }
-    return retainIm(ajax, { sessionUrl, devApiHost, wsPath });
-  }, [preview, ajax, sessionUrl, devApiHost, wsPath]);
+    return retainIm(ajax, { sessionUrl, devApiHost, wsPath, apiBase });
+  }, [preview, ajax, sessionUrl, devApiHost, wsPath, apiBase]);
   useEffect(() => {
     if (preview) {
       return undefined;
