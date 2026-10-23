@@ -11,7 +11,7 @@ import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useIntl } from '@kne/react-intl';
 import { useIsMobile } from '@kne/responsive-utils';
 import withLocale from './withLocale';
-import { getImState, retainIm, revokeImMessage, sendImContent, setImChatOpen, subscribeIm } from './connection';
+import { getImState, retainIm, revokeImMessage, sendImContent, setImChatOpen, setImConversation, subscribeIm } from './connection';
 import { callRecordText, isCallSignal } from './callRecord';
 import { configureCall, endPreviewCall, startCall, useCall } from './callSession';
 import CallOverlay from './CallOverlay';
@@ -336,6 +336,28 @@ const Im = createWithRemoteLoader({
     );
     return [...extras, ...base];
   }, [propConversations, openedConversations]);
+  const userMode = !preview && live.userMode;
+  const directoryConversations = useMemo(() => {
+    if (!conversationItems || !userMode) {
+      return conversationItems;
+    }
+    return conversationItems
+      .map(item => {
+        const id = String(item.id);
+        const last = live.lastMessages[id];
+        const next = { ...item };
+        if (live.conversationUnread[id] != null) {
+          next.unread = live.conversationUnread[id];
+        }
+        if (last) {
+          next.preview = Number(last.status) === 1 ? formatMessage({ id: 'MessageRecalled' }) : noticePreview(last, formatMessage);
+          next.time = formatChatTime(last.createdAt || last.sentAt, formatMessage, locale);
+        }
+        return { item: next, stamp: messageStamp(last) };
+      })
+      .sort((a, b) => b.stamp - a.stamp)
+      .map(entry => entry.item);
+  }, [conversationItems, userMode, live.lastMessages, live.conversationUnread, formatMessage, locale]);
   const contactItems = Array.isArray(contacts) ? contacts : null;
   const showDirectory = !!(conversationItems || contactItems);
   const [directoryTab, setDirectoryTab] = useState(conversationItems ? 'conversations' : 'contacts');
@@ -378,19 +400,25 @@ const Im = createWithRemoteLoader({
     selfIds.add(String(memberId));
     selfIds.add(`guest_${memberId}`);
   }
-  const peerOnline =
-    preview ||
-    (live.onlineUsers || []).some(user => {
-      const id = String(user?.userId || '');
-      return id && !selfIds.has(id);
-    });
+  if (userMode && live.userId) {
+    selfIds.add(String(live.userId));
+  }
   const onlineIdSet = new Set((live.onlineUsers || []).map(user => String(user?.userId || '')).filter(id => id && !selfIds.has(id)));
+  // 用户级连接的在线列表跨会话合并，判断对端在线只能看该会话的成员
+  const conversationPeerOnline = id => {
+    const target = (live.conversations || []).find(item => String(item.id) === String(id));
+    return !!target && (target.members || []).some(member => !selfIds.has(String(member.userId)) && (onlineIdSet.has(String(member.userId)) || onlineIdSet.has(`guest_${member.id}`)));
+  };
+  const peerOnline = preview || (userMode ? conversationPeerOnline(live.conversationId) : onlineIdSet.size > 0);
   const personOnline = (item, conversation) => {
     if (!item) {
       return false;
     }
     if (typeof item.online === 'boolean') {
       return item.online;
+    }
+    if (conversation && userMode && conversationPeerOnline(item.id)) {
+      return true;
     }
     if (conversation && String(item.id) === String(activeId) && peerOnline) {
       return true;
@@ -419,6 +447,25 @@ const Im = createWithRemoteLoader({
     setImChatOpen(true);
     return () => setImChatOpen(false);
   }, [preview]);
+  useEffect(() => {
+    if (!preview) {
+      setImConversation(activeId ?? '');
+    }
+  }, [preview, activeId]);
+  const followRef = useRef(null);
+  followRef.current = { activeId, conversationItems, onConversationSelect };
+  useEffect(() => {
+    const { activeId: current, conversationItems: items, onConversationSelect: onSelect } = followRef.current;
+    if (!userMode || !live.conversationId || String(live.conversationId) === String(current ?? '')) {
+      return;
+    }
+    // 来电会把连接切到来电会话，列表选中跟随
+    setPickedId(live.conversationId);
+    const target = (items || []).find(item => String(item.id) === String(live.conversationId));
+    if (target && onSelect) {
+      onSelect(target);
+    }
+  }, [userMode, live.conversationId]);
   useEffect(() => {
     const next = { ajax, callUrl, send: sendImContent };
     if (preview) {
@@ -753,11 +800,22 @@ const Im = createWithRemoteLoader({
   };
   const messageContact = item => {
     const matched = conversationItems && conversationItems.find(conversation => String(conversation.id) === String(item.id) || String(conversation.contactId) === String(item.id));
-    if (onContactSelect) {
-      onContactSelect(item);
-    }
+    const result = onContactSelect ? onContactSelect(item) : null;
     if (matched) {
       selectConversation(matched);
+      return;
+    }
+    if (result && typeof result.then === 'function') {
+      result.then(
+        conversation => {
+          if (!conversation || conversation.id == null) {
+            return;
+          }
+          setOpenedConversations(current => [conversation, ...current.filter(entry => String(entry.id) !== String(conversation.id))]);
+          selectConversation(conversation);
+        },
+        () => {}
+      );
       return;
     }
     const created = {
@@ -787,7 +845,7 @@ const Im = createWithRemoteLoader({
       return name.includes(contactKeywordText) || remark.includes(contactKeywordText);
     });
   }, [contactItems, contactKeywordText]);
-  const directoryRows = directoryTabOn === 'contacts' ? visibleContacts : conversationItems || [];
+  const directoryRows = directoryTabOn === 'contacts' ? visibleContacts : directoryConversations || [];
   const activeConversation = (conversationItems || []).find(item => String(item.id) === String(activeId));
   const stacked = showDirectory && (isMobile || (rootWidth > 0 && rootWidth < DIRECTORY_WIDTH + CHAT_MIN_WIDTH));
   const hideDirectory = stacked && mobileChat;
@@ -908,7 +966,11 @@ const Im = createWithRemoteLoader({
         </div>
       ) : null}
       <div className={style['list']} ref={listRef}>
-        {ready && historyLoaded && messages.length === 0 ? <div className={style['empty']}>{formatMessage({ id: 'Empty' })}</div> : null}
+        {userMode && !activeId ? (
+          <div className={style['empty']}>{formatMessage({ id: 'PickConversation' })}</div>
+        ) : ready && historyLoaded && messages.length === 0 ? (
+          <div className={style['empty']}>{formatMessage({ id: 'Empty' })}</div>
+        ) : null}
         {displayItems.map(item => {
           if (item.kind === 'time') {
             return (
@@ -983,7 +1045,7 @@ const Im = createWithRemoteLoader({
           showVoice={false}
           borderType="default"
           placeholder={formatMessage({ id: 'Placeholder' })}
-          disabled={!ready}
+          disabled={!ready || (userMode && !activeId)}
           loading={uploading}
           toolbarItems={toolbarItems}
           onSend={sendText}

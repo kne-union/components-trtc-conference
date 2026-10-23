@@ -64,7 +64,9 @@ const locale = {
   SearchContacts: '搜索',
   NoContactMatch: '没有找到联系人',
   SendMessage: '发消息',
-  PickContact: '选择一个联系人'
+  PickContact: '选择一个联系人',
+  PickConversation: '选择一个会话开始聊天',
+  MessageRecalled: '撤回了一条消息'
 };
 
 export default locale;

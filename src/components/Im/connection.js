@@ -12,7 +12,13 @@ const emptyState = {
   notice: null,
   peerReadSeq: 0,
   historyLoaded: false,
-  onlineUsers: []
+  onlineUsers: [],
+  userMode: false,
+  userId: '',
+  conversationId: '',
+  conversations: [],
+  conversationUnread: {},
+  lastMessages: {}
 };
 
 const defaultOptions = {
@@ -33,6 +39,11 @@ let options = { ...defaultOptions };
 let noticeSeq = 0;
 let pendingUnread = null;
 let entryNotified = false;
+// 用户级连接：令牌不绑定会话，一条连接收该用户全部会话的事件；我在各会话里的成员 id 各不相同
+let userMode = false;
+let selfUserId = '';
+let memberIds = {};
+let requestedConversationId = '';
 const signalMessageIds = new Set();
 
 const HAND_HOLD_MS = 10000;
@@ -46,6 +57,16 @@ const clearHandTimer = () => {
 
 const requestOnlineUsers = current => {
   sendSocket(current, 'getOnlineUsers', { conversationId });
+};
+
+const mergeOnlineUsers = users => {
+  const map = new Map(state.onlineUsers.map(item => [String(item.userId), item]));
+  users.forEach(item => {
+    if (item?.userId != null) {
+      map.set(String(item.userId), item);
+    }
+  });
+  return Array.from(map.values());
 };
 
 const upsertOnlineUser = user => {
@@ -185,7 +206,71 @@ const maybeEntryNotice = () => {
   patch({ notice: { seq: noticeSeq, message: incoming } });
 };
 
+const totalUnread = map => Object.keys(map).reduce((sum, key) => sum + (chatOpen && key === conversationId ? 0 : Number(map[key] || 0)), 0);
+
+const patchConversationUnread = map => {
+  patch({ conversationUnread: map, unread: totalUnread(map) });
+};
+
+const applyUserUnreadCount = data => {
+  if (data.type === 'unreadCountUpdated') {
+    const id = String(data.payload?.conversationId || '');
+    if (!id) {
+      return;
+    }
+    const count = chatOpen && id === conversationId ? 0 : Number(data.payload?.unreadCount || 0);
+    patchConversationUnread({ ...state.conversationUnread, [id]: count });
+    return;
+  }
+  const map = {};
+  Object.entries(data.payload?.conversations || {}).forEach(([id, count]) => {
+    map[String(id)] = chatOpen && String(id) === conversationId ? 0 : Number(count || 0);
+  });
+  patchConversationUnread(map);
+};
+
+const applyConversations = list => {
+  const nextMemberIds = { ...memberIds };
+  const unreadMap = { ...state.conversationUnread };
+  const lastMessages = { ...state.lastMessages };
+  list.forEach(item => {
+    const id = String(item?.id || '');
+    if (!id) {
+      return;
+    }
+    const self = (item.members || []).find(member => String(member.userId) === selfUserId);
+    if (self) {
+      nextMemberIds[id] = String(self.id);
+    }
+    if (item.unreadCount != null) {
+      unreadMap[id] = chatOpen && id === conversationId ? 0 : Number(item.unreadCount || 0);
+    }
+    if (item.lastMessage && !lastMessages[id]) {
+      lastMessages[id] = item.lastMessage;
+    }
+  });
+  memberIds = nextMemberIds;
+  const memberId = conversationId ? memberIds[conversationId] || '' : '';
+  const memberChanged = memberId && memberId !== state.memberId;
+  patch({ conversations: list, conversationUnread: unreadMap, unread: totalUnread(unreadMap), lastMessages, memberId });
+  if (memberChanged && !state.historyLoaded) {
+    requestActiveConversation(socket);
+  }
+};
+
+const requestActiveConversation = current => {
+  if (!conversationId) {
+    return;
+  }
+  sendSocket(current, 'getMessageHistory', { conversationId, limit: 100 });
+  requestOnlineUsers(current);
+};
+
 const applyUnreadCount = data => {
+  if (userMode) {
+    applyUserUnreadCount(data);
+    return;
+  }
   pendingUnread = unreadFromPayload(data);
   patch({ unread: chatOpen ? 0 : pendingUnread });
   maybeEntryNotice();
@@ -201,6 +286,9 @@ const markRead = list => {
     lastMessageId: last.id,
     lastSeq: last.seq
   });
+  if (userMode && Number(state.conversationUnread[conversationId] || 0) > 0) {
+    patchConversationUnread({ ...state.conversationUnread, [conversationId]: 0 });
+  }
 };
 
 const disconnect = () => {
@@ -212,6 +300,10 @@ const disconnect = () => {
   chatOpen = false;
   pendingUnread = null;
   entryNotified = false;
+  userMode = false;
+  selfUserId = '';
+  memberIds = {};
+  requestedConversationId = '';
   options = { ...defaultOptions };
   if (current && current.readyState < WebSocket.CLOSING) {
     current.close();
@@ -237,13 +329,21 @@ const connect = async (ajax, currentGeneration) => {
       patch({ connectError: body?.msg || 'failed', ready: false });
       return;
     }
-    const memberId = String(body.data.memberId);
-    conversationId = String(body.data.conversationId);
+    userMode = !body.data.conversationId;
+    selfUserId = userMode ? String(body.data.userId || '') : '';
+    let memberId = userMode ? '' : String(body.data.memberId);
+    conversationId = userMode ? requestedConversationId : String(body.data.conversationId);
     const wsPath = options.wsPath || defaultOptions.wsPath;
     const nextSocket = new WebSocket(`${wsBase()}${wsPath}?token=${encodeURIComponent(body.data.wsToken)}`);
     socket = nextSocket;
     nextSocket.addEventListener('open', () => {
       if (currentGeneration !== generation || socket !== nextSocket) {
+        return;
+      }
+      if (userMode) {
+        patch({ connectError: '', ready: true, userMode: true, userId: selfUserId, conversationId });
+        sendSocket(nextSocket, 'getConversations', { page: 1, pageSize: 100 });
+        sendSocket(nextSocket, 'getUnreadCount', {});
         return;
       }
       patch({ connectError: '', ready: true, memberId });
@@ -265,8 +365,15 @@ const connect = async (ajax, currentGeneration) => {
         patch({ connectError: data.payload?.message || 'failed' });
         return;
       }
+      if (data.type === 'conversations') {
+        if (userMode) {
+          applyConversations(Array.isArray(data.payload?.list) ? data.payload.list : []);
+        }
+        return;
+      }
       if (data.type === 'onlineUsers') {
-        patch({ onlineUsers: Array.isArray(data.payload?.users) ? data.payload.users : [] });
+        const users = Array.isArray(data.payload?.users) ? data.payload.users : [];
+        patch({ onlineUsers: userMode ? mergeOnlineUsers(users) : users });
         return;
       }
       if (data.type === 'userOnline') {
@@ -278,6 +385,12 @@ const connect = async (ajax, currentGeneration) => {
         return;
       }
       if (data.type === 'messageHistory') {
+        if (userMode) {
+          if (String(data.payload?.conversationId || '') !== conversationId) {
+            return;
+          }
+          memberId = memberIds[conversationId] || '';
+        }
         const list = mergeMessages([], data.payload?.list || []);
         const maxSeq = list.reduce((max, item) => Math.max(max, Number(item.seq || 0)), 0);
         patch({
@@ -297,6 +410,15 @@ const connect = async (ajax, currentGeneration) => {
       }
       if (data.type === 'messageRevoked') {
         const messageId = String(data.payload?.messageId || '');
+        if (userMode) {
+          const lastMessages = { ...state.lastMessages };
+          Object.keys(lastMessages).forEach(id => {
+            if (String(lastMessages[id]?.id) === messageId) {
+              lastMessages[id] = { ...lastMessages[id], status: 1 };
+            }
+          });
+          patch({ lastMessages });
+        }
         const messages = state.messages.map(item => (String(item.id) === messageId ? { ...item, status: 1 } : item));
         patch({ messages });
         scheduleAutoLower(messages, state.memberId);
@@ -307,6 +429,9 @@ const connect = async (ajax, currentGeneration) => {
         return;
       }
       if (data.type === 'messageRead') {
+        if (userMode && String(data.payload?.conversationId || '') !== conversationId) {
+          return;
+        }
         const lastId = String(data.payload?.lastMessageId || '');
         const target = state.messages.find(item => String(item.id) === lastId);
         const seq = Number(target?.seq || 0);
@@ -320,8 +445,41 @@ const connect = async (ajax, currentGeneration) => {
         if (!incoming) {
           return;
         }
+        if (userMode) {
+          const targetId = String(incoming.conversationId || '');
+          if (data.type === 'sendMessageSuccess' && !memberIds[targetId] && incoming.senderId != null) {
+            memberIds = { ...memberIds, [targetId]: String(incoming.senderId) };
+          }
+          if (!memberIds[targetId]) {
+            sendSocket(nextSocket, 'getConversations', { page: 1, pageSize: 100 });
+          }
+          const signal = isCallSignal(incoming);
+          if (!signal) {
+            patch({ lastMessages: { ...state.lastMessages, [targetId]: incoming } });
+          }
+          if (targetId !== conversationId) {
+            const mineElsewhere = data.type === 'sendMessageSuccess' || String(incoming.senderId) === String(memberIds[targetId] || '');
+            if (signal && mineElsewhere && incoming.id != null) {
+              signalMessageIds.add(String(incoming.id));
+              sendSocket(nextSocket, 'revokeMessage', { messageId: incoming.id });
+            }
+            if (data.type === 'newMessage') {
+              if (signal && !mineElsewhere) {
+                // 接听、挂断的信令发往当前会话，来电前先切到来电所在会话
+                setImConversation(targetId);
+                ingestCallSignal(incoming);
+              } else if (!mineElsewhere && !signal) {
+                noticeSeq += 1;
+                patch({ notice: { seq: noticeSeq, message: incoming } });
+              }
+              sendSocket(nextSocket, 'recvAck', { messageId: incoming.id, conversationId: incoming.conversationId });
+            }
+            return;
+          }
+          memberId = memberIds[targetId] || memberId;
+        }
         const messages = mergeMessages(state.messages, [incoming]);
-        const mine = String(incoming.senderId) === memberId;
+        const mine = String(incoming.senderId) === memberId || (userMode && data.type === 'sendMessageSuccess');
         const signal = isCallSignal(incoming);
         if (signal && mine && incoming.id != null) {
           signalMessageIds.add(String(incoming.id));
@@ -331,7 +489,7 @@ const connect = async (ajax, currentGeneration) => {
           ingestCallSignal(incoming);
         }
         const shouldNotify = data.type === 'newMessage' && !mine && !chatOpen && !signal;
-        const unread = shouldNotify ? state.unread + 1 : state.unread;
+        const unread = shouldNotify && !userMode ? state.unread + 1 : state.unread;
         noticeSeq += shouldNotify ? 1 : 0;
         patch({
           messages,
@@ -384,9 +542,45 @@ export const isImChatOpen = () => chatOpen;
 
 export const setImChatOpen = open => {
   chatOpen = open;
+  if (userMode) {
+    patch({ unread: totalUnread(state.conversationUnread) });
+    if (open) {
+      markRead(state.messages);
+    }
+    return;
+  }
   if (open) {
     patch({ unread: 0 });
     markRead(state.messages);
+  }
+};
+
+// 用户级连接切换当前会话：不重连，只换历史、在线成员与发送目标
+export const setImConversation = id => {
+  const next = id == null ? '' : String(id);
+  requestedConversationId = next;
+  if (!userMode || next === conversationId) {
+    return;
+  }
+  clearHandTimer();
+  conversationId = next;
+  const unreadMap = chatOpen && next ? { ...state.conversationUnread, [next]: 0 } : state.conversationUnread;
+  patch({
+    conversationId: next,
+    memberId: next ? memberIds[next] || '' : '',
+    messages: [],
+    historyLoaded: false,
+    peerReadSeq: 0,
+    conversationUnread: unreadMap,
+    unread: totalUnread(unreadMap)
+  });
+  if (!next) {
+    return;
+  }
+  if (memberIds[next]) {
+    requestActiveConversation(socket);
+  } else {
+    sendSocket(socket, 'getConversations', { page: 1, pageSize: 100 });
   }
 };
 

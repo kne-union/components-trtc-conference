@@ -64,7 +64,9 @@ const locale = {
   SearchContacts: 'Search',
   NoContactMatch: 'No matching contacts',
   SendMessage: 'Message',
-  PickContact: 'Choose a contact'
+  PickContact: 'Choose a contact',
+  PickConversation: 'Choose a chat to start',
+  MessageRecalled: 'A message was recalled'
 };
 
 export default locale;
