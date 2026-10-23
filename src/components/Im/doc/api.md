@@ -1,6 +1,6 @@
 ### Im
 
-即时通讯面板。调用会话接口拿到 WebSocket 凭证后拉取历史并收发消息。自己的未读消息显示圆点，悬停可撤回。发送时间在消息间隔超过 5 分钟时居中显示。
+即时通讯面板。调用会话接口拿到 WebSocket 凭证后拉取历史并收发消息。会话接口返回 `conversationId` 时为会议模式，连接只属于这一个会话。不返回 `conversationId` 时为用户级模式，一条连接接收该用户全部会话的消息，切换会话不重连，各会话的未读、最后一条消息和排序实时更新。自己的未读消息显示圆点，悬停可撤回。发送时间在消息间隔超过 5 分钟时居中显示。
 
 #### 属性说明
 
@@ -8,7 +8,7 @@
 |--------|------|------|--------|------|
 | className | string | 否 | - | 根节点类名 |
 | avatarShape | `'circle' \| 'rounded'` | 否 | `circle` | 头像形状。`circle` 为圆形，`rounded` 为圆角矩形。作用于会话列表、联系人、消息和通话头像 |
-| sessionUrl | string | 否 | - | 创建或加入会话的 POST 地址，成功时 `data` 含 `wsToken`、`conversationId`、`memberId`。传入 `data` 时不需要 |
+| sessionUrl | string | 否 | - | 创建或加入会话的 POST 地址。会议模式成功时 `data` 含 `wsToken`、`conversationId`、`memberId`；用户级模式只含 `wsToken`、`userId`（对应 IM 成员的 `userId`）。传入 `data` 时不需要 |
 | data | object | 否 | - | 静态消息。传入后不建立连接，直接渲染。字段：`memberId`、`memberName`、`peerReadSeq`、`messages` |
 | devApiHost | string | 否 | - | 本地开发时的 WebSocket 主机，例如 `localhost:8042`。不传则使用当前页面主机 |
 | wsPath | string | 否 | `/api/v1/im/ws` | WebSocket 路径，接在接口主机后面 |
@@ -23,11 +23,11 @@
 | features | object | 否 | - | 统一开关。字段：`phrases`、`emoji`、`image`、`file`、`raiseHand`、`voiceCall`、`videoCall`。传入的字段覆盖同名 `show*` |
 | callUrl | string | 否 | - | 签发 TRTC 进房参数的 POST 地址。请求体 `{ roomId }`，成功时 `data` 含 `sdkAppId`、`userId`、`userSig`、`roomId` |
 | phrases | string[] | 否 | 内置会议常用语 | 自定义常用语，点击后直接发送 |
-| conversations | array | 否 | - | 左侧会话列表，不传则不显示左侧栏。项字段：`id`、`name`、`avatar`、`preview`、`time`、`unread`、`contactId` |
+| conversations | array | 否 | - | 左侧会话列表，不传则不显示左侧栏。项字段：`id`、`name`、`avatar`、`preview`、`time`、`unread`、`contactId`。用户级模式下 `id` 为 IM 会话 ID，`unread`、`preview`、`time` 由连接实时覆盖并按最新消息排序，在线状态按会话成员判断 |
 | contacts | array | 否 | - | 左侧联系人列表，不传则不显示通讯录。项字段：`id`、`name`、`avatar`、`remark`。与 `conversations` 同时传入时，左侧可在聊天和通讯录之间切换。通讯录可按姓名、备注关键字筛选 |
-| activeConversationId | string | 否 | 第一项 | 当前会话。不传时组件内部记住点击项 |
+| activeConversationId | string | 否 | 第一项 | 当前会话。不传时组件内部记住点击项。用户级模式下切换只更换历史和发送目标，不重连；没有当前会话时提示选择会话。收到其他会话的来电会自动切到该会话并回调 `onConversationSelect` |
 | onConversationSelect | function | 否 | - | 点击会话时回调，参数为该项。可在这里切换右侧 `data` 或会话连接 |
-| onContactSelect | function | 否 | - | 在联系人资料卡上点击「发消息」时回调，参数为该项。已有会话（`id` 或 `contactId` 对上）则打开；没有则新建一条与该联系人的会话并打开。父组件可在回调里补上这条会话的 `data` |
+| onContactSelect | function | 否 | - | 在联系人资料卡上点击「发消息」时回调，参数为该项。已有会话（`id` 或 `contactId` 对上）则打开；没有则新建一条与该联系人的会话并打开。父组件可在回调里补上这条会话的 `data`。回调返回 Promise 并解析为会话项（含真实 `id`）时，用该项代替临时会话打开，适用于用户级模式先创建单聊再进入 |
 
 ### ImUnreadButton
 
@@ -62,7 +62,7 @@
 
 | 属性名 | 类型 | 必填 | 默认值 | 说明 |
 |--------|------|------|--------|------|
-| sessionUrl | string | 是 | - | 与 `Im` 相同 |
+| sessionUrl | string | 是 | - | 与 `Im` 相同。用户级模式下页面只需挂一个连接，即可接收全部会话的消息、未读和来电 |
 | devApiHost | string | 否 | - | 与 `Im` 相同 |
 | wsPath | string | 否 | `/api/v1/im/ws` | 与 `Im` 相同 |
 | showNotice | boolean | 否 | `true` | 是否在连接组件内展示通知 |
@@ -81,5 +81,11 @@
 | connectError | string | 失败原因。`failed` 表示连接失败，其他字符串为服务端消息 |
 | messages | array | 当前消息列表 |
 | memberId | string | 当前成员 ID |
-| unread | number | 面板关闭期间收到的他人消息数 |
-| onlineUsers | array | 当前会话在线成员。项含 `userId`、`name`、`avatar` |
+| unread | number | 会议模式为面板关闭期间收到的他人消息数；用户级模式为全部会话未读之和（面板打开时不含当前会话） |
+| onlineUsers | array | 在线成员。项含 `userId`、`name`、`avatar`。用户级模式下为已查询过的会话合并结果 |
+| userMode | boolean | 是否为用户级连接 |
+| userId | string | 用户级模式下当前用户的 IM `userId` |
+| conversationId | string | 用户级模式下当前会话 ID |
+| conversations | array | 用户级模式下服务端会话列表，项含 `id`、`members`、`unreadCount`、`lastMessage` |
+| conversationUnread | object | 用户级模式下各会话未读数，键为会话 ID |
+| lastMessages | object | 用户级模式下各会话最后一条消息，键为会话 ID |
