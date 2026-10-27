@@ -82,10 +82,19 @@
 | messages | array | 当前消息列表 |
 | memberId | string | 当前成员 ID |
 | unread | number | 会议模式为面板关闭期间收到的他人消息数；用户级模式为全部会话未读之和（面板打开时不含当前会话） |
-| onlineUsers | array | 在线成员。项含 `userId`、`name`、`avatar`。用户级模式下为已查询过的会话合并结果 |
+| onlineUsers | array | 在线成员。项含 `userId`、`name`、`avatar`。用户级模式下连接后会查询每个会话的在线成员并合并 |
 | userMode | boolean | 是否为用户级连接 |
 | userId | string | 用户级模式下当前用户的 IM `userId` |
 | conversationId | string | 用户级模式下当前会话 ID |
 | conversations | array | 用户级模式下服务端会话列表，项含 `id`、`members`、`unreadCount`、`lastMessage` |
 | conversationUnread | object | 用户级模式下各会话未读数，键为会话 ID |
 | lastMessages | object | 用户级模式下各会话最后一条消息，键为会话 ID |
+
+### isImPeerOnline
+
+判断某个会话里除自己外是否有成员在线。参数为 `useIm()` 的返回值和会话 ID，返回 boolean。用户级模式下可用于在会话列表或业务卡片上显示对方在线状态。
+
+```js
+const im = useIm();
+const online = isImPeerOnline(im, conversationId);
+```

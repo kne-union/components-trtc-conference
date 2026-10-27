@@ -17,7 +17,7 @@ import { configureCall, endPreviewCall, startCall, useCall } from './callSession
 import CallOverlay from './CallOverlay';
 import style from './style.module.scss';
 
-export { isImChatOpen } from './connection';
+export { isImChatOpen, isImPeerOnline } from './connection';
 export { registerOpenChat } from './callSession';
 
 const PHRASE_IDS = ['PhraseArrived', 'PhraseWait', 'PhraseHearMe', 'PhraseCantHear', 'PhraseCantSee', 'PhraseUnmute', 'PhraseMuted', 'PhraseNetwork', 'PhraseStart', 'PhraseStepAway'];
