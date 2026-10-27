@@ -44,6 +44,7 @@ let userMode = false;
 let selfUserId = '';
 let memberIds = {};
 let requestedConversationId = '';
+const onlineRequestedIds = new Set();
 const signalMessageIds = new Set();
 
 const HAND_HOLD_MS = 10000;
@@ -176,6 +177,16 @@ const patch = partial => {
 
 export const getImState = () => state;
 
+export const isImPeerOnline = (snapshot, id) => {
+  const target = (snapshot?.conversations || []).find(item => String(item.id) === String(id));
+  if (!target) {
+    return false;
+  }
+  const self = String(snapshot.userId || '');
+  const onlineIds = new Set((snapshot.onlineUsers || []).map(user => String(user?.userId || '')));
+  return (target.members || []).some(member => String(member.userId) !== self && (onlineIds.has(String(member.userId)) || onlineIds.has(`guest_${member.id}`)));
+};
+
 export const subscribeIm = listener => {
   listeners.add(listener);
   listener(state);
@@ -250,6 +261,12 @@ const applyConversations = list => {
     }
   });
   memberIds = nextMemberIds;
+  list.forEach(item => {
+    const id = String(item?.id || '');
+    if (id && !onlineRequestedIds.has(id) && sendSocket(socket, 'getOnlineUsers', { conversationId: id })) {
+      onlineRequestedIds.add(id);
+    }
+  });
   const memberId = conversationId ? memberIds[conversationId] || '' : '';
   const memberChanged = memberId && memberId !== state.memberId;
   patch({ conversations: list, conversationUnread: unreadMap, unread: totalUnread(unreadMap), lastMessages, memberId });
@@ -304,6 +321,7 @@ const disconnect = () => {
   selfUserId = '';
   memberIds = {};
   requestedConversationId = '';
+  onlineRequestedIds.clear();
   options = { ...defaultOptions };
   if (current && current.readyState < WebSocket.CLOSING) {
     current.close();
